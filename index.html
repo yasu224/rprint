@@ -274,6 +274,11 @@
       <button class="tool" data-stroke="2" data-i18n="stroke.m">中</button>
       <button class="tool" data-stroke="3" data-i18n="stroke.l">大</button>
     </div>
+    <div class="group" id="strokeColorGroup" title="枠線(線)の色" data-i18n-title="tip.strokecolor">
+      <label data-i18n="lbl.strokecolor">線色</label>
+      <input type="color" id="strokeCustom" value="#000000">
+    </div>
+    <div class="group" id="strokePalette" title="枠線(線)の色を選択" data-i18n-title="tip.strokepalette"></div>
   </div>
 
   <div class="sec" id="secText">
@@ -281,9 +286,10 @@
     <div class="group" id="selKindGroup" title="選択モードで選べるオブジェクトの種類" data-i18n-title="tip.selkind" style="display:none">
       <label data-i18n="lbl.selkind">選択対象</label>
       <label class="ckb"><input type="checkbox" id="selText" checked> <span data-i18n="kind.text">文字</span></label>
-      <label class="ckb"><input type="checkbox" id="selFrame" checked> <span data-i18n="kind.frame">枠塗り</span></label>
-      <label class="ckb"><input type="checkbox" id="selRect" checked> <span data-i18n="kind.rect">長方形</span></label>
-      <label class="ckb"><input type="checkbox" id="selRedact" checked> <span data-i18n="kind.redact">墨消し</span></label>
+      <label class="ckb"><input type="checkbox" id="selFrame"> <span data-i18n="kind.frame">枠塗り</span></label>
+      <label class="ckb"><input type="checkbox" id="selRect"> <span data-i18n="kind.rect">長方形</span></label>
+      <label class="ckb"><input type="checkbox" id="selRedact"> <span data-i18n="kind.redact">墨消し</span></label>
+      <label class="ckb"><input type="checkbox" id="selPaint"> <span data-i18n="kind.paint">塗り</span></label>
     </div>
     <div class="group" id="textCtl" title="文字ツールの設定" data-i18n-title="tip.textcfg">
       <label for="font" data-i18n="lbl.text">文字</label>
@@ -335,8 +341,7 @@
     <div class="sectitle" data-i18n="sec.detect">検出</div>
     <div class="group" title="地図中の文字・数字を検出して別レイヤーに分離" data-i18n-title="tip.detsec">
       <button class="tool" id="textLayerBtn" data-i18n="btn.textdetect" title="文字・数字を検出 → 色の上に表示＋塗りつぶしの壁から除外（数字を跨いで塗れる）" data-i18n-title="tip.textdetect">🔤 文字検出</button>
-      <button class="tool" id="paintVecBtn" data-i18n="btn.paintvec" title="塗りつぶした色をベクター図形に変換 → 選択ツールで移動・サイズ調整・削除できる" data-i18n-title="tip.paintvec">🧩 塗りをベクター化</button>
-      <label class="ckb" id="autoVecLbl" title="塗るたびに自動でベクター図形に変換する" data-i18n-title="tip.autovec"><input type="checkbox" id="autoVec"> <span data-i18n="lbl.autovec">自動</span></label>
+      <label class="ckb" id="autoVecLbl" title="塗るたびに自動でベクター図形に変換する" data-i18n-title="tip.autovec"><input type="checkbox" id="autoVec" checked> <span data-i18n="lbl.autovec">塗りを自動ベクター化</span></label>
     </div>
   </div>
 
@@ -471,7 +476,10 @@ const wrap = $('#wrap');
 
 // ---- 枠塗り状態 ----
 let frameDrawing = [];   // 描画中の頂点リスト (ページ座標 {x,y})
-let frameSel = null;     // 選択中フレームID
+let frameSel = null;     // 選択中フレームID(単一)
+let frameSelSet = new Set();   // 範囲選択した複数フレームID(選択ツールのエリア選択)
+// 現在選択中フレームID群: 範囲選択(複数)があればそれ、無ければ単一選択
+function selFrameIds(){ return frameSelSet.size ? [...frameSelSet] : (frameSel ? [frameSel] : []); }
 
 // ---- 長方形塗り状態 ----
 let rectStart = null;      // 始点(overlayキャンバス座標) / 未開始は null
@@ -508,9 +516,9 @@ function rectBox(fr){
 const REDACT_COLOR = '#3a3a3a';   // 濃いグレー(画面表示)
 // オブジェクトの枠線(ストローク)の太さ(ページ座標pt)。0=線なし / 小 / 中 / 大
 const STROKE_W = { 0:0, 1:1.5, 2:3, 3:6 };
-// 現在の枠線色: 塗り色があればそれ、透明ならカラーピッカーの値(=直近の実色)を使う
+// 現在の枠線色: 専用の線色パレット/ピッカーで選んだ色(塗り色とは独立)
 function strokeColorNow(){
-  return (state.color && state.color!=='transparent') ? state.color : (toHex(($('#custom')&&$('#custom').value)||'#000000'));
+  return toHex(state.strokeColor || '#000000');
 }
 // 始点・対角点(overlayキャンバス座標)から長方形フレームを作成・選択。
 // redact=true なら墨消し用フレーム(濃いグレー表示・PDFで真の削除)。
@@ -555,6 +563,8 @@ function resizeRectFrame(fr, key, pageX, pageY, pg){
 
 // ---- state ----
 const PALETTE = ['#ffb3ae','#ffd5a6','#fff19c','#b6e8c1','#a9e6e2','#aaccff','#c5c4f5','#e0bdf7','#ffbcd8','#d6d6db','transparent'];
+// 枠線(線)用パレット。線は塗りより濃い色が見やすいので原色系を用意
+const STROKE_PALETTE = ['#000000','#555555','#ffffff','#e53935','#fb8c00','#fdd835','#43a047','#1e88e5','#5e35b1','#d81b60'];
 const state = {
   pages: [],        // {svgText,w,h, rscale, overlay(canvas), boundary(canvas), undo:[], redo:[]}
   active: -1,
@@ -563,8 +573,9 @@ const state = {
   alpha: 0.5,
   size: 16,
   strokeW: 0,       // オブジェクトの枠線の太さ(0=なし/1=小/2=中/3=大)
-  selKinds: { text:true, frame:true, rect:true, redact:true },   // 選択モードで選べる種類
-  autoVec: false,   // 塗るたびに自動でベクター図形化
+  strokeColor: '#000000',   // 枠線(線)の色(塗り色とは独立)
+  selKinds: { text:true, frame:false, rect:false, redact:false, paint:false },   // 選択モードで選べる種類(初期は文字のみ)
+  autoVec: true,   // 塗るたびに自動でベクター図形化(既定ON)
   gap: 3,           // 塗りつぶしの隙間を塞ぐ強さ(クロージング半径)
   zoom: 1,          // 表示倍率
   rotation: 0,      // 表示回転 (0/90/180/270)
@@ -696,7 +707,7 @@ PALETTE.forEach((c,i) => {
 });
 function setColor(c, swEl){
   state.color = c;
-  document.querySelectorAll('.swatch').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('#palette .swatch').forEach(e=>e.classList.remove('active'));
   if (swEl) swEl.classList.add('active');
   if (c!=='transparent') $('#custom').value = toHex(c);   // 透明はカラーピッカーに反映しない
   updatePreview();
@@ -704,6 +715,23 @@ function setColor(c, swEl){
   recolorSelectedFrame();   // 選択中オブジェクトの色も変更(透明=塗りなしも可)
 }
 $('#custom').oninput = e => setColor(e.target.value, null);
+
+// ---- 枠線(線)色パレット ----
+const strokePaletteEl = $('#strokePalette');
+if (strokePaletteEl) STROKE_PALETTE.forEach((c,i) => {
+  const sw = document.createElement('div');
+  sw.className = 'swatch' + (i===0?' active':'');
+  sw.style.background = c; sw.dataset.color = c;
+  sw.onclick = () => setStrokeColor(c, sw);
+  strokePaletteEl.appendChild(sw);
+});
+function setStrokeColor(c, swEl){
+  state.strokeColor = toHex(c);
+  document.querySelectorAll('#strokePalette .swatch').forEach(e=>e.classList.toggle('active', swEl ? e===swEl : (e.dataset.color===state.strokeColor)));
+  const sc=$('#strokeCustom'); if(sc) sc.value = state.strokeColor;
+  recolorSelectedFrameStroke();   // 選択中オブジェクトの線色にも反映
+}
+if ($('#strokeCustom')) $('#strokeCustom').oninput = e => setStrokeColor(e.target.value, null);
 // ブラシ／消しゴムの色プレビュー(太さ・色・不透明度を反映)
 function updatePreview(){
   const box=$('#brushPrev'); if(!box) return;
@@ -742,6 +770,7 @@ document.querySelectorAll('.tool[data-tool]').forEach(b=>{
       // 枠塗りツールから離れたら描きかけ頂点はリセット。選択は frame/長方形/墨消し間では保持(共に frames を編集)
       if (state.tool !== 'frame') { frameDrawing = []; }
       if (state.tool !== 'frame' && state.tool !== 'rect' && state.tool !== 'redact' && state.tool !== 'select') { frameSel = null; }
+      if (state.tool !== 'select') frameSelSet.clear();   // エリア選択(複数)は選択ツール専用
       renderFrameLayer();
       // 長方形/墨消しツールから離れたら作成中の始点・プレビューをリセット
       if (state.tool !== 'rect' && state.tool !== 'redact') { rectStart = null; clearRectPreview(); }
@@ -801,7 +830,7 @@ function applySelKindUI(){
   const tl=document.getElementById('textlayer');   // 文字を選択対象外にしたら、クリックを下のオブジェクトへ通す
   if (tl) tl.classList.toggle('notext', state.tool==='select' && !selKindEnabled('text'));
 }
-[['selText','text'],['selFrame','frame'],['selRect','rect'],['selRedact','redact']].forEach(([id,k])=>{
+[['selText','text'],['selFrame','frame'],['selRect','rect'],['selRedact','redact'],['selPaint','paint']].forEach(([id,k])=>{
   const el=document.getElementById(id); if(el) el.onchange=()=>{ state.selKinds[k]=el.checked; applySelKindUI(); };
 });
 $('#font').onchange   = e => { state.font = e.target.value; applySelStyle(); };
@@ -828,7 +857,6 @@ $('#gap').oninput   = e => { state.gap   = +e.target.value;  $('#gapVal').textCo
 $('#textLayerBtn').onclick = toggleTextLayer;
 if($('#wallBtn')) $('#wallBtn').onclick = toggleWall;
 if($('#vectorizeBtn')) $('#vectorizeBtn').onclick = vectorizeCurrentPage;
-if($('#paintVecBtn')) $('#paintVecBtn').onclick = ()=>paintToVector();
 if($('#autoVec')) $('#autoVec').onchange = e=>{ state.autoVec = e.target.checked; };
 $('#lineBoost').oninput = e => {
   state.lineBoost = +e.target.value; $('#lineBoostVal').textContent = e.target.value;
@@ -1112,7 +1140,7 @@ async function hydratePage(pg){
   if (!pg || pg._hydrated) return;
   const W=Math.round(pg.w*pg.rscale), H=Math.round(pg.h*pg.rscale);
   const mk=()=>{ const c=document.createElement('canvas'); c.width=W; c.height=H; return c; };
-  pg.overlay=mk(); pg.brush=mk(); pg.frameCanvas=mk();
+  pg.overlay=mk(); pg.brush=mk(); pg.frameCanvas=mk(); pg.frameCanvasLow=mk();
   // overlay/brush は塗りつぶし・保存で getImageData を多用するため、生成時に willReadFrequently を指定
   pg.overlay.getContext('2d', {willReadFrequently:true});
   pg.brush.getContext('2d', {willReadFrequently:true});
@@ -1129,7 +1157,7 @@ function dehydratePage(pg){
     pg._dirty=false;
   }
   // キャンバス・派生バッファを解放(GC対象に)
-  pg.overlay=null; pg.brush=null; pg.frameCanvas=null;
+  pg.overlay=null; pg.brush=null; pg.frameCanvas=null; pg.frameCanvasLow=null;
   pg.boundary=null; pg.detCanvas=null; pg.wallCanvas=null; pg.wall=null; pg.textMask=null; pg._dark=null;
   pg._hydrated=false;
 }
@@ -1145,15 +1173,16 @@ async function buildPages(pages, append){
       rscale = Math.max(rscale, rs);                           // スキャンのネイティブ解像度を保つ
     }
     // キャンバスは作らず(遅延生成)。開いたページだけ hydratePage で確保する。
-    newPgs.push({ svgText:p.svg, w, h, rscale, overlay:null, brush:null, frameCanvas:null, frames:[],
+    newPgs.push({ svgText:p.svg, w, h, rscale, overlay:null, brush:null, frameCanvas:null, frameCanvasLow:null, frames:[],
       boundary:null, undo:[], redo:[], tundo:[], tredo:[], texts:pdfTextsToBoxes(p.texts),
       _editable:p._editable||null, _hydrated:false, _oData:null, _bData:null, _dirty:false });
   }
   // 再編集SVGの編集状態(overlay/brush/texts)を _oData 等へ復元(キャンバス不要)
   for (const pg of newPgs){ if(pg._editable){ const ed=pg._editable; pg._editable=null; await restoreEditable(pg, ed); } }
   if (append && state.pages.length){
-    const start=state.pages.length; state.pages=state.pages.concat(newPgs);
-    buildTabs(); await showPage(start);
+    const at = (state.active>=0 ? state.active+1 : state.pages.length);   // 選択中ページの直後に挿入
+    state.pages.splice(at, 0, ...newPgs);
+    buildTabs(); await showPage(at);
   } else {
     state.pages=newPgs; state.rotation=0; state.zoom=1;
     buildTabs(); await showPage(0);
@@ -1223,7 +1252,7 @@ async function showPage(idx){
   if (seq !== _pageSeq) return;      // 別の切替に追い越されたら中断
   state.active = idx;
   const empty = $('#empty');
-  frameDrawing = []; frameSel = null;   // 枠塗りの描画中状態はページ固有。ページ切替/削除で必ずリセット
+  frameDrawing = []; frameSel = null; frameSelSet.clear();   // 枠塗りの描画中状態はページ固有。ページ切替/削除で必ずリセット
   rectStart = null; clearRectPreview();  // 長方形塗りの作成中状態もリセット
   wrap.innerHTML = '';
   // 回転ラッパー(#rot)に svg と overlay を入れ、CSS transform で拡大/回転する
@@ -1238,7 +1267,12 @@ async function showPage(idx){
   ov.id = 'overlay';
   ov.style.cursor = cursorForTool();
   rot.appendChild(ov);
-  // 枠塗り描画キャンバス (overlay の真上に重ねて表示)
+  // 塗り・枠塗り用キャンバス(検出#detlayerの「下」に置く＝地番が塗りの上に見える)
+  const fcL = pg.frameCanvasLow;
+  fcL.id = 'frame-display-canvas-low';
+  fcL.style.cssText = 'position:absolute;left:0;top:0;pointer-events:none';
+  rot.appendChild(fcL);
+  // 長方形・墨消し用キャンバス(検出#detlayerの「上」=従来位置)
   const fc = pg.frameCanvas;
   fc.id = 'frame-display-canvas';
   fc.style.cssText = 'position:absolute;left:0;top:0;pointer-events:none';
@@ -1281,6 +1315,8 @@ function applyView(){
   ov.style.width  = Wd+'px'; ov.style.height  = Hd+'px';
   const fc2 = rot.querySelector('#frame-display-canvas');
   if (fc2){ fc2.style.width=Wd+'px'; fc2.style.height=Hd+'px'; }
+  const fcL2 = rot.querySelector('#frame-display-canvas-low');
+  if (fcL2){ fcL2.style.width=Wd+'px'; fcL2.style.height=Hd+'px'; }
   const fl2 = rot.querySelector('#framelayer');
   if (fl2){ fl2.style.width=Wd+'px'; fl2.style.height=Hd+'px';
             fl2.setAttribute('width',Wd); fl2.setAttribute('height',Hd);
@@ -1332,13 +1368,14 @@ function restore(pg, snap, cb){
   oc.clearRect(0,0,pg.overlay.width,pg.overlay.height);
   if (pg.brush) pg.brush.getContext('2d').clearRect(0,0,pg.brush.width,pg.brush.height);
   if (pg.frameCanvas) pg.frameCanvas.getContext('2d').clearRect(0,0,pg.frameCanvas.width,pg.frameCanvas.height);
+  if (pg.frameCanvasLow) pg.frameCanvasLow.getContext('2d').clearRect(0,0,pg.frameCanvasLow.width,pg.frameCanvasLow.height);
   if (snap && snap.frames != null){ try{ pg.frames=JSON.parse(snap.frames); }catch(_){ pg.frames=[]; } }
+  redrawFrameCanvas(pg);   // frames[] から派生キャンバス(低層/高層)を再生成
   if (!snap){ renderFrameLayer(); cb&&cb(); return; }
   let pending=0; const done=()=>{ if(--pending<=0){ renderFrameLayer(); cb&&cb(); } };
   const load=(url,ctx)=>{ if(!url) return; pending++; const im=new Image(); im.onload=()=>{ctx.drawImage(im,0,0);done();}; im.onerror=done; im.src=url; };
   load(snap.o, oc);
   if (pg.brush) load(snap.b, pg.brush.getContext('2d'));
-  if (pg.frameCanvas && snap.fc) load(snap.fc, pg.frameCanvas.getContext('2d'));
   if (!pending){ renderFrameLayer(); cb&&cb(); }
 }
 function undoPaint(){
@@ -1783,7 +1820,9 @@ function refreshDetLayer(){
   const pg=state.pages[state.active];
   if (state.textLayerOn && pg && pg.detCanvas){
     const c=pg.detCanvas; c.id='detlayer'; c.style.pointerEvents='none';
-    rot.insertBefore(c, pg.overlay.nextSibling);
+    // 塗り・枠塗り(low)の上、長方形・墨消し(high)の下に置く=地番は塗りの上/墨消しの下
+    const fch=document.getElementById('frame-display-canvas');
+    if (fch) rot.insertBefore(c, fch); else rot.insertBefore(c, pg.overlay.nextSibling);
     sizeDetLayer();
   }
 }
@@ -2061,6 +2100,8 @@ function updateAlignBar(){
   setD('alphaGroup', inc(['fill','brush','frame','rect','select']));
   setD('sizeGroup',  inc(['brush','eraser']));   // 太さは枠塗りでは使わない
   setD('strokeGroup',inc(['frame','rect','select']));   // 枠線はオブジェクト系のみ
+  setD('strokeColorGroup',inc(['frame','rect','select']));   // 線色ピッカー
+  setD('strokePalette',inc(['frame','rect','select']));      // 線色パレット
   setD('selKindGroup', t==='select');   // 選択対象の種類は選択モードのみ
   setD('textCtl',    inc(['text','stamp']));
   setD('stampGroup', inc(['text','stamp']));
@@ -2111,18 +2152,35 @@ function startRubberBand(e){
   const tlr=tl.getBoundingClientRect();
   const x0=e.clientX, y0=e.clientY;
   const prior = e.shiftKey ? new Set(selIds) : new Set();
+  const priorFr = e.shiftKey ? new Set(frameSelSet) : new Set();
+  const pg = framePg();
   const band=document.createElement('div'); band.className='rubberband'; tl.appendChild(band);
   try{ tl.setPointerCapture(e.pointerId); }catch(_){}
   function apply(ev){
     const x=Math.min(x0,ev.clientX), y=Math.min(y0,ev.clientY), w=Math.abs(ev.clientX-x0), h=Math.abs(ev.clientY-y0);
     band.style.left=(x-tlr.left)+'px'; band.style.top=(y-tlr.top)+'px'; band.style.width=w+'px'; band.style.height=h+'px';
+    // 文字の範囲選択(対象のときのみ)
     const ids=new Set(prior);
-    document.querySelectorAll('.textbox').forEach(b=>{ const r=b.getBoundingClientRect();
+    if (selKindEnabled('text')) document.querySelectorAll('.textbox').forEach(b=>{ const r=b.getBoundingClientRect();
       if(!(r.right<x||r.left>x+w||r.bottom<y||r.top>y+h)) ids.add(b.dataset.id); });
     setSelection([...ids]);
+    // 図形(枠塗り・長方形・墨消し・塗り)の範囲選択: マーキー矩形と外接矩形が交差するもの
+    if (pg && pg.frames && pg.frames.length){
+      const a=pageCoords(x0,y0), c=pageCoords(ev.clientX,ev.clientY);
+      const rx0=Math.min(a.x,c.x), rx1=Math.max(a.x,c.x), ry0=Math.min(a.y,c.y), ry1=Math.max(a.y,c.y);
+      const set=new Set(priorFr);
+      for (const f of pg.frames){
+        if (!f.pts || !f.pts.length || !selKindEnabled(frameKind(f))) continue;
+        const xs=f.pts.map(p=>p.x), ys=f.pts.map(p=>p.y);
+        const fx0=Math.min(...xs), fx1=Math.max(...xs), fy0=Math.min(...ys), fy1=Math.max(...ys);
+        if (!(fx1<rx0||fx0>rx1||fy1<ry0||fy0>ry1)) set.add(f.id);
+      }
+      frameSelSet = set; frameSel = (set.size===1) ? [...set][0] : null;
+      renderFrameLayer();
+    }
   }
   const move=ev=>apply(ev);
-  const up=ev=>{ apply(ev); band.remove(); tl.removeEventListener('pointermove',move); tl.removeEventListener('pointerup',up); };
+  const up=ev=>{ apply(ev); band.remove(); tl.removeEventListener('pointermove',move); tl.removeEventListener('pointerup',up); updateAlignBar(); };
   tl.addEventListener('pointermove',move); tl.addEventListener('pointerup',up);
 }
 
@@ -2204,8 +2262,8 @@ function cancelPendingText(){ if(_pendingText){ clearTimeout(_pendingText.timer)
 function onTextLayerDown(e){
   if (e.target.classList && (e.target.classList.contains('textbox')||e.target.classList.contains('del'))) return;
   if (state.tool==='select'){
-    if (handleSelectObject(e)) return;   // オブジェクト(枠/長方形/墨消し)の選択・移動・リサイズを優先
-    if (selKindEnabled('text')) startRubberBand(e);   // 文字が選択対象のときだけ範囲選択
+    if (handleSelectObject(e)) return;   // オブジェクトの選択・移動・リサイズを優先
+    startRubberBand(e);   // エリア選択(文字＋図形)。対象種別は selKind で内部制御
     return;
   }
   if (state.tool!=='text' && state.tool!=='stamp') return;
@@ -2386,7 +2444,7 @@ document.addEventListener('keydown', e=>{
   // 削除はツール単位: オブジェクト=PDF要素 / 枠塗り=フレーム / 文字系=文字枠。それ以外のツールでは何もしない。
   if (state.tool==='object' && (e.key==='Delete'||e.key==='Backspace') && objSel.length){ e.preventDefault(); objDeleteSel(); return; }
   if (state.tool==='frame' && (e.key==='Delete'||e.key==='Backspace') && frameSel){ e.preventDefault(); deleteSelectedFrame(); return; }
-  if ((state.tool==='rect'||state.tool==='redact'||state.tool==='select') && (e.key==='Delete'||e.key==='Backspace') && frameSel){ e.preventDefault(); deleteSelectedFrame(); return; }
+  if ((state.tool==='rect'||state.tool==='redact'||state.tool==='select') && (e.key==='Delete'||e.key==='Backspace') && selFrameIds().length){ e.preventDefault(); deleteSelectedFrame(); return; }
   if (isTextTool() && (e.key==='Delete'||e.key==='Backspace') && selIds.size){ e.preventDefault(); removeSelected(); return; }
   // 全選択 / コピー / 貼り付け / 複製 は文字系ツールのときのみ(他ツールへ漏らさない)
   if (isTextTool() && ctrl && (e.key==='a'||e.key==='A')){ const pg=state.pages[state.active]; if(pg&&pg.texts.length){ e.preventDefault(); setSelection(pg.texts.map(t=>t.id)); } return; }
@@ -2397,7 +2455,7 @@ document.addEventListener('keydown', e=>{
     if (state.tool==='frame' && frameDrawing.length>0){ frameDrawing=[]; renderFrameLayer(); return; }
     if (state.tool==='frame' && frameSel){ frameSel=null; renderFrameLayer(); return; }
     if ((state.tool==='rect'||state.tool==='redact') && rectStart){ rectStart=null; clearRectPreview(); return; }   // 作成を取消
-    if ((state.tool==='rect'||state.tool==='redact'||state.tool==='select') && frameSel){ frameSel=null; renderFrameLayer(); return; }     // 選択を解除
+    if ((state.tool==='rect'||state.tool==='redact'||state.tool==='select') && selFrameIds().length){ frameSel=null; frameSelSet.clear(); renderFrameLayer(); return; }     // 選択を解除
     clearSelection(); return; }
 });
 // ---- ショートカット一覧ポップアップ ----
@@ -2455,7 +2513,9 @@ function calcAreas(){
   let srcCtx;
   if (pg.frameCanvas){
     const tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H;
-    srcCtx=tmp.getContext('2d'); srcCtx.drawImage(pg.overlay,0,0); srcCtx.drawImage(pg.frameCanvas,0,0);
+    srcCtx=tmp.getContext('2d'); srcCtx.drawImage(pg.overlay,0,0);
+    if (pg.frameCanvasLow) srcCtx.drawImage(pg.frameCanvasLow,0,0);
+    srcCtx.drawImage(pg.frameCanvas,0,0);
   } else { srcCtx=pg.overlay.getContext('2d'); }
   const data=srcCtx.getImageData(0,0,W,H).data;
   const ptPerPx=pg.w/W;
@@ -2630,12 +2690,16 @@ function paintToVector(opts){
       for (const loop of rg.loops){
         if (!loop || loop.length<3) continue;
         newFrames.push({ id:'fv'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-          pts: loop.map(p=>({x:p[0], y:p[1]})), color, alpha, strokeW:0, strokeColor:color });
+          pts: loop.map(p=>({x:p[0], y:p[1]})), color, alpha, strokeW:0, strokeColor:color, paint:true });
       }
     }
     if (!newFrames.length){ if(!opts.silent) alert(I18N.t('m.nopaint')); return; }
     if (!opts.noSnapshot) snapshot(pg);
-    pg.frames = (pg.frames||[]).concat(newFrames);
+    // 二重塗り防止: 新しい塗りにほぼ覆われる既存の「塗り」は重ねずに置き換える(再塗りで差し替え)
+    const coveredByNew = f => { if(!f.paint || !f.pts || f.pts.length<3) return false;
+      let inside=0; for(const p of f.pts){ if(newFrames.some(nf=>polyContains(nf.pts,p.x,p.y))) inside++; }
+      return inside >= f.pts.length*0.6; };
+    pg.frames = (pg.frames||[]).filter(f=>!coveredByNew(f)).concat(newFrames);
     // 元の塗り(オーバーレイ/ブラシ)を消去 — 以後はベクターオブジェクトとして扱う
     pg.overlay.getContext('2d').clearRect(0,0,pg.overlay.width,pg.overlay.height);
     if (pg.brush) pg.brush.getContext('2d').clearRect(0,0,pg.brush.width,pg.brush.height);
@@ -2892,8 +2956,9 @@ async function compositeCanvas(longSide, withText=false, withOverlay=true){
     img.onerror=()=>{ URL.revokeObjectURL(url); res(); }; img.src=url; });
   cx.imageSmoothingEnabled = true;
   if (withOverlay) cx.drawImage(pg.overlay, 0,0, W,H);     // 色レイヤーを拡大して重ねる
-  if (withOverlay && pg.frameCanvas) cx.drawImage(pg.frameCanvas, 0,0, W,H); // 枠塗りレイヤー
+  if (withOverlay && pg.frameCanvasLow) cx.drawImage(pg.frameCanvasLow, 0,0, W,H); // 塗り・枠塗り(地番の下)
   if (withOverlay && state.textLayerOn && pg.detCanvas) cx.drawImage(pg.detCanvas, 0,0, W,H); // 地番を塗りの上に
+  if (withOverlay && pg.frameCanvas) cx.drawImage(pg.frameCanvas, 0,0, W,H); // 長方形・墨消し(地番の上)
   if (withText) drawTextsOnCanvas(cx, sc, pg.texts);
   return c;
 }
@@ -3280,20 +3345,26 @@ function commitFramePolygon(pg){
 }
 
 // フレームの種類(レイヤー): 枠塗り / 長方形 / 墨消し
-function frameKind(f){ return f.redact ? 'redact' : (f.rect ? 'rect' : 'frame'); }
+function frameKind(f){ return f.redact ? 'redact' : (f.rect ? 'rect' : (f.paint ? 'paint' : 'frame')); }
 // 重なり順を固定: 枠塗り(下) → 長方形 → 墨消し(上)。種類内は作成順を保持(安定ソート)。
-const _LAYER_ORDER = { frame:0, rect:1, redact:2 };
+const _LAYER_ORDER = { paint:0, frame:1, rect:2, redact:3 };   // 塗り(ベクター化)は最下層
 function framesInDrawOrder(pg){
   return (pg.frames||[]).slice().sort((a,b)=>_LAYER_ORDER[frameKind(a)]-_LAYER_ORDER[frameKind(b)]);
 }
-// 全フレームを pg.frameCanvas に再描画(レイヤー順で重ねる)
+// 全フレームを再描画(レイヤー順)。塗り・枠塗りは frameCanvasLow(検出#detlayerの下)、
+// 長方形・墨消しは frameCanvas(検出の上)へ振り分けて描く。
 function redrawFrameCanvas(pg){
   if (!pg||!pg.frameCanvas) return;
   const W=pg.frameCanvas.width, H=pg.frameCanvas.height;
-  const ctx=pg.frameCanvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
+  const ctxH=pg.frameCanvas.getContext('2d');
+  const low=pg.frameCanvasLow||pg.frameCanvas;          // 低層が無ければ高層に集約(後方互換)
+  const ctxL=low.getContext('2d');
+  ctxH.clearRect(0,0,W,H);
+  if (low!==pg.frameCanvas) ctxL.clearRect(0,0,low.width,low.height);
   for (const fr of framesInDrawOrder(pg)){
     if (!fr.pts||fr.pts.length<3) continue;
+    const k=frameKind(fr);
+    const ctx = (k==='paint'||k==='frame') ? ctxL : ctxH;   // 塗り/枠塗り→低層, 長方形/墨消し→高層
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(fr.pts[0].x*pg.rscale, fr.pts[0].y*pg.rscale);
@@ -3328,8 +3399,8 @@ function flushFrameCanvas(){ if(_fcReq){ cancelAnimationFrame(_fcReq); _fcReq=0;
 // frameCanvas の表示サイズを overlay に合わせる(applyViewでも行うが念のため)
 function syncFrameCanvasDisplay(pg){
   const ov=document.getElementById('overlay'); if(!ov||!pg) return;
-  const fc=document.getElementById('frame-display-canvas'); if(!fc) return;
-  fc.style.width=ov.style.width; fc.style.height=ov.style.height;
+  const fc=document.getElementById('frame-display-canvas'); if(fc){ fc.style.width=ov.style.width; fc.style.height=ov.style.height; }
+  const fcL=document.getElementById('frame-display-canvas-low'); if(fcL){ fcL.style.width=ov.style.width; fcL.style.height=ov.style.height; }
 }
 
 // フレームレイヤーSVGを更新(ハンドル・プレビュー線・選択枠)
@@ -3456,12 +3527,17 @@ function renderSelectLayer(fl){
   while(fl.firstChild) fl.removeChild(fl.firstChild);
   const pg=framePg(); if(!pg) return;
   if (frameSel && !(pg.frames||[]).find(f=>f.id===frameSel)) frameSel=null;
-  const fr=(pg.frames||[]).find(f=>f.id===frameSel); if(!fr) return;
+  frameSelSet.forEach(id=>{ if(!(pg.frames||[]).find(f=>f.id===id)) frameSelSet.delete(id); });
   const SVGNS='http://www.w3.org/2000/svg';
-  const poly=document.createElementNS(SVGNS,'polygon');
-  poly.setAttribute('points', fr.pts.map(p=>{const s=framePageToSvg(p.x,p.y,pg);return s.sx.toFixed(1)+','+s.sy.toFixed(1);}).join(' '));
-  poly.setAttribute('fill','none'); poly.setAttribute('stroke','#ff3b30'); poly.setAttribute('stroke-width','2');
-  fl.appendChild(poly);
+  const ids=selFrameIds(); if(!ids.length) return;
+  // 選択中の全フレームに赤い輪郭を表示
+  ids.forEach(id=>{ const f=(pg.frames||[]).find(x=>x.id===id); if(!f||!f.pts) return;
+    const p=document.createElementNS(SVGNS,'polygon');
+    p.setAttribute('points', f.pts.map(q=>{const s=framePageToSvg(q.x,q.y,pg);return s.sx.toFixed(1)+','+s.sy.toFixed(1);}).join(' '));
+    p.setAttribute('fill','none'); p.setAttribute('stroke','#ff3b30'); p.setAttribute('stroke-width','2');
+    fl.appendChild(p); });
+  if (ids.length!==1) return;   // ハンドル(リサイズ/頂点)は単一選択時のみ
+  const fr=(pg.frames||[]).find(f=>f.id===ids[0]); if(!fr) return;
   if (fr.rect){
     for (const h of rectHandles(fr)){
       const s=framePageToSvg(h.x,h.y,pg);
@@ -3492,8 +3568,9 @@ function handleSelectObject(e){
   const pg=framePg(); if(!pg||!(pg.frames&&pg.frames.length)) return false;
   const d=selDispCoords(e.clientX,e.clientY); if(!d) return false;
   const pc=pageCoords(e.clientX,e.clientY);
-  const selFr=(pg.frames||[]).find(f=>f.id===frameSel);
-  // 1) 選択中オブジェクトのハンドル(リサイズ/頂点)
+  const ids0=selFrameIds();
+  // 1) 単一選択中オブジェクトのハンドル(リサイズ/頂点)。複数選択中は対象外。
+  const selFr = (ids0.length===1) ? (pg.frames||[]).find(f=>f.id===ids0[0]) : null;
   if (selFr){
     if (selFr.rect){ const hk=hitRectHandle(pg, selFr, d.dispX, d.dispY); if(hk){ snapshot(pg); startObjResize(pg, selFr, hk); return true; } }
     else { for (let i=0;i<selFr.pts.length;i++){ const s=framePageToSvg(selFr.pts[i].x,selFr.pts[i].y,pg); if(Math.hypot(d.dispX-s.sx,d.dispY-s.sy)<=10){ snapshot(pg); startPointDrag(pg, selFr, i); return true; } } }
@@ -3502,15 +3579,30 @@ function handleSelectObject(e){
   let hit=null;
   for (let i=pg.frames.length-1;i>=0;i--){ const f=pg.frames[i]; if(f.pts && selKindEnabled(frameKind(f)) && polyContains(f.pts,pc.x,pc.y)){ hit=f; break; } }
   if (hit){
-    frameSel=hit.id; clearSelection();   // 文字選択は解除
+    // 既に複数選択の一部を掴んだ → グループごと移動
+    if (frameSelSet.size>1 && frameSelSet.has(hit.id)){
+      startGroupMove(pg, selFrameIds(), pc); return true;
+    }
+    frameSelSet.clear();                  // 単一選択に切替
+    frameSel=hit.id; clearSelection();    // 文字選択は解除
     if(!hit.redact) syncColorControlsToFrame(hit);
     renderFrameLayer(); updateAlignBar();
     startObjMove(pg, hit, pc);
     return true;
   }
   // 3) 何も無ければ選択解除(→範囲選択へ)
-  if (frameSel){ frameSel=null; renderFrameLayer(); updateAlignBar(); }
+  if (frameSel || frameSelSet.size){ frameSel=null; frameSelSet.clear(); renderFrameLayer(); updateAlignBar(); }
   return false;
+}
+// 複数フレームをまとめて移動
+function startGroupMove(pg, ids, startPc){
+  const frs=ids.map(id=>(pg.frames||[]).find(f=>f.id===id)).filter(Boolean);
+  let last={x:startPc.x,y:startPc.y}, moved=false;
+  const move=ev=>{ const p=pageCoords(ev.clientX,ev.clientY); const dx=p.x-last.x, dy=p.y-last.y;
+    if(!moved){ moved=true; snapshot(pg); }
+    frs.forEach(fr=>{ fr.pts=fr.pts.map(q=>({x:q.x+dx,y:q.y+dy})); }); last=p; scheduleFrameCanvas(pg); renderFrameLayer(); };
+  const up=()=>{ document.removeEventListener('pointermove',move); document.removeEventListener('pointerup',up); flushFrameCanvas(); renderFrameLayer(); };
+  document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
 }
 function startObjResize(pg, fr, key){
   let moved=false;
@@ -3641,10 +3733,11 @@ function onFramePointerDown(e, pg, p){
 
 // 選択中フレームを削除
 function deleteSelectedFrame(){
-  const pg=framePg(); if(!pg||!frameSel) return;
+  const pg=framePg(); const ids=selFrameIds(); if(!pg||!ids.length) return;
   snapshot(pg);
-  pg.frames=pg.frames.filter(f=>f.id!==frameSel);
-  frameSel=null;
+  const idset=new Set(ids);
+  pg.frames=pg.frames.filter(f=>!idset.has(f.id));
+  frameSel=null; frameSelSet.clear();
   redrawFrameCanvas(pg);
   renderFrameLayer();
 }
@@ -3654,10 +3747,13 @@ function syncColorControlsToFrame(fr){
   state.color = fr.color;
   state.alpha = (typeof fr.alpha==='number') ? fr.alpha : state.alpha;
   const cu=$('#custom'); if(cu && fr.color!=='transparent') cu.value = toHex(fr.color);
-  document.querySelectorAll('.swatch').forEach(e=> e.classList.toggle('active', e.dataset.color===fr.color));
+  document.querySelectorAll('#palette .swatch').forEach(e=> e.classList.toggle('active', e.dataset.color===fr.color));
   const al=$('#alpha'); if(al){ al.value = Math.round(state.alpha*100); const av=$('#alphaVal'); if(av) av.textContent = Math.round(state.alpha*100)+'%'; }
   state.strokeW = fr.strokeW||0;   // 枠線UIも選択枠に合わせる
   document.querySelectorAll('#strokeGroup .tool').forEach(b=>b.classList.toggle('active', (+b.dataset.stroke)===state.strokeW));
+  if (fr.strokeColor){ state.strokeColor = toHex(fr.strokeColor);   // 線色UIも選択枠に合わせる
+    const scu=$('#strokeCustom'); if(scu) scu.value = state.strokeColor;
+    document.querySelectorAll('#strokePalette .swatch').forEach(e=> e.classList.toggle('active', e.dataset.color===state.strokeColor)); }
   updatePreview();
 }
 // 枠塗りで枠を選択中なら、色UIの変更をその枠へ反映(連続変更は1つの履歴にまとめる)
@@ -3668,8 +3764,18 @@ function recolorSelectedFrame(){
   const fr=(pg.frames||[]).find(f=>f.id===frameSel); if(!fr || fr.redact) return;   // 墨消しは色固定
   if (_frameStyleTimer===null) snapshot(pg);                 // バースト先頭で1回だけ履歴
   clearTimeout(_frameStyleTimer); _frameStyleTimer=setTimeout(()=>{_frameStyleTimer=null;}, 600);
-  fr.color = state.color; fr.alpha = state.alpha;
-  if (fr.strokeW>0) fr.strokeColor = strokeColorNow();        // 線ありなら線色も追従
+  fr.color = state.color; fr.alpha = state.alpha;             // 線色は独立(専用パレットで変更)
+  redrawFrameCanvas(pg);
+  renderFrameLayer();
+}
+// 線色パレットの変更を選択中オブジェクトの枠線色へ反映(連続変更は1履歴にまとめる)
+function recolorSelectedFrameStroke(){
+  if ((state.tool!=='frame' && state.tool!=='rect' && state.tool!=='select') || !frameSel) return;
+  const pg=framePg(); if(!pg) return;
+  const fr=(pg.frames||[]).find(f=>f.id===frameSel); if(!fr || fr.redact) return;   // 墨消しは色固定
+  if (_frameStyleTimer===null) snapshot(pg);
+  clearTimeout(_frameStyleTimer); _frameStyleTimer=setTimeout(()=>{_frameStyleTimer=null;}, 600);
+  fr.strokeColor = state.strokeColor;
   redrawFrameCanvas(pg);
   renderFrameLayer();
 }
