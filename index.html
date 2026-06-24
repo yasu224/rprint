@@ -2695,10 +2695,19 @@ function paintToVector(opts){
     }
     if (!newFrames.length){ if(!opts.silent) alert(I18N.t('m.nopaint')); return; }
     if (!opts.noSnapshot) snapshot(pg);
-    // 二重塗り防止: 新しい塗りにほぼ覆われる既存の「塗り」は重ねずに置き換える(再塗りで差し替え)
+    // 二重塗り防止: 同じ区画の塗り直しは重ねずに置き換える。
+    //  ① 旧の頂点の大半が新の内側  または  ② 外接矩形がほぼ一致(IoU)=ほぼ同じ範囲
+    const bbox=f=>{const xs=f.pts.map(p=>p.x),ys=f.pts.map(p=>p.y);
+      return {x0:Math.min(...xs),y0:Math.min(...ys),x1:Math.max(...xs),y1:Math.max(...ys)};};
+    const newBoxes=newFrames.map(bbox);
+    const iou=(a,b)=>{ const ix=Math.max(0,Math.min(a.x1,b.x1)-Math.max(a.x0,b.x0)),
+      iy=Math.max(0,Math.min(a.y1,b.y1)-Math.max(a.y0,b.y0)), inter=ix*iy;
+      if(inter<=0) return 0; const aA=(a.x1-a.x0)*(a.y1-a.y0), bA=(b.x1-b.x0)*(b.y1-b.y0);
+      return inter/((aA+bA-inter)||1); };
     const coveredByNew = f => { if(!f.paint || !f.pts || f.pts.length<3) return false;
       let inside=0; for(const p of f.pts){ if(newFrames.some(nf=>polyContains(nf.pts,p.x,p.y))) inside++; }
-      return inside >= f.pts.length*0.6; };
+      if (inside >= f.pts.length*0.6) return true;
+      const fb=bbox(f); return newBoxes.some(nb=>iou(fb,nb)>=0.5); };
     pg.frames = (pg.frames||[]).filter(f=>!coveredByNew(f)).concat(newFrames);
     // 元の塗り(オーバーレイ/ブラシ)を消去 — 以後はベクターオブジェクトとして扱う
     pg.overlay.getContext('2d').clearRect(0,0,pg.overlay.width,pg.overlay.height);
