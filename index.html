@@ -303,6 +303,8 @@
       <input type="color" id="tcolor" value="#000000" title="文字色" data-i18n-title="tip.tcolor">
       <button class="tool" id="btoggle" title="太字" data-i18n-title="tip.bold"><b>B</b></button>
       <button class="tool" id="vtoggle" title="縦書き／横書き切替" data-i18n-title="tip.vtoggle" data-i18n="txt.horiz">横書き</button>
+      <label for="letterSpacing" data-i18n="lbl.lspace">字間</label>
+      <input type="number" id="letterSpacing" min="-20" max="40" value="0" step="1" title="文字の間隔(字間・マイナスで詰め)" data-i18n-title="tip.lspace" style="width:46px">
     </div>
     <div class="group" id="stampGroup" title="スタンプ(クリックで配置・連続可)" data-i18n-title="tip.stamp">
       <label data-i18n="lbl.stamp">スタンプ</label>
@@ -582,6 +584,7 @@ const state = {
   baseName: 'colored', // 保存ファイル名のベース(読み込んだPDF名から)
   font: 'gothic',   // 文字フォント
   fontSize: 20,     // 文字サイズ(pt)
+  letterSpacing: 0, // 文字の間隔(字間, pt)
   vertical: false,  // 縦書き
   textColor: '#000000', // 文字色(塗り色とは独立)
   bold: false,      // 太字
@@ -838,6 +841,7 @@ $('#font').onchange   = e => { state.font = e.target.value; applySelStyle(); };
 rebuildFontOptions();
 { const _ls=document.getElementById('langSel'); if(_ls) _ls.addEventListener('change', e=>rebuildFontOptions(e.target.value)); }
 $('#fsize').oninput   = e => { state.fontSize = Math.max(6, +e.target.value||20); applySelStyle(); };
+$('#letterSpacing').oninput = e => { state.letterSpacing = Math.max(-20, Math.min(40, +e.target.value||0)); applySelStyle(); };
 $('#tcolor').oninput  = e => { state.textColor = e.target.value; applySelStyle(); };
 $('#btoggle').onclick = () => {
   state.bold = !state.bold;
@@ -2107,7 +2111,7 @@ function updateAlignBar(){
   setD('stampGroup', inc(['text','stamp']));
   const ag=document.getElementById('alignGroup'); if(ag) ag.style.display = (t==='select' || n>=2) ? 'flex':'none';
 }
-function setSelection(ids, primary){ selIds.clear(); (ids||[]).forEach(i=>selIds.add(i)); selText=(primary!==undefined)?primary:((ids&&ids.length)?ids[ids.length-1]:null); refreshSelClasses(); updateAlignBar(); }
+function setSelection(ids, primary){ selIds.clear(); (ids||[]).forEach(i=>selIds.add(i)); selText=(primary!==undefined)?primary:((ids&&ids.length)?ids[ids.length-1]:null); refreshSelClasses(); updateAlignBar(); syncTextControlsToSelection(); }
 function clearSelection(){ selIds.clear(); selText=null; refreshSelClasses(); updateAlignBar(); }
 function selectedTexts(){ const pg=state.pages[state.active]; return pg ? pg.texts.filter(x=>selIds.has(x.id)) : []; }
 function removeSelected(){ const pg=state.pages[state.active]; if(!pg||!selIds.size) return; snapTexts(pg); pg.texts=pg.texts.filter(x=>!selIds.has(x.id)); clearSelection(); renderTexts(); }
@@ -2282,7 +2286,7 @@ function createTextBoxAt(clientX, clientY, isStamp){
   const size = isStamp ? Math.max(state.fontSize, 28) : state.fontSize;
   const t = { id:'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
               x:p.x, y:p.y, text: isStamp ? state.stamp : I18N.t('txt.default'), size: size, font:state.font,
-              vertical:state.vertical, color:textColor(), bold:state.bold };
+              vertical:state.vertical, color:textColor(), bold:state.bold, letterSpacing:state.letterSpacing||0 };
   if (isStamp){ t.x -= size*0.35; t.y -= size*0.5; }   // クリック位置を中心に
   snapTexts(state.pages[state.active]);                // 文字追加を履歴に
   state.pages[state.active].texts.push(t);
@@ -2321,17 +2325,34 @@ function styleBox(el, t){
   el.style.fontSize = (t.size*state.zoom)+'px';
   el.style.fontFamily = fontCss(t.font);
   el.style.fontWeight = t.bold ? 'bold' : 'normal';
+  el.style.letterSpacing = ((t.letterSpacing||0)*state.zoom)+'px';   // 字間
   el.style.color = t.color;
 }
 function selectText(id, additive){
   if (additive){ if(selIds.has(id)) selIds.delete(id); else if(id) selIds.add(id); selText = selIds.size?id:null; }
   else { selIds.clear(); if(id) selIds.add(id); selText = id; }
-  refreshSelClasses(); updateAlignBar();
+  refreshSelClasses(); updateAlignBar(); syncTextControlsToSelection();
+}
+// 枠単位編集: 単一の文字枠を選択したら、その枠のスタイルをツールバー/stateへ反映
+// (applySelStyle は選択枠へツールバーの全スタイルを書き込むため、選択時に枠の値へ合わせる)
+function syncTextControlsToSelection(){
+  if (selIds.size!==1) return;
+  const id=[...selIds][0], pg=state.pages[state.active]; if(!pg) return;
+  const t=(pg.texts||[]).find(x=>x.id===id); if(!t) return;
+  state.font=t.font||state.font; state.fontSize=t.size||state.fontSize;
+  state.vertical=!!t.vertical; state.textColor=t.color||state.textColor;
+  state.bold=!!t.bold; state.letterSpacing=t.letterSpacing||0;
+  const f=$('#font'); if(f) f.value=state.font;
+  const fs=$('#fsize'); if(fs) fs.value=state.fontSize;
+  const ls=$('#letterSpacing'); if(ls) ls.value=state.letterSpacing;
+  const tc=$('#tcolor'); if(tc){ try{ tc.value=toHex(state.textColor); }catch(_){} }
+  const bt=$('#btoggle'); if(bt) bt.classList.toggle('active', state.bold);
+  const vt=$('#vtoggle'); if(vt) vt.textContent=(window.I18N? I18N.t(state.vertical?'txt.vert':'txt.horiz') : (state.vertical?'縦書き':'横書き'));
 }
 function applySelStyle(){
   const sel=selectedTexts(); if(!sel.length || state.active<0) return;
   snapTexts(state.pages[state.active]);                // 装飾変更を履歴に
-  sel.forEach(t=>{ t.font=state.font; t.size=state.fontSize; t.vertical=state.vertical; t.color=textColor(); t.bold=state.bold; });
+  sel.forEach(t=>{ t.font=state.font; t.size=state.fontSize; t.vertical=state.vertical; t.color=textColor(); t.bold=state.bold; t.letterSpacing=state.letterSpacing||0; });
   renderTexts(); refreshSelClasses();
 }
 function removeText(id){
@@ -2978,16 +2999,20 @@ function drawTextsOnCanvas(ctx, sc, texts){
     ctx.fillStyle = t.color;
     ctx.font = `${t.bold?'bold ':''}${(t.size*sc)}px ${fontCss(t.font)}`;
     const lines=(t.text||'').split('\n');
+    const ls=(t.letterSpacing||0)*sc;   // 字間
     if (!t.vertical){
       const y0=(t.y+t.size*0.85)*sc;
-      lines.forEach((ln,i)=> ctx.fillText(ln, t.x*sc, y0+i*t.size*1.3*sc));
+      lines.forEach((ln,i)=>{ const y=y0+i*t.size*1.3*sc;
+        if (!ls){ ctx.fillText(ln, t.x*sc, y); }
+        else { let x=t.x*sc; for (const ch of [...ln]){ ctx.fillText(ch, x, y); x+=ctx.measureText(ch).width+ls; } }
+      });
     } else {
-      const top=(t.y+t.size*0.85)*sc, col0=(t.x+t.size*0.5)*sc;
+      const top=(t.y+t.size*0.85)*sc, col0=(t.x+t.size*0.5)*sc, vstep=t.size*sc+ls;
       ctx.textAlign='center';
       lines.forEach((ln,ci)=>{
         const cx=col0 - ci*t.size*1.3*sc;
         [...ln].forEach((ch,ri)=>{
-          const by=top+ri*t.size*sc;
+          const by=top+ri*vstep;
           if (VERT_ROTATE.test(ch)){   // 縦書きで90°回転(長音符ーなど)
             ctx.save(); ctx.translate(cx, by - t.size*sc*0.30); ctx.rotate(Math.PI/2);
             const pb=ctx.textBaseline; ctx.textBaseline='middle'; ctx.fillText(ch,0,0); ctx.textBaseline=pb;
@@ -3248,18 +3273,20 @@ function drawTextsOnPdf(doc, texts){
     } else {
       doc.setFont(fam, 'normal');
     }
+    const ls = t.letterSpacing||0;   // 字間(pt)
     const lines = s.split('\n');
     if (!t.vertical){
       const base = Object.assign({ baseline:'alphabetic' }, opts);
+      if (ls) base.charSpace = ls;   // jsPDFの字間(pt)
       lines.forEach((ln,i)=> { if(ln) doc.text(ln, t.x, t.y + t.size*0.85 + i*t.size*1.25, base); });
     } else {
-      const col0 = t.x + t.size*0.5;
+      const col0 = t.x + t.size*0.5, vstep = t.size + ls;
       const base = Object.assign({ align:'center', baseline:'alphabetic' }, opts);
       const baseRot = Object.assign({ align:'center', baseline:'middle', angle:90 }, opts);
       lines.forEach((ln,ci)=>{
         const cx = col0 - ci*t.size*1.3;
         [...ln].forEach((ch,ri)=>{
-          const by = t.y + t.size*0.85 + ri*t.size;
+          const by = t.y + t.size*0.85 + ri*vstep;
           if (VERT_ROTATE.test(ch)) doc.text(ch, cx, by - t.size*0.30, baseRot);   // 長音符ーなどを90°回転
           else doc.text(ch, cx, by, base);
         });

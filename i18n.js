@@ -71,6 +71,8 @@
     'kind.paint':     ['塗り','Paint','涂色','칠','Tô','Relleno','Füllung','Remplissage','تعبئة'],
     'tip.selkind':    ['選択モードで選べるオブジェクトの種類','Object types selectable in select mode','选择模式中可选的对象类型','선택 모드에서 선택 가능한 종류','Loại đối tượng chọn được ở chế độ chọn','Tipos de objeto seleccionables en modo selección','Im Auswahlmodus auswählbare Objekttypen','Types d’objets sélectionnables en mode sélection','أنواع الكائنات القابلة للتحديد في وضع التحديد'],
     'lbl.text':       ['文字','Text','文字','문자','Chữ','Texto','Text','Texte','نص'],
+    'lbl.lspace':     ['字間','Spacing','字间','자간','Giãn chữ','Espaciado','Abstand','Espacement','تباعد'],
+    'tip.lspace':     ['文字の間隔(字間)を調整(0=標準)','Adjust spacing between characters (0 = normal)','调整字符间距(0=默认)','문자 간격 조정(0=기본)','Điều chỉnh khoảng cách giữa các chữ (0 = mặc định)','Ajusta el espacio entre caracteres (0 = normal)','Abstand zwischen Zeichen anpassen (0 = normal)','Ajuster l’espacement entre les caractères (0 = normal)','اضبط المسافة بين الأحرف (0 = عادي)'],
     'lbl.stamp':      ['スタンプ','Stamp','印章','스탬프','Dấu','Sello','Stempel','Tampon','ختم'],
     'lbl.align':      ['整列','Align','对齐','정렬','Căn','Alinear','Ausrichten','Aligner','محاذاة'],
     'lbl.gap':        ['隙間塞ぎ','Gap fill','补缝','틈 메움','Lấp khe','Rellenar hueco','Lücke','Combler','سد الفجوات'],
