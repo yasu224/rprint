@@ -1,0 +1,114 @@
+﻿<!doctype html>
+<html lang="ja">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-835577852"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-835577852');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>公図色付け — ユーザー登録</title>
+<style>
+  :root { --bar:#1f2430; --bar2:#2b3242; --accent:#4f8cff; --line:#3a4254; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; font-family:"Segoe UI","Meiryo",sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%, #2b3242, #11141c); color:#eaeef7; }
+  body { display:flex; align-items:center; justify-content:center; }
+  .card { width:380px; max-width:92vw; background:#1f2430; border:1px solid var(--line);
+    border-radius:14px; padding:28px 26px 22px; box-shadow:0 18px 50px rgba(0,0,0,.45); }
+  .brand { display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+  .brand .title { font-size:18px; font-weight:700; }
+  .logo { margin-left:auto; }
+  .logo svg { height:22px; width:auto; display:block; }
+  .logo svg path { fill:#fff; }
+  .sub { font-size:12px; opacity:.6; margin:0 0 18px; }
+  label { display:block; font-size:12px; opacity:.8; margin:13px 0 6px; }
+  input { width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--line);
+    background:#2b3242; color:#fff; font-size:14px; outline:none; }
+  input:focus { border-color:var(--accent); }
+  .hint { font-size:11px; opacity:.5; margin-top:5px; }
+  button { width:100%; margin-top:20px; padding:11px; border:0; border-radius:8px;
+    background:var(--accent); color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:default; }
+  .msg { margin-top:13px; min-height:18px; font-size:13px; text-align:center; }
+  .msg.err { color:#ff6b6b; }
+  .msg.ok  { color:#46d17f; }
+  .alt { margin-top:16px; font-size:12px; text-align:center; opacity:.8; }
+  .alt a { color:var(--accent); text-decoration:none; }
+</style>
+</head>
+<body>
+  <form class="card" id="form" autocomplete="off">
+    <div class="brand">
+      <span class="title">🗺 公図色付け</span>
+      <span class="logo" title="MARY">
+        <svg viewBox="166 362 238 58" xmlns="http://www.w3.org/2000/svg" aria-label="MARY">
+          <path d="M184.8,363.8l11.9,39.2l11.9-39.2h18v54.2h-11.7V392c0-1.7,0.3-13.3,0.4-15.3l-12.8,41.4H191l-12.8-41.4c0.1,1.7,0.4,13.6,0.4,15.3v26.1h-11.7v-54.2H184.8z"/>
+          <path d="M289.9,418.1H276l-4.1-11.3h-21.5l-4.1,11.3h-13.9l20.6-54.2h16.1L289.9,418.1z M261.1,375.8l-7.4,20.3h14.9L261.1,375.8z"/>
+          <path d="M329.1,363.8c6.3,0,14.9,1.6,14.9,15.1c0,4.1-0.2,11.3-7.7,13.9c4.9,1.2,6.9,4.6,6.9,9.8v4.9c0,5.6,0.9,8.9,1.3,10.5h-12.7c-0.6-2.5-0.8-5.8-0.8-8.3v-5.1c0-6.1-3.4-6.2-6.8-6.2H308v19.6h-12.3v-54.2H329.1z M308,375.1v12.4h17.9c3.8,0,5.9-1.2,5.9-6.8c0-4.5-2.3-5.6-5.9-5.6H308z"/>
+          <path d="M363,363.8l12.2,21.9l12.3-21.9h14.4l-20.4,33v21.2H369v-21.2l-20.4-33H363z"/>
+        </svg>
+      </span>
+    </div>
+    <p class="sub">新規ユーザー登録</p>
+
+    <label for="u" data-i18n="auth.username">ユーザー名</label>
+    <input type="text" id="u" name="username" autocomplete="username">
+    <div class="hint">3〜64文字の英数字・記号（_ . - @）</div>
+
+    <label for="em">メールアドレス（請求・お知らせ用）</label>
+    <input type="email" id="em" name="email" autocomplete="email">
+    <div class="hint">Stripe の請求に使用します</div>
+
+    <label for="p" data-i18n="auth.password">パスワード</label>
+    <input type="password" id="p" name="password" autocomplete="new-password">
+    <div class="hint">8文字以上</div>
+
+    <label for="p2">パスワード（確認）</label>
+    <input type="password" id="p2" name="password2" autocomplete="new-password">
+
+    <button type="submit" id="btn">登録する</button>
+    <div class="msg" id="msg"></div>
+    <div class="alt">すでにアカウントをお持ちですか？ <select id="langSel" aria-label="Language" style="font-size:12px;border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:#2b3242;color:#fff;margin-right:8px"></select><a href="login.html" data-i18n="auth.login">ログイン</a></div>
+  </form>
+
+<script>
+  const $ = s => document.querySelector(s);
+  $('#form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = $('#btn'), msg = $('#msg');
+    msg.className = 'msg'; msg.textContent = '';
+    const u = $('#u').value.trim(), p = $('#p').value, p2 = $('#p2').value, em = $('#em').value.trim();
+    if (u.length < 3) { msg.className='msg err'; msg.textContent='ユーザー名は3文字以上にしてください'; return; }
+    if (p.length < 8) { msg.className='msg err'; msg.textContent='パスワードは8文字以上にしてください'; return; }
+    if (p !== p2)     { msg.className='msg err'; msg.textContent='パスワードが一致しません'; return; }
+    btn.disabled = true; btn.textContent = '登録中…';
+    try {
+      const res = await fetch('api/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p, email: em })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        msg.className = 'msg ok';
+        msg.textContent = '登録しました。お申し込み（マイページ）へ移動します…';
+        setTimeout(() => { location.href = 'mypage.html'; }, 900);
+      } else {
+        msg.className = 'msg err';
+        msg.textContent = data.error || '登録に失敗しました';
+        btn.disabled = false; btn.textContent = '登録する';
+      }
+    } catch (e2) {
+      msg.className = 'msg err'; msg.textContent = '通信エラーが発生しました';
+      btn.disabled = false; btn.textContent = '登録する';
+    }
+  });
+</script>
+<script src="i18n.js?v=20260617"></script>
+</body>
+</html>

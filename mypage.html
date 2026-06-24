@@ -1,0 +1,169 @@
+﻿<!doctype html>
+<html lang="ja">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-835577852"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-835577852');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>公図色付け — マイページ</title>
+<style>
+  :root { --bar:#1f2430; --bar2:#2b3242; --accent:#4f8cff; --line:#3a4254; --ok:#46d17f; --warn:#ffb454; --err:#ff6b6b; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; min-height:100%; font-family:"Segoe UI","Meiryo",sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%, #2b3242, #11141c); color:#eaeef7; }
+  body { display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; }
+  .card { width:520px; max-width:94vw; background:#1f2430; border:1px solid var(--line);
+    border-radius:14px; padding:26px 26px 22px; box-shadow:0 18px 50px rgba(0,0,0,.45); }
+  .brand { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .brand .title { font-size:18px; font-weight:700; }
+  .brand .sp { margin-left:auto; }
+  h2 { font-size:14px; margin:22px 0 10px; opacity:.85; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:14px; padding:6px 0; }
+  .row .k { opacity:.7; }
+  .badge { font-size:12px; padding:3px 10px; border-radius:999px; font-weight:700; }
+  .badge.active { background:rgba(70,209,127,.18); color:var(--ok); }
+  .badge.none, .badge.canceled { background:rgba(255,107,107,.16); color:var(--err); }
+  .badge.past_due, .badge.trialing { background:rgba(255,180,84,.16); color:var(--warn); }
+  label { display:block; font-size:12px; opacity:.8; margin:12px 0 6px; }
+  input { width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--line);
+    background:#2b3242; color:#fff; font-size:14px; outline:none; }
+  input:focus { border-color:var(--accent); }
+  button { padding:10px 14px; border:0; border-radius:8px; background:var(--accent); color:#fff;
+    font-size:14px; font-weight:600; cursor:pointer; }
+  button.sub { background:#2b3242; border:1px solid var(--line); }
+  button.full { width:100%; margin-top:10px; }
+  button:disabled { opacity:.55; cursor:default; }
+  .msg { margin-top:10px; min-height:18px; font-size:13px; }
+  .msg.err { color:var(--err); } .msg.ok { color:var(--ok); }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .links { margin-top:20px; display:flex; gap:14px; font-size:13px; }
+  .links a { color:var(--accent); text-decoration:none; cursor:pointer; }
+  .note { font-size:12px; opacity:.6; margin-top:6px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <span class="title">🗺 公図色付け</span>
+      <span class="sp"></span>
+      <select id="langSel" aria-label="Language" style="font-size:12px;border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:#2b3242;color:#fff;margin-right:10px"></select><a class="links" href="index.html" data-i18n="my.toapp" style="color:var(--accent);text-decoration:none">← アプリへ戻る</a>
+    </div>
+
+    <h2 data-i18n="my.account">アカウント</h2>
+    <div class="row"><span class="k">ユーザー名</span><span id="uName">—</span></div>
+    <div class="row"><span class="k">メール</span><span id="uEmail">—</span></div>
+
+    <h2 data-i18n="my.sub">サブスクリプション（月額）</h2>
+    <div class="row"><span class="k">状態</span><span id="subBadge" class="badge none">—</span></div>
+    <div class="row"><span class="k">次回更新日</span><span id="subEnd">—</span></div>
+    <div class="actions" id="subActions"></div>
+    <div class="note" id="subNote"></div>
+    <div class="msg" id="subMsg"></div>
+
+    <h2 data-i18n="my.changepw">パスワード変更</h2>
+    <label for="curPw">現在のパスワード</label>
+    <input type="password" id="curPw" autocomplete="current-password">
+    <label for="newPw">新しいパスワード（8文字以上）</label>
+    <input type="password" id="newPw" autocomplete="new-password">
+    <button class="full" id="pwBtn">変更する</button>
+    <div class="msg" id="pwMsg"></div>
+
+    <div class="links">
+      <a id="adminLink" style="display:none">🛠 ユーザー管理</a>
+      <a id="logout">⎋ ログアウト</a>
+    </div>
+  </div>
+
+<script>
+  const $ = s => document.querySelector(s);
+  const api = (p, opt) => fetch('api/'+p, Object.assign({headers:{'Content-Type':'application/json'}}, opt||{}));
+  let ME = null;
+
+  function badge(status){
+    const b = $('#subBadge');
+    const map = { active:'有効', trialing:'無料トライアル中', past_due:'支払い遅延', canceled:'解約済み', none:'未加入' };
+    const s = status || 'none';
+    b.className = 'badge ' + (['active','trialing','past_due','canceled'].includes(s) ? s : 'none');
+    b.textContent = map[s] || s;
+  }
+
+  async function load(){
+    try { ME = await (await api('me')).json(); } catch(e){ location.replace('login.html'); return; }
+    if (!ME || !ME.authenticated){ location.replace('login.html'); return; }
+    $('#uName').textContent = ME.user || '—';
+    $('#uEmail').textContent = ME.email || '（未設定）';
+    badge(ME.sub_status);
+    $('#subEnd').textContent = ME.period_end ? ME.period_end.replace('T',' ').slice(0,16) : '—';
+    if (ME.admin) $('#adminLink').style.display = '';
+
+    const act = $('#subActions'); act.innerHTML = '';
+    if (!ME.stripe_ready){
+      $('#subNote').textContent = '決済は現在準備中です（管理者にお問い合わせください）。';
+    } else if (ME.subscribed){
+      const m = document.createElement('button'); m.className='sub'; m.textContent='契約・支払い方法の管理';
+      m.onclick = openPortal; act.appendChild(m);
+      $('#subNote').textContent = '契約内容の変更・解約・カード変更は「管理」から行えます（Stripe）。';
+    } else {
+      const s = document.createElement('button'); s.textContent='月額プランに加入する';
+      s.onclick = startCheckout; act.appendChild(s);
+      if (ME.has_customer){ const m=document.createElement('button'); m.className='sub'; m.textContent='請求情報の管理'; m.onclick=openPortal; act.appendChild(m); }
+      $('#subNote').textContent = 'カード情報は Stripe の安全な画面で入力します（当サイトは保持しません）。';
+    }
+  }
+
+  async function startCheckout(){
+    const msg = $('#subMsg'); msg.className='msg'; msg.textContent='決済画面へ移動します…';
+    try {
+      const r = await api('checkout', { method:'POST', body:'{}' });
+      const d = await r.json();
+      if (r.ok && d.url) { location.href = d.url; return; }
+      msg.className='msg err'; msg.textContent = d.error || '決済の開始に失敗しました';
+    } catch(e){ msg.className='msg err'; msg.textContent='通信エラー'; }
+  }
+  async function openPortal(){
+    const msg = $('#subMsg'); msg.className='msg'; msg.textContent='管理画面へ移動します…';
+    try {
+      const r = await api('portal', { method:'POST', body:'{}' });
+      const d = await r.json();
+      if (r.ok && d.url) { location.href = d.url; return; }
+      msg.className='msg err'; msg.textContent = d.error || '管理画面を開けませんでした';
+    } catch(e){ msg.className='msg err'; msg.textContent='通信エラー'; }
+  }
+
+  $('#pwBtn').onclick = async () => {
+    const msg=$('#pwMsg'); msg.className='msg'; msg.textContent='';
+    const cur=$('#curPw').value, nw=$('#newPw').value;
+    if (nw.length < 8){ msg.className='msg err'; msg.textContent='新しいパスワードは8文字以上にしてください'; return; }
+    $('#pwBtn').disabled=true;
+    try {
+      const r = await api('account/password', { method:'POST', body: JSON.stringify({current:cur, new:nw}) });
+      const d = await r.json();
+      if (r.ok){ msg.className='msg ok'; msg.textContent='変更しました'; $('#curPw').value=''; $('#newPw').value=''; }
+      else { msg.className='msg err'; msg.textContent = d.error || '変更に失敗しました'; }
+    } catch(e){ msg.className='msg err'; msg.textContent='通信エラー'; }
+    $('#pwBtn').disabled=false;
+  };
+
+  $('#logout').onclick = async () => { try{ await api('logout',{method:'POST'}); }catch(e){} location.href='login.html'; };
+  $('#adminLink').onclick = () => location.href = 'admin.html';
+
+  // 決済完了で戻ってきたら DB を即時同期
+  (async () => {
+    const q = new URLSearchParams(location.search);
+    if (q.get('checkout') === 'success' && q.get('sid')){
+      try { await api('checkout/confirm', { method:'POST', body: JSON.stringify({session_id:q.get('sid')}) }); } catch(e){}
+      history.replaceState({}, '', 'mypage.html');
+    }
+    load();
+  })();
+</script>
+<script src="i18n.js?v=20260617"></script>
+</body>
+</html>

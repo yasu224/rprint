@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Help — 公図色付け</title>
+<style>
+  :root{ --bar:#1f2430; --bar2:#2b3242; --accent:#4f8cff; --line:#3a4254; --ink:#1d2330; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:#eef1f5; color:var(--ink); font-family:"Segoe UI","Meiryo",sans-serif; line-height:1.7; }
+  header{ position:sticky; top:0; z-index:5; background:var(--bar); color:#eaeef7;
+    display:flex; align-items:center; gap:12px; padding:12px 18px; box-shadow:0 1px 0 var(--line); flex-wrap:wrap; }
+  header .ttl{ font-weight:700; font-size:17px; }
+  header .sp{ margin-left:auto; }
+  header select{ background:var(--bar2); color:#eaeef7; border:1px solid var(--line); border-radius:8px; padding:5px 8px; font-size:13px; cursor:pointer; }
+  header a.back{ background:var(--accent); color:#fff; text-decoration:none; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; }
+  main{ max-width:860px; margin:0 auto; padding:22px 18px 80px; }
+  .lead{ background:#fff; border:1px solid #e2e6ee; border-radius:12px; padding:16px 18px; margin-bottom:22px; box-shadow:0 2px 10px rgba(0,0,0,.05); }
+  h2{ font-size:18px; margin:28px 0 10px; padding-bottom:6px; border-bottom:2px solid var(--accent); }
+  p{ margin:6px 0; }
+  ul{ margin:6px 0; padding-left:22px; }
+  li{ margin:4px 0; }
+  .note{ background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:12px 14px; margin:10px 0; }
+  .note.warn{ background:#fef2f2; border-color:#fecaca; }
+  kbd{ background:var(--bar2); color:#fff; border-radius:5px; padding:2px 8px; font-size:12px; white-space:nowrap; }
+  table{ width:100%; border-collapse:collapse; background:#fff; border:1px solid #e2e6ee; border-radius:10px; overflow:hidden; margin:8px 0; }
+  td,th{ padding:8px 12px; border-bottom:1px solid #eef1f5; text-align:start; font-size:14px; }
+  th{ background:#f3f5f9; }
+  tr:last-child td{ border-bottom:0; }
+  html[dir=rtl] ul{ padding-left:0; padding-right:22px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="ttl">🗺 <span id="hdrTitle">操作説明</span></span>
+  <span class="sp"></span>
+  <select id="langSel" aria-label="Language"></select>
+  <a class="back" id="backLink" href="index.html">← アプリへ戻る</a>
+</header>
+<main id="content"></main>
+
+<script>
+// 言語: アプリと同じ ['ja','en','zh','ko','vi','es','de','fr','ar']
+var LANGS = [['ja','日本語'],['en','English'],['zh','简体中文'],['ko','한국어'],['vi','Tiếng Việt'],['es','Español'],['de','Deutsch'],['fr','Français'],['ar','العربية']];
+var UI = {
+  title: ['操作説明','Help','操作说明','사용법','Hướng dẫn','Ayuda','Hilfe','Aide','مساعدة'],
+  back:  ['← アプリへ戻る','← Back to app','← 返回应用','← 앱으로','← Về ứng dụng','← Volver a la app','← Zur App','← Retour à l’app','→ العودة للتطبيق']
+};
+
+// 各言語の本文(HTML)。構成は全言語共通。
+var HELP = {};
+
+HELP.ja = `
+<div class="lead">公図などのPDF・画像を読み込み、色塗り・文字入れ・面積計算・墨消しができるツールです。保存したPDF/PNG/SVGはそのまま印刷・提出に使えます。<b>データはお使いのブラウザ内だけで処理</b>され、サーバーへ画像は送られません。</div>
+<h2>1. ファイルを読み込む</h2><ul>
+<li><b>📂 ファイルを選択</b>、または画面にPDF / SVG / 画像(PNG・JPEG)を<b>ドラッグ＆ドロップ</b>。複数まとめて読み込めます。</li>
+<li>上部の<b>ページタブ(1p・2p…)</b>で切替。<b>＋追加</b>で後ろに追加、<b>🗑ページ削除</b>で表示中を削除。</li>
+<li>当アプリで保存したSVGは開き直すと<b>再編集</b>できます。</li></ul>
+<h2>2. ツール一覧</h2><ul>
+<li><b>🪣 塗り</b>：線で囲まれた領域をクリックで塗ります。</li>
+<li><b>🔷 枠塗り</b>：クリックで頂点を追加→始点クリックで閉じて塗ります。頂点ドラッグで調整。</li>
+<li><b>▭ 長方形</b>：始点クリック→対角を動かしてクリックで確定。作成後はクリックで選択しハンドルでサイズ調整、<kbd>Delete</kbd>で削除。</li>
+<li><b>⬛ 墨消し</b>：黒塗り。画面は濃いグレー、<b>PDF出力時に枠内の内容を実際に消去して黒で塗ります(復元不可)</b>。</li>
+<li><b>🖌 ブラシ</b>：自由に塗る(<kbd>Shift</kbd>で直線)。<b>🧽 消しゴム</b>：塗り・ブラシを消す。</li>
+<li><b>✏️ 文字</b>：クリックで文字枠を作成。枠はドラッグで移動(編集中も可)。</li>
+<li><b>🔲 選択</b>：範囲選択・文字枠の複数移動。<b>✋ 移動</b>：拡大時ドラッグで表示位置を移動(無操作が続くと自動で移動モード)。</li></ul>
+<p class="note">💡「枠塗り」「長方形」「墨消し」は独立レイヤーです。各ツールの「全消去」はそのツールの図形だけを消します。</p>
+<h2>3. 色・不透明度・太さ</h2><ul><li>パレットまたはカラーピッカーで色を指定。不透明度で濃さ、太さでブラシ・消しゴムの太さを調整。枠塗り・長方形を選択中に色を変えるとその図形に反映。</li></ul>
+<h2>4. 文字・スタンプ・整列</h2><ul>
+<li>書体・サイズ・文字色・太字(B)・縦/横書きを設定。スタンプ◯✓×をクリックで配置。</li>
+<li><kbd>Shift</kbd>+クリックで複数選択し、左揃え・中央・等間隔で整列。</li>
+<li>文字はPDFに<b>本物の文字列</b>として埋め込まれ検索・コピー可(多言語対応)。</li></ul>
+<h2>5. 塗り設定・文字検出</h2><ul>
+<li><b>隙間塞ぎ</b>：線が途切れて塗りが漏れるとき上げる。<b>線を濃く</b>：薄い線を強調。</li>
+<li><b>🔤 文字検出</b>：地図中の文字・数字を検出して塗りの壁から除外(地番を跨いで塗れる)。</li></ul>
+<h2>6. 面積を計算</h2><ul><li><b>縮尺 1/</b>に公図の縮尺を入力(既定600)→<b>📐 面積を計算</b>で色ごとの面積を㎡・坪で表示。</li></ul>
+<h2>7. 表示(拡大・回転・移動)</h2><ul><li>➖/➕で縮小・拡大(<kbd>Ctrl</kbd>+ホイール可)、⤢全体で幅に合わせる。↺/↻で90°回転。✋移動またはスクロールで位置調整。</li></ul>
+<h2>8. 編集(戻す・全消去)</h2><ul><li><b>↶戻す</b>(<kbd>Ctrl</kbd>+<kbd>Z</kbd>)・<b>↷進む</b>(<kbd>Ctrl</kbd>+<kbd>Y</kbd>)。<b>🗑全消去</b>は選択中のツールの内容だけを消します。</li></ul>
+<h2>9. 保存・印刷</h2><ul>
+<li><b>💾 SVG</b>(再編集可)・<b>🖼 PNG</b>・<b>📕 PDF</b>。複数ページは自動でまとめ(SVG/PNG=ZIP、PDF=1つ)。</li>
+<li><b>ベクターで保存</b>で拡大しても劣化しません。<b>🖨 印刷</b>/<b>🖨 文字だけ</b>(重ね刷り用)。</li></ul>
+<h2>10. ショートカット</h2><table><tr><th>操作</th><th>キー</th></tr>
+<tr><td>戻す / やり直し</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
+<tr><td>拡大 / 縮小</td><td><kbd>Ctrl</kbd>+<kbd>＋</kbd> / <kbd>－</kbd></td></tr>
+<tr><td>文字枠の移動</td><td>矢印キー(<kbd>Shift</kbd>で大)</td></tr>
+<tr><td>文字枠の削除</td><td><kbd>Delete</kbd></td></tr>
+<tr><td>取消 / 選択解除</td><td><kbd>Esc</kbd></td></tr></table>
+<h2>11. スマートフォン</h2><p>画面が狭いときは左上の <b>☰</b> でメニューを開閉します。</p>
+<h2>12. 注意点</h2>
+<div class="note warn"><b>⬛ 墨消し：</b>墨消しは<b>PDF出力時のみ</b>枠内を実際に削除して黒で塗ります(復元不可)。画面・PNG/SVGでは濃いグレーの目印です。重要情報を隠す場合は<b>必ずPDFで出力</b>してください。</div>
+<ul><li>対応形式：読込=PDF/SVG/PNG/JPEG、保存=PDF/PNG/SVG。</li><li>複数ページ表示中は、表示外のページはメモリ節約のため一時的に畳まれます(切替時に自動復元)。</li></ul>`;
+
+HELP.en = `
+<div class="lead">A tool to load cadastral-map PDFs/images and add color fills, text, area calculation and redaction. Saved PDF/PNG/SVG can be printed or submitted as-is. <b>All processing happens in your browser</b>; images are never sent to a server.</div>
+<h2>1. Loading files</h2><ul>
+<li><b>📂 Select file</b>, or <b>drag &amp; drop</b> PDF / SVG / images (PNG, JPEG). Multiple files at once are supported.</li>
+<li>Switch pages with the <b>page tabs (1p, 2p…)</b>. <b>＋Add</b> appends files; <b>🗑Delete page</b> removes the current one.</li>
+<li>SVG saved by this app can be reopened and <b>re-edited</b>.</li></ul>
+<h2>2. Tools</h2><ul>
+<li><b>🪣 Fill</b>: click inside a line-enclosed area to fill it.</li>
+<li><b>🔷 Frame fill</b>: click to add points, click the start point to close and fill. Drag points to adjust.</li>
+<li><b>▭ Rectangle</b>: click a corner, move the opposite corner, click to confirm. Select an existing one and resize with handles; <kbd>Delete</kbd> to remove.</li>
+<li><b>⬛ Redaction</b>: blackout. Shown dark gray on screen; <b>on PDF export the content inside is truly erased and filled black (unrecoverable)</b>.</li>
+<li><b>🖌 Brush</b>: free painting (<kbd>Shift</kbd> for a straight line). <b>🧽 Eraser</b>: remove fills/brush.</li>
+<li><b>✏️ Text</b>: click to create a text box. Drag to move (also while editing).</li>
+<li><b>🔲 Select</b>: marquee-select and move multiple text boxes. <b>✋ Pan</b>: drag to scroll when zoomed (auto-activates after idle).</li></ul>
+<p class="note">💡 Frame fill, Rectangle and Redaction are independent layers. Each tool's “Clear all” removes only that tool's shapes.</p>
+<h2>3. Color, opacity, width</h2><ul><li>Pick a color from the palette or color picker. Opacity sets the strength; Width sets the brush/eraser size. Changing the color while a frame/rectangle is selected updates that shape.</li></ul>
+<h2>4. Text, stamps, align</h2><ul>
+<li>Set font, size, color, bold (B) and vertical/horizontal. Place stamps ◯ ✓ × by clicking.</li>
+<li><kbd>Shift</kbd>+click to multi-select, then align left/center/even spacing.</li>
+<li>Text is embedded in the PDF as <b>real, searchable text</b> (multilingual).</li></ul>
+<h2>5. Fill settings, text detection</h2><ul>
+<li><b>Gap bridging</b>: raise it if fills leak through broken lines. <b>Boost lines</b>: emphasize faint lines.</li>
+<li><b>🔤 Text detection</b>: detect characters/numbers and exclude them from the fill walls (fill across numbers).</li></ul>
+<h2>6. Area calculation</h2><ul><li>Enter the map scale in <b>Scale 1/</b> (default 600), then <b>📐 Calculate area</b> shows the area per color in m² and tsubo.</li></ul>
+<h2>7. View (zoom, rotate, pan)</h2><ul><li>➖/➕ to zoom (<kbd>Ctrl</kbd>+wheel too), ⤢ to fit width, ↺/↻ to rotate 90°. Use ✋ Pan or scroll to reposition.</li></ul>
+<h2>8. Edit (undo, clear)</h2><ul><li><b>↶ Undo</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) / <b>↷ Redo</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 Clear all</b> removes only the active tool's content.</li></ul>
+<h2>9. Save &amp; print</h2><ul>
+<li><b>💾 SVG</b> (re-editable), <b>🖼 PNG</b>, <b>📕 PDF</b>. Multiple pages are bundled automatically (SVG/PNG = ZIP, PDF = one file).</li>
+<li><b>Save as vector</b> keeps quality when zoomed. <b>🖨 Print</b> / <b>🖨 Text only</b> (for overprinting).</li></ul>
+<h2>10. Shortcuts</h2><table><tr><th>Action</th><th>Key</th></tr>
+<tr><td>Undo / Redo</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
+<tr><td>Zoom in / out</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd></td></tr>
+<tr><td>Move text box</td><td>Arrow keys (<kbd>Shift</kbd> = larger)</td></tr>
+<tr><td>Delete text box</td><td><kbd>Delete</kbd></td></tr>
+<tr><td>Cancel / deselect</td><td><kbd>Esc</kbd></td></tr></table>
+<h2>11. Smartphone</h2><p>On narrow screens, use the <b>☰</b> button (top-left) to open/close the menu.</p>
+<h2>12. Notes</h2>
+<div class="note warn"><b>⬛ Redaction:</b> redaction truly deletes and blacks out the area <b>only on PDF export</b> (unrecoverable). On screen and in PNG/SVG it is just a dark-gray marker. To hide sensitive data, <b>always export as PDF</b>.</div>
+<ul><li>Formats: load = PDF/SVG/PNG/JPEG, save = PDF/PNG/SVG.</li><li>With multiple pages, off-screen pages are temporarily folded to save memory (restored on switch).</li></ul>`;
+
+HELP.zh = `
+<div class="lead">用于载入地图(公图)PDF/图片，进行涂色、加文字、面积计算与涂黑遮盖的工具。保存的 PDF/PNG/SVG 可直接打印或提交。<b>所有处理都在您的浏览器内完成</b>，图片不会上传到服务器。</div>
+<h2>1. 载入文件</h2><ul>
+<li><b>📂 选择文件</b>，或将 PDF / SVG / 图片(PNG、JPEG)<b>拖放</b>到页面。支持一次多文件。</li>
+<li>用顶部<b>页标签(1p、2p…)</b>切换。<b>＋添加</b>在后面追加，<b>🗑删除页</b>删除当前页。</li>
+<li>本应用保存的 SVG 重新打开后可<b>再次编辑</b>。</li></ul>
+<h2>2. 工具</h2><ul>
+<li><b>🪣 填充</b>：点击被线框住的区域进行填充。</li>
+<li><b>🔷 框填充</b>：点击添加顶点→点击起点闭合并填充，拖动顶点可调整。</li>
+<li><b>▭ 矩形</b>：点击起点→移动对角点→再次点击确定。已创建的可点击选择并用手柄调整大小，<kbd>Delete</kbd>删除。</li>
+<li><b>⬛ 涂黑遮盖</b>：屏幕显示深灰，<b>导出 PDF 时真正擦除框内内容并填黑(不可恢复)</b>。</li>
+<li><b>🖌 画笔</b>：自由涂(<kbd>Shift</kbd>画直线)。<b>🧽 橡皮</b>：擦除涂色/画笔。</li>
+<li><b>✏️ 文字</b>：点击创建文字框，可拖动移动(编辑中也可)。</li>
+<li><b>🔲 选择</b>：框选并移动多个文字框。<b>✋ 平移</b>：放大时拖动滚动(空闲后自动启用)。</li></ul>
+<p class="note">💡 “框填充”“矩形”“涂黑”是独立图层，各工具的“全部清除”只清除该工具的图形。</p>
+<h2>3. 颜色・不透明度・粗细</h2><ul><li>用调色板或取色器选色。不透明度调浓淡，粗细调画笔/橡皮大小。选中框填充/矩形时改色会应用到该图形。</li></ul>
+<h2>4. 文字・印章・对齐</h2><ul>
+<li>设置字体、字号、颜色、粗体(B)、竖/横排。点击放置印章 ◯ ✓ ×。</li>
+<li><kbd>Shift</kbd>+点击多选，可左对齐/居中/等间距。</li>
+<li>文字以<b>真实可检索文字</b>嵌入 PDF(多语言)。</li></ul>
+<h2>5. 填充设置・文字检测</h2><ul>
+<li><b>桥接缝隙</b>：填充从断线漏出时调高。<b>加深线条</b>：强调浅线。</li>
+<li><b>🔤 文字检测</b>：检测文字数字并排除于填充墙(可跨数字填充)。</li></ul>
+<h2>6. 计算面积</h2><ul><li>在<b>比例 1/</b>输入比例(默认600)→<b>📐 计算面积</b>按颜色显示面积(㎡・坪)。</li></ul>
+<h2>7. 显示(缩放・旋转・平移)</h2><ul><li>➖/➕缩放(也可<kbd>Ctrl</kbd>+滚轮)，⤢适合宽度，↺/↻旋转90°。用✋平移或滚动调整位置。</li></ul>
+<h2>8. 编辑(撤销・清除)</h2><ul><li><b>↶撤销</b>(<kbd>Ctrl</kbd>+<kbd>Z</kbd>)・<b>↷重做</b>(<kbd>Ctrl</kbd>+<kbd>Y</kbd>)。<b>🗑全部清除</b>只清除当前工具的内容。</li></ul>
+<h2>9. 保存・打印</h2><ul>
+<li><b>💾 SVG</b>(可再编辑)・<b>🖼 PNG</b>・<b>📕 PDF</b>。多页自动打包(SVG/PNG=ZIP，PDF=单个)。</li>
+<li><b>矢量保存</b>放大不失真。<b>🖨 打印</b>/<b>🖨 仅文字</b>(套印用)。</li></ul>
+<h2>10. 快捷键</h2><table><tr><th>操作</th><th>按键</th></tr>
+<tr><td>撤销 / 重做</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
+<tr><td>放大 / 缩小</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd></td></tr>
+<tr><td>移动文字框</td><td>方向键(<kbd>Shift</kbd>更大)</td></tr>
+<tr><td>删除文字框</td><td><kbd>Delete</kbd></td></tr>
+<tr><td>取消 / 取消选择</td><td><kbd>Esc</kbd></td></tr></table>
+<h2>11. 智能手机</h2><p>屏幕较窄时，用左上角 <b>☰</b> 开关菜单。</p>
+<h2>12. 注意事项</h2>
+<div class="note warn"><b>⬛ 涂黑：</b>仅在<b>导出 PDF 时</b>真正删除框内内容并填黑(不可恢复)。屏幕与 PNG/SVG 中只是深灰标记。隐藏敏感信息请<b>务必导出 PDF</b>。</div>
+<ul><li>格式：载入=PDF/SVG/PNG/JPEG，保存=PDF/PNG/SVG。</li><li>多页时，非当前页会临时折叠以节省内存(切换时自动恢复)。</li></ul>`;
+
+HELP.ko = `
+<div class="lead">지적도(공도) PDF·이미지를 불러와 색칠·문자 입력·면적 계산·검정칠을 할 수 있는 도구입니다. 저장한 PDF/PNG/SVG는 그대로 인쇄·제출할 수 있습니다. <b>모든 처리는 브라우저 안에서만</b> 이루어지며 이미지는 서버로 전송되지 않습니다.</div>
+<h2>1. 파일 불러오기</h2><ul>
+<li><b>📂 파일 선택</b> 또는 PDF / SVG / 이미지(PNG·JPEG)를 <b>끌어다 놓기</b>. 여러 개 동시 가능.</li>
+<li>상단 <b>페이지 탭(1p·2p…)</b>으로 전환. <b>＋추가</b>로 뒤에 추가, <b>🗑페이지 삭제</b>로 현재 페이지 삭제.</li>
+<li>이 앱에서 저장한 SVG는 다시 열면 <b>재편집</b>할 수 있습니다.</li></ul>
+<h2>2. 도구</h2><ul>
+<li><b>🪣 채우기</b>: 선으로 둘러싸인 영역을 클릭해 채웁니다.</li>
+<li><b>🔷 영역 채우기</b>: 클릭으로 점 추가→시작점 클릭으로 닫아 채우기. 점을 끌어 조정.</li>
+<li><b>▭ 사각형</b>: 시작점 클릭→대각점 이동→다시 클릭하여 확정. 만든 후 클릭 선택, 핸들로 크기 조정, <kbd>Delete</kbd> 삭제.</li>
+<li><b>⬛ 검정칠</b>: 화면은 진회색, <b>PDF 출력 시 영역 내 내용을 실제로 삭제하고 검정으로 채움(복원 불가)</b>.</li>
+<li><b>🖌 브러시</b>: 자유롭게 칠(<kbd>Shift</kbd> 직선). <b>🧽 지우개</b>: 색·브러시 지우기.</li>
+<li><b>✏️ 문자</b>: 클릭으로 문자 상자 생성, 끌어서 이동(편집 중에도 가능).</li>
+<li><b>🔲 선택</b>: 범위 선택·여러 문자 이동. <b>✋ 이동</b>: 확대 시 끌어 화면 이동(무조작 시 자동 전환).</li></ul>
+<p class="note">💡 ‘영역 채우기’ ‘사각형’ ‘검정칠’은 독립 레이어입니다. 각 도구의 ‘전체 지우기’는 해당 도구 도형만 지웁니다.</p>
+<h2>3. 색·불투명도·굵기</h2><ul><li>팔레트나 색 선택기로 색 지정. 불투명도로 농도, 굵기로 브러시/지우개 크기 조정. 영역/사각형 선택 중 색을 바꾸면 그 도형에 반영.</li></ul>
+<h2>4. 문자·스탬프·정렬</h2><ul>
+<li>글꼴·크기·색·굵게(B)·세로/가로 설정. 스탬프 ◯ ✓ × 클릭 배치.</li>
+<li><kbd>Shift</kbd>+클릭 다중 선택 후 왼쪽/가운데/등간격 정렬.</li>
+<li>문자는 PDF에 <b>실제 검색 가능한 텍스트</b>로 삽입(다국어).</li></ul>
+<h2>5. 채우기 설정·문자 검출</h2><ul>
+<li><b>틈 메우기</b>: 끊긴 선으로 채움이 새면 올립니다. <b>선 진하게</b>: 옅은 선 강조.</li>
+<li><b>🔤 문자 검출</b>: 문자·숫자를 검출해 채움 벽에서 제외(숫자를 가로질러 채우기).</li></ul>
+<h2>6. 면적 계산</h2><ul><li><b>축척 1/</b>에 축척 입력(기본 600)→<b>📐 면적 계산</b>으로 색별 면적을 ㎡·평으로 표시.</li></ul>
+<h2>7. 보기(확대·회전·이동)</h2><ul><li>➖/➕ 확대·축소(<kbd>Ctrl</kbd>+휠 가능), ⤢ 폭 맞춤, ↺/↻ 90° 회전. ✋ 이동이나 스크롤로 위치 조정.</li></ul>
+<h2>8. 편집(되돌리기·지우기)</h2><ul><li><b>↶되돌리기</b>(<kbd>Ctrl</kbd>+<kbd>Z</kbd>)·<b>↷다시</b>(<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑전체 지우기</b>는 현재 도구 내용만 지웁니다.</li></ul>
+<h2>9. 저장·인쇄</h2><ul>
+<li><b>💾 SVG</b>(재편집 가능)·<b>🖼 PNG</b>·<b>📕 PDF</b>. 여러 페이지는 자동 묶음(SVG/PNG=ZIP, PDF=하나).</li>
+<li><b>벡터로 저장</b>은 확대해도 깨지지 않음. <b>🖨 인쇄</b>/<b>🖨 문자만</b>(겹쳐 인쇄용).</li></ul>
+<h2>10. 단축키</h2><table><tr><th>동작</th><th>키</th></tr>
+<tr><td>되돌리기 / 다시</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
+<tr><td>확대 / 축소</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd></td></tr>
+<tr><td>문자 상자 이동</td><td>화살표(<kbd>Shift</kbd> 크게)</td></tr>
+<tr><td>문자 상자 삭제</td><td><kbd>Delete</kbd></td></tr>
+<tr><td>취소 / 선택 해제</td><td><kbd>Esc</kbd></td></tr></table>
+<h2>11. 스마트폰</h2><p>화면이 좁을 때 왼쪽 위 <b>☰</b>로 메뉴를 엽니다.</p>
+<h2>12. 주의</h2>
+<div class="note warn"><b>⬛ 검정칠:</b> <b>PDF 출력 시에만</b> 영역 내용을 실제로 삭제하고 검정으로 채웁니다(복원 불가). 화면·PNG/SVG에서는 진회색 표시일 뿐입니다. 민감 정보는 <b>반드시 PDF로 출력</b>하세요.</div>
+<ul><li>형식: 불러오기=PDF/SVG/PNG/JPEG, 저장=PDF/PNG/SVG.</li><li>여러 페이지일 때 화면 밖 페이지는 메모리 절약을 위해 일시적으로 접힙니다(전환 시 자동 복원).</li></ul>`;
+
+HELP.vi = `
+<div class="lead">Công cụ tải PDF/ảnh bản đồ địa chính để tô màu, thêm chữ, tính diện tích và bôi đen. PDF/PNG/SVG đã lưu có thể in hoặc nộp trực tiếp. <b>Mọi xử lý diễn ra trong trình duyệt của bạn</b>; ảnh không được gửi lên máy chủ.</div>
+<h2>1. Tải tệp</h2><ul>
+<li><b>📂 Chọn tệp</b> hoặc <b>kéo &amp; thả</b> PDF / SVG / ảnh (PNG, JPEG). Hỗ trợ nhiều tệp.</li>
+<li>Chuyển trang bằng <b>thẻ trang (1p, 2p…)</b>. <b>＋Thêm</b> để nối tệp, <b>🗑Xóa trang</b> để xóa trang hiện tại.</li>
+<li>SVG lưu bằng ứng dụng này có thể mở lại để <b>chỉnh sửa tiếp</b>.</li></ul>
+<h2>2. Công cụ</h2><ul>
+<li><b>🪣 Tô</b>: nhấp vào vùng được đường bao quanh để tô.</li>
+<li><b>🔷 Tô khung</b>: nhấp để thêm điểm→nhấp điểm đầu để đóng và tô. Kéo điểm để chỉnh.</li>
+<li><b>▭ Chữ nhật</b>: nhấp điểm đầu→di chuyển điểm đối diện→nhấp để xác nhận. Chọn hình đã tạo và đổi cỡ bằng tay nắm; <kbd>Delete</kbd> để xóa.</li>
+<li><b>⬛ Bôi đen</b>: trên màn hình màu xám đậm; <b>khi xuất PDF nội dung bên trong bị xóa thật và tô đen (không khôi phục được)</b>.</li>
+<li><b>🖌 Cọ</b>: tô tự do (<kbd>Shift</kbd> để vẽ thẳng). <b>🧽 Tẩy</b>: xóa tô/cọ.</li>
+<li><b>✏️ Chữ</b>: nhấp để tạo ô chữ; kéo để di chuyển (cả khi đang sửa).</li>
+<li><b>🔲 Chọn</b>: chọn vùng và di chuyển nhiều ô chữ. <b>✋ Di chuyển</b>: kéo để cuộn khi phóng to (tự bật khi rảnh).</li></ul>
+<p class="note">💡 “Tô khung”, “Chữ nhật”, “Bôi đen” là các lớp độc lập. “Xóa tất cả” của mỗi công cụ chỉ xóa hình của công cụ đó.</p>
+<h2>3. Màu, độ mờ, độ dày</h2><ul><li>Chọn màu từ bảng màu hoặc bộ chọn. Độ mờ chỉnh đậm nhạt; độ dày chỉnh cỡ cọ/tẩy. Đổi màu khi đang chọn khung/chữ nhật sẽ áp dụng cho hình đó.</li></ul>
+<h2>4. Chữ, con dấu, căn chỉnh</h2><ul>
+<li>Đặt phông, cỡ, màu, đậm (B), dọc/ngang. Đặt con dấu ◯ ✓ × bằng cách nhấp.</li>
+<li><kbd>Shift</kbd>+nhấp để chọn nhiều, rồi căn trái/giữa/đều.</li>
+<li>Chữ được nhúng vào PDF dưới dạng <b>văn bản thật, tìm kiếm được</b> (đa ngôn ngữ).</li></ul>
+<h2>5. Cài đặt tô, nhận diện chữ</h2><ul>
+<li><b>Lấp khe</b>: tăng khi tô bị rò qua nét đứt. <b>Đậm nét</b>: làm nổi nét mờ.</li>
+<li><b>🔤 Nhận diện chữ</b>: phát hiện chữ/số và loại khỏi tường tô (tô vượt qua số).</li></ul>
+<h2>6. Tính diện tích</h2><ul><li>Nhập tỷ lệ ở <b>Tỷ lệ 1/</b> (mặc định 600)→<b>📐 Tính diện tích</b> hiển thị diện tích theo màu (m², tsubo).</li></ul>
+<h2>7. Hiển thị (phóng, xoay, di chuyển)</h2><ul><li>➖/➕ phóng to/thu nhỏ (<kbd>Ctrl</kbd>+lăn chuột), ⤢ vừa bề rộng, ↺/↻ xoay 90°. Dùng ✋ Di chuyển hoặc cuộn để chỉnh vị trí.</li></ul>
+<h2>8. Sửa (hoàn tác, xóa)</h2><ul><li><b>↶ Hoàn tác</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) · <b>↷ Làm lại</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 Xóa tất cả</b> chỉ xóa nội dung của công cụ hiện tại.</li></ul>
+<h2>9. Lưu &amp; in</h2><ul>
+<li><b>💾 SVG</b> (sửa lại được) · <b>🖼 PNG</b> · <b>📕 PDF</b>. Nhiều trang được gộp tự động (SVG/PNG = ZIP, PDF = một tệp).</li>
+<li><b>Lưu dạng vector</b> không vỡ khi phóng to. <b>🖨 In</b> / <b>🖨 Chỉ chữ</b> (in chồng).</li></ul>
+<h2>10. Phím tắt</h2><table><tr><th>Thao tác</th><th>Phím</th></tr>
+<tr><td>Hoàn tác / Làm lại</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
+<tr><td>Phóng to / thu nhỏ</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd></td></tr>
+<tr><td>Di chuyển ô chữ</td><td>Phím mũi tên (<kbd>Shift</kbd> = lớn)</td></tr>
+<tr><td>Xóa ô chữ</td><td><kbd>Delete</kbd></td></tr>
+<tr><td>Hủy / bỏ chọn</td><td><kbd>Esc</kbd></td></tr></table>
+<h2>11. Điện thoại</h2><p>Khi màn hình hẹp, dùng nút <b>☰</b> (trên trái) để mở/đóng menu.</p>
+<h2>12. Lưu ý</h2>
+<div class="note warn"><b>⬛ Bôi đen:</b> chỉ <b>khi xuất PDF</b> mới xóa thật và tô đen vùng đó (không khôi phục được). Trên màn hình và PNG/SVG chỉ là dấu xám đậm. Để che thông tin nhạy cảm, <b>luôn xuất PDF</b>.</div>
+<ul><li>Định dạng: tải = PDF/SVG/PNG/JPEG, lưu = PDF/PNG/SVG.</li><li>Khi có nhiều trang, các trang ngoài màn hình tạm được gấp lại để tiết kiệm bộ nhớ (tự khôi phục khi chuyển).</li></ul>`;
+
+HELP.es = `
+<div class="lead">Herramienta para cargar PDF/imágenes de planos catastrales y añadir rellenos de color, texto, cálculo de área y tachado. Los PDF/PNG/SVG guardados se pueden imprimir o presentar tal cual. <b>Todo el procesamiento ocurre en tu navegador</b>; las imágenes nunca se envían a un servidor.</div>
+<h2>1. Cargar archivos</h2><ul>
+<li><b>📂 Seleccionar archivo</b> o <b>arrastra y suelta</b> PDF / SVG / imágenes (PNG, JPEG). Admite varios a la vez.</li>
+<li>Cambia de página con las <b>pestañas (1p, 2p…)</b>. <b>＋Añadir</b> anexa archivos; <b>🗑Eliminar página</b> borra la actual.</li>
+<li>El SVG guardado por esta app se puede reabrir y <b>volver a editar</b>.</li></ul>
+<h2>2. Herramientas</h2><ul>
+<li><b>🪣 Rellenar</b>: haz clic dentro de un área cerrada por líneas para rellenarla.</li>
+<li><b>🔷 Relleno de marco</b>: clic para añadir puntos→clic en el inicio para cerrar y rellenar. Arrastra puntos para ajustar.</li>
+<li><b>▭ Rectángulo</b>: clic en una esquina→mueve la opuesta→clic para confirmar. Selecciona uno y cambia el tamaño con los tiradores; <kbd>Delete</kbd> para borrar.</li>
+<li><b>⬛ Tachado</b>: gris oscuro en pantalla; <b>al exportar PDF el contenido interior se borra realmente y se rellena de negro (irrecuperable)</b>.</li>
+<li><b>🖌 Pincel</b>: pintar libremente (<kbd>Shift</kbd> para línea recta). <b>🧽 Borrador</b>: quitar rellenos/pincel.</li>
+<li><b>✏️ Texto</b>: clic para crear un cuadro de texto; arrastra para moverlo (también al editar).</li>
+<li><b>🔲 Seleccionar</b>: selección por área y mover varios cuadros. <b>✋ Desplazar</b>: arrastra para desplazar al ampliar (se activa al estar inactivo).</li></ul>
+<p class="note">💡 Relleno de marco, Rectángulo y Tachado son capas independientes. El “Borrar todo” de cada herramienta solo borra sus propias formas.</p>
+<h2>3. Color, opacidad, grosor</h2><ul><li>Elige color en la paleta o el selector. La opacidad ajusta la intensidad; el grosor, el tamaño de pincel/borrador. Cambiar el color con un marco/rectángulo seleccionado lo aplica a esa forma.</li></ul>
+<h2>4. Texto, sellos, alinear</h2><ul>
+<li>Ajusta fuente, tamaño, color, negrita (B) y vertical/horizontal. Coloca sellos ◯ ✓ × con clic.</li>
+<li><kbd>Shift</kbd>+clic para selección múltiple y alinear izquierda/centro/espaciado uniforme.</li>
+<li>El texto se incrusta en el PDF como <b>texto real y buscable</b> (multilingüe).</li></ul>
+<h2>5. Ajustes de relleno, detección de texto</h2><ul>
+<li><b>Cerrar huecos</b>: súbelo si el relleno se escapa por líneas rotas. <b>Resaltar líneas</b>: enfatiza líneas tenues.</li>
+<li><b>🔤 Detección de texto</b>: detecta caracteres/números y los excluye de los muros de relleno.</li></ul>
+<h2>6. Calcular área</h2><ul><li>Introduce la escala en <b>Escala 1/</b> (por defecto 600)→<b>📐 Calcular área</b> muestra el área por color en m² y tsubo.</li></ul>
+<h2>7. Vista (zoom, rotar, desplazar)</h2><ul><li>➖/➕ para zoom (<kbd>Ctrl</kbd>+rueda), ⤢ ajustar al ancho, ↺/↻ rotar 90°. Usa ✋ Desplazar o el scroll para reubicar.</li></ul>
+<h2>8. Editar (deshacer, borrar)</h2><ul><li><b>↶ Deshacer</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) · <b>↷ Rehacer</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 Borrar todo</b> elimina solo el contenido de la herramienta activa.</li></ul>
+<h2>9. Guardar e imprimir</h2><ul>
+<li><b>💾 SVG</b> (reeditable), <b>🖼 PNG</b>, <b>📕 PDF</b>. Varias páginas se agrupan automáticamente (SVG/PNG = ZIP, PDF = un archivo).</li>
+<li><b>Guardar como vector</b> mantiene la calidad al ampliar. <b>🖨 Imprimir</b> / <b>🖨 Solo texto</b> (para sobreimpresión).</li></ul>
+<h2>10. Atajos</h2><table><tr><th>Acción</th><th>Tecla</th></tr>
+<tr><td>Deshacer / Rehacer</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
+<tr><td>Acercar / Alejar</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd></td></tr>
+<tr><td>Mover cuadro de texto</td><td>Flechas (<kbd>Shift</kbd> = más)</td></tr>
+<tr><td>Borrar cuadro de texto</td><td><kbd>Delete</kbd></td></tr>
+<tr><td>Cancelar / deseleccionar</td><td><kbd>Esc</kbd></td></tr></table>
+<h2>11. Smartphone</h2><p>En pantallas estrechas, usa el botón <b>☰</b> (arriba a la izquierda) para abrir/cerrar el menú.</p>
+<h2>12. Notas</h2>
+<div class="note warn"><b>⬛ Tachado:</b> el tachado borra realmente y ennegrece el área <b>solo al exportar PDF</b> (irrecuperable). En pantalla y en PNG/SVG es solo una marca gris oscuro. Para ocultar datos sensibles, <b>exporta siempre como PDF</b>.</div>
+<ul><li>Formatos: cargar = PDF/SVG/PNG/JPEG, guardar = PDF/PNG/SVG.</li><li>Con varias páginas, las que no se ven se pliegan temporalmente para ahorrar memoria (se restauran al cambiar).</li></ul>`;
+
+HELP.de = `
+<div class="lead">Werkzeug zum Laden von Katasterplan-PDFs/Bildern für Farbflächen, Text, Flächenberechnung und Schwärzung. Gespeicherte PDF/PNG/SVG können direkt gedruckt oder eingereicht werden. <b>Die gesamte Verarbeitung erfolgt in Ihrem Browser</b>; Bilder werden nie an einen Server gesendet.</div>
+<h2>1. Dateien laden</h2><ul>
+<li><b>📂 Datei wählen</b> oder PDF / SVG / Bilder (PNG, JPEG) per <b>Drag &amp; Drop</b>. Mehrere gleichzeitig möglich.</li>
+<li>Seiten über die <b>Reiter (1p, 2p…)</b> wechseln. <b>＋Hinzufügen</b> hängt an, <b>🗑Seite löschen</b> entfernt die aktuelle.</li>
+<li>Von dieser App gespeicherte SVG lassen sich erneut öffnen und <b>weiterbearbeiten</b>.</li></ul>
+<h2>2. Werkzeuge</h2><ul>
+<li><b>🪣 Füllen</b>: in einen von Linien umschlossenen Bereich klicken, um zu füllen.</li>
+<li><b>🔷 Rahmenfüllung</b>: klicken für Punkte→Startpunkt klicken zum Schließen und Füllen. Punkte ziehen zum Anpassen.</li>
+<li><b>▭ Rechteck</b>: Ecke klicken→Gegenecke bewegen→klicken zum Bestätigen. Vorhandenes auswählen und mit Griffen skalieren; <kbd>Delete</kbd> löscht.</li>
+<li><b>⬛ Schwärzung</b>: am Bildschirm dunkelgrau; <b>beim PDF-Export wird der Inhalt wirklich gelöscht und schwarz gefüllt (nicht wiederherstellbar)</b>.</li>
+<li><b>🖌 Pinsel</b>: frei malen (<kbd>Shift</kbd> für gerade Linie). <b>🧽 Radierer</b>: Füllungen/Pinsel entfernen.</li>
+<li><b>✏️ Text</b>: klicken für ein Textfeld; ziehen zum Verschieben (auch während der Bearbeitung).</li>
+<li><b>🔲 Auswahl</b>: Bereichsauswahl und mehrere Textfelder verschieben. <b>✋ Verschieben</b>: beim Zoomen ziehen zum Scrollen (aktiviert sich bei Inaktivität).</li></ul>
+<p class="note">💡 Rahmenfüllung, Rechteck und Schwärzung sind eigene Ebenen. „Alles löschen“ entfernt nur die Formen des jeweiligen Werkzeugs.</p>
+<h2>3. Farbe, Deckkraft, Stärke</h2><ul><li>Farbe aus der Palette oder dem Farbwähler. Deckkraft regelt die Intensität, Stärke die Pinsel-/Radierergröße. Farbänderung bei ausgewähltem Rahmen/Rechteck wirkt auf diese Form.</li></ul>
+<h2>4. Text, Stempel, Ausrichten</h2><ul>
+<li>Schrift, Größe, Farbe, Fett (B), vertikal/horizontal einstellen. Stempel ◯ ✓ × per Klick setzen.</li>
+<li><kbd>Shift</kbd>+Klick für Mehrfachauswahl, dann links/zentriert/gleichmäßig ausrichten.</li>
+<li>Text wird als <b>echter, durchsuchbarer Text</b> ins PDF eingebettet (mehrsprachig).</li></ul>
+<h2>5. Fülleinstellungen, Texterkennung</h2><ul>
+<li><b>Lücken schließen</b>: erhöhen, wenn die Füllung durch unterbrochene Linien ausläuft. <b>Linien verstärken</b>: schwache Linien betonen.</li>
+<li><b>🔤 Texterkennung</b>: Zeichen/Zahlen erkennen und aus den Füllwänden ausschließen.</li></ul>
+<h2>6. Fläche berechnen</h2><ul><li>Maßstab unter <b>Maßstab 1/</b> eingeben (Standard 600)→<b>📐 Fläche berechnen</b> zeigt die Fläche je Farbe in m² und Tsubo.</li></ul>
+<h2>7. Ansicht (Zoom, Drehen, Verschieben)</h2><ul><li>➖/➕ zum Zoomen (<kbd>Ctrl</kbd>+Rad), ⤢ an Breite anpassen, ↺/↻ um 90° drehen. Mit ✋ Verschieben oder Scrollen positionieren.</li></ul>
+<h2>8. Bearbeiten (Rückgängig, Löschen)</h2><ul><li><b>↶ Rückgängig</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) · <b>↷ Wiederholen</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 Alles löschen</b> entfernt nur den Inhalt des aktiven Werkzeugs.</li></ul>
+<h2>9. Speichern &amp; Drucken</h2><ul>
+<li><b>💾 SVG</b> (wiederbearbeitbar), <b>🖼 PNG</b>, <b>📕 PDF</b>. Mehrere Seiten werden automatisch gebündelt (SVG/PNG = ZIP, PDF = eine Datei).</li>
+<li><b>Als Vektor speichern</b> bleibt beim Zoomen scharf. <b>🖨 Drucken</b> / <b>🖨 Nur Text</b> (für Überdruck).</li></ul>
+<h2>10. Tastenkürzel</h2><table><tr><th>Aktion</th><th>Taste</th></tr>
+<tr><td>Rückgängig / Wiederholen</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
+<tr><td>Vergrößern / Verkleinern</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd></td></tr>
+<tr><td>Textfeld verschieben</td><td>Pfeiltasten (<kbd>Shift</kbd> = groß)</td></tr>
+<tr><td>Textfeld löschen</td><td><kbd>Delete</kbd></td></tr>
+<tr><td>Abbrechen / Abwählen</td><td><kbd>Esc</kbd></td></tr></table>
+<h2>11. Smartphone</h2><p>Bei schmalem Bildschirm das <b>☰</b>-Symbol (oben links) zum Öffnen/Schließen des Menüs nutzen.</p>
+<h2>12. Hinweise</h2>
+<div class="note warn"><b>⬛ Schwärzung:</b> Die Schwärzung löscht und schwärzt den Bereich wirklich <b>nur beim PDF-Export</b> (nicht wiederherstellbar). Am Bildschirm und in PNG/SVG ist es nur eine dunkelgraue Markierung. Zum Verbergen sensibler Daten <b>immer als PDF exportieren</b>.</div>
+<ul><li>Formate: Laden = PDF/SVG/PNG/JPEG, Speichern = PDF/PNG/SVG.</li><li>Bei mehreren Seiten werden nicht sichtbare Seiten zur Speicherersparnis vorübergehend zusammengeklappt (beim Wechsel automatisch wiederhergestellt).</li></ul>`;
+
+HELP.fr = `
+<div class="lead">Outil pour charger des PDF/images de plans cadastraux et ajouter des remplissages de couleur, du texte, le calcul de surface et le caviardage. Les PDF/PNG/SVG enregistrés peuvent être imprimés ou soumis tels quels. <b>Tout le traitement se fait dans votre navigateur</b> ; les images ne sont jamais envoyées à un serveur.</div>
+<h2>1. Charger des fichiers</h2><ul>
+<li><b>📂 Choisir un fichier</b> ou <b>glissez-déposez</b> des PDF / SVG / images (PNG, JPEG). Plusieurs à la fois.</li>
+<li>Changez de page avec les <b>onglets (1p, 2p…)</b>. <b>＋Ajouter</b> ajoute à la suite ; <b>🗑Supprimer la page</b> supprime l’actuelle.</li>
+<li>Les SVG enregistrés par cette app peuvent être rouverts et <b>réédités</b>.</li></ul>
+<h2>2. Outils</h2><ul>
+<li><b>🪣 Remplir</b> : cliquez dans une zone fermée par des lignes pour la remplir.</li>
+<li><b>🔷 Remplissage de cadre</b> : cliquez pour ajouter des points→cliquez le point de départ pour fermer et remplir. Faites glisser les points pour ajuster.</li>
+<li><b>▭ Rectangle</b> : cliquez un coin→déplacez le coin opposé→cliquez pour valider. Sélectionnez-en un et redimensionnez avec les poignées ; <kbd>Delete</kbd> pour supprimer.</li>
+<li><b>⬛ Caviardage</b> : gris foncé à l’écran ; <b>à l’export PDF le contenu intérieur est réellement effacé et rempli en noir (irrécupérable)</b>.</li>
+<li><b>🖌 Pinceau</b> : peindre librement (<kbd>Shift</kbd> pour une ligne droite). <b>🧽 Gomme</b> : effacer remplissages/pinceau.</li>
+<li><b>✏️ Texte</b> : cliquez pour créer une zone de texte ; glissez pour la déplacer (même en édition).</li>
+<li><b>🔲 Sélection</b> : sélection par zone et déplacement de plusieurs zones. <b>✋ Déplacer</b> : glisser pour faire défiler en zoom (s’active si inactif).</li></ul>
+<p class="note">💡 Remplissage de cadre, Rectangle et Caviardage sont des calques indépendants. « Tout effacer » de chaque outil ne supprime que ses propres formes.</p>
+<h2>3. Couleur, opacité, épaisseur</h2><ul><li>Choisissez la couleur dans la palette ou le sélecteur. L’opacité règle l’intensité ; l’épaisseur, la taille du pinceau/gomme. Changer la couleur avec un cadre/rectangle sélectionné l’applique à cette forme.</li></ul>
+<h2>4. Texte, tampons, aligner</h2><ul>
+<li>Réglez police, taille, couleur, gras (B) et vertical/horizontal. Placez les tampons ◯ ✓ × en cliquant.</li>
+<li><kbd>Shift</kbd>+clic pour sélection multiple, puis aligner à gauche/centre/espacement régulier.</li>
+<li>Le texte est intégré au PDF comme <b>vrai texte recherchable</b> (multilingue).</li></ul>
+<h2>5. Réglages de remplissage, détection de texte</h2><ul>
+<li><b>Combler les espaces</b> : augmentez si le remplissage fuit par des lignes coupées. <b>Renforcer les lignes</b> : accentue les lignes pâles.</li>
+<li><b>🔤 Détection de texte</b> : détecte les caractères/chiffres et les exclut des murs de remplissage.</li></ul>
+<h2>6. Calculer la surface</h2><ul><li>Saisissez l’échelle dans <b>Échelle 1/</b> (par défaut 600)→<b>📐 Calculer la surface</b> affiche la surface par couleur en m² et tsubo.</li></ul>
+<h2>7. Affichage (zoom, rotation, déplacement)</h2><ul><li>➖/➕ pour zoomer (<kbd>Ctrl</kbd>+molette), ⤢ ajuster à la largeur, ↺/↻ pivoter de 90°. Utilisez ✋ Déplacer ou le défilement pour repositionner.</li></ul>
+<h2>8. Édition (annuler, effacer)</h2><ul><li><b>↶ Annuler</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) · <b>↷ Rétablir</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 Tout effacer</b> ne supprime que le contenu de l’outil actif.</li></ul>
+<h2>9. Enregistrer &amp; imprimer</h2><ul>
+<li><b>💾 SVG</b> (rééditable), <b>🖼 PNG</b>, <b>📕 PDF</b>. Plusieurs pages sont regroupées automatiquement (SVG/PNG = ZIP, PDF = un fichier).</li>
+<li><b>Enregistrer en vectoriel</b> reste net au zoom. <b>🖨 Imprimer</b> / <b>🖨 Texte seul</b> (pour surimpression).</li></ul>
+<h2>10. Raccourcis</h2><table><tr><th>Action</th><th>Touche</th></tr>
+<tr><td>Annuler / Rétablir</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
+<tr><td>Zoom avant / arrière</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd></td></tr>
+<tr><td>Déplacer la zone de texte</td><td>Flèches (<kbd>Shift</kbd> = plus)</td></tr>
+<tr><td>Supprimer la zone de texte</td><td><kbd>Delete</kbd></td></tr>
+<tr><td>Annuler / désélectionner</td><td><kbd>Esc</kbd></td></tr></table>
+<h2>11. Smartphone</h2><p>Sur petit écran, utilisez le bouton <b>☰</b> (en haut à gauche) pour ouvrir/fermer le menu.</p>
+<h2>12. Remarques</h2>
+<div class="note warn"><b>⬛ Caviardage :</b> le caviardage efface et noircit réellement la zone <b>uniquement à l’export PDF</b> (irrécupérable). À l’écran et en PNG/SVG, ce n’est qu’un repère gris foncé. Pour masquer des données sensibles, <b>exportez toujours en PDF</b>.</div>
+<ul><li>Formats : charger = PDF/SVG/PNG/JPEG, enregistrer = PDF/PNG/SVG.</li><li>Avec plusieurs pages, les pages hors écran sont temporairement repliées pour économiser la mémoire (restaurées au changement).</li></ul>`;
+
+HELP.ar = `
+<div class="lead">أداة لتحميل ملفات PDF/صور خرائط المساحة وإضافة التعبئة اللونية والنص وحساب المساحة والتعتيم. يمكن طباعة أو تقديم ملفات PDF/PNG/SVG المحفوظة كما هي. <b>تتم كل المعالجة داخل متصفحك</b>، ولا تُرسل الصور إلى أي خادم.</div>
+<h2>1. تحميل الملفات</h2><ul>
+<li><b>📂 اختيار ملف</b> أو <b>اسحب وأفلت</b> ملفات PDF / SVG / صور (PNG، JPEG). يُدعم عدة ملفات معًا.</li>
+<li>بدّل الصفحات عبر <b>علامات التبويب (1p، 2p…)</b>. <b>＋إضافة</b> يُلحق الملفات، و<b>🗑حذف الصفحة</b> يحذف الحالية.</li>
+<li>يمكن إعادة فتح ملفات SVG المحفوظة بهذا التطبيق <b>وتحريرها مجددًا</b>.</li></ul>
+<h2>2. الأدوات</h2><ul>
+<li><b>🪣 تعبئة</b>: انقر داخل منطقة محاطة بخطوط لتعبئتها.</li>
+<li><b>🔷 تعبئة إطار</b>: انقر لإضافة نقاط ثم انقر نقطة البداية للإغلاق والتعبئة. اسحب النقاط للتعديل.</li>
+<li><b>▭ مستطيل</b>: انقر زاوية ثم حرّك الزاوية المقابلة ثم انقر للتأكيد. اختر مستطيلًا موجودًا وغيّر حجمه بالمقابض؛ <kbd>Delete</kbd> للحذف.</li>
+<li><b>⬛ تعتيم</b>: يظهر رماديًا داكنًا على الشاشة؛ <b>وعند تصدير PDF يُمحى المحتوى داخله فعليًا ويُملأ بالأسود (غير قابل للاسترجاع)</b>.</li>
+<li><b>🖌 فرشاة</b>: رسم حر (<kbd>Shift</kbd> لخط مستقيم). <b>🧽 ممحاة</b>: محو التعبئة/الفرشاة.</li>
+<li><b>✏️ نص</b>: انقر لإنشاء مربع نص؛ اسحب لتحريكه (حتى أثناء التحرير).</li>
+<li><b>🔲 تحديد</b>: تحديد بمنطقة وتحريك عدة مربعات نص. <b>✋ تحريك</b>: اسحب للتمرير عند التكبير (يُفعّل تلقائيًا عند الخمول).</li></ul>
+<p class="note">💡 «تعبئة الإطار» و«المستطيل» و«التعتيم» طبقات مستقلة. «مسح الكل» لكل أداة يمسح أشكال تلك الأداة فقط.</p>
+<h2>3. اللون والشفافية والسماكة</h2><ul><li>اختر اللون من اللوحة أو منتقي الألوان. الشفافية تضبط الكثافة، والسماكة تضبط حجم الفرشاة/الممحاة. تغيير اللون أثناء تحديد إطار/مستطيل يطبّقه على ذلك الشكل.</li></ul>
+<h2>4. النص والأختام والمحاذاة</h2><ul>
+<li>اضبط الخط والحجم واللون والغامق (B) والاتجاه رأسي/أفقي. ضع الأختام ◯ ✓ × بالنقر.</li>
+<li><kbd>Shift</kbd>+نقر للتحديد المتعدد ثم المحاذاة لليسار/الوسط/تباعد متساوٍ.</li>
+<li>يُضمّن النص في PDF كـ<b>نص حقيقي قابل للبحث</b> (متعدد اللغات).</li></ul>
+<h2>5. إعدادات التعبئة وكشف النص</h2><ul>
+<li><b>سد الفجوات</b>: ارفعه إذا تسربت التعبئة عبر خطوط متقطعة. <b>تغميق الخطوط</b>: يُبرز الخطوط الباهتة.</li>
+<li><b>🔤 كشف النص</b>: يكشف الأحرف/الأرقام ويستبعدها من جدران التعبئة (للتعبئة عبر الأرقام).</li></ul>
+<h2>6. حساب المساحة</h2><ul><li>أدخل المقياس في <b>المقياس 1/</b> (الافتراضي 600) ثم <b>📐 حساب المساحة</b> يعرض المساحة لكل لون بالمتر المربع والـtsubo.</li></ul>
+<h2>7. العرض (تكبير، تدوير، تحريك)</h2><ul><li>➖/➕ للتكبير (<kbd>Ctrl</kbd>+العجلة)، ⤢ ملاءمة العرض، ↺/↻ تدوير 90°. استخدم ✋ تحريك أو التمرير لتغيير الموضع.</li></ul>
+<h2>8. التحرير (تراجع، مسح)</h2><ul><li><b>↶ تراجع</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) · <b>↷ إعادة</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 مسح الكل</b> يمسح محتوى الأداة الحالية فقط.</li></ul>
+<h2>9. الحفظ والطباعة</h2><ul>
+<li><b>💾 SVG</b> (قابل لإعادة التحرير)، <b>🖼 PNG</b>، <b>📕 PDF</b>. تُجمَّع الصفحات المتعددة تلقائيًا (SVG/PNG = ZIP، PDF = ملف واحد).</li>
+<li><b>الحفظ كمتجه</b> يبقى واضحًا عند التكبير. <b>🖨 طباعة</b> / <b>🖨 النص فقط</b> (للطباعة فوق).</li></ul>
+<h2>10. اختصارات</h2><table><tr><th>الإجراء</th><th>المفتاح</th></tr>
+<tr><td>تراجع / إعادة</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
+<tr><td>تكبير / تصغير</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd></td></tr>
+<tr><td>تحريك مربع النص</td><td>الأسهم (<kbd>Shift</kbd> = أكبر)</td></tr>
+<tr><td>حذف مربع النص</td><td><kbd>Delete</kbd></td></tr>
+<tr><td>إلغاء / إلغاء التحديد</td><td><kbd>Esc</kbd></td></tr></table>
+<h2>11. الهاتف الذكي</h2><p>عند ضيق الشاشة، استخدم زر <b>☰</b> (أعلى اليسار) لفتح/إغلاق القائمة.</p>
+<h2>12. ملاحظات</h2>
+<div class="note warn"><b>⬛ التعتيم:</b> يحذف التعتيم المنطقة فعليًا ويسوّدها <b>عند تصدير PDF فقط</b> (غير قابل للاسترجاع). على الشاشة وفي PNG/SVG هو مجرد علامة رمادية داكنة. لإخفاء البيانات الحساسة، <b>صدّر دائمًا كـ PDF</b>.</div>
+<ul><li>الصيغ: التحميل = PDF/SVG/PNG/JPEG، الحفظ = PDF/PNG/SVG.</li><li>مع عدة صفحات، تُطوى الصفحات غير الظاهرة مؤقتًا لتوفير الذاكرة (تُستعاد عند التبديل).</li></ul>`;
+
+(function(){
+  var sel = document.getElementById('langSel');
+  LANGS.forEach(function(l){ var o=document.createElement('option'); o.value=l[0]; o.textContent=l[1]; sel.appendChild(o); });
+  function idx(l){ for(var i=0;i<LANGS.length;i++) if(LANGS[i][0]===l) return i; return 0; }
+  function getLang(){
+    var l=null; try{ l=localStorage.getItem('lang'); }catch(e){}
+    if(!l){ var b=(navigator.language||'ja').slice(0,2).toLowerCase(); l=idx(b)>=0&&LANGS[idx(b)][0]===b?b:'ja'; }
+    return HELP[l]?l:'ja';
+  }
+  function apply(l){
+    document.documentElement.setAttribute('lang', l);
+    document.documentElement.setAttribute('dir', l==='ar'?'rtl':'ltr');
+    document.getElementById('hdrTitle').textContent = UI.title[idx(l)];
+    document.getElementById('backLink').textContent = UI.back[idx(l)];
+    document.getElementById('content').innerHTML = HELP[l] || HELP.ja;
+    document.title = UI.title[idx(l)] + ' — 公図色付け';
+    sel.value = l;
+  }
+  sel.addEventListener('change', function(){ try{ localStorage.setItem('lang', sel.value); }catch(e){} apply(sel.value); });
+  apply(getLang());
+})();
+</script>
+</body>
+</html>

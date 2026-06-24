@@ -1,0 +1,45 @@
+# 公図色付け(共有レンタルサーバ版) Apache 設定
+# さくらのレンタルサーバ等の共有ホスティング向け
+
+# 初期ページはログイン画面
+DirectoryIndex login.html
+
+# CGI に渡す環境変数(サブディレクトリ /rpaint/ 配置に合わせる)
+# 別ディレクトリへ展開する場合は値を変更してください。
+SetEnv COOKIE_PATH /rpaint/
+# 必要に応じて:
+#   SetEnv ALLOW_REGISTRATION 0     ← 自由登録を禁止
+#   SetEnv DEMO_TTL_MIN 15          ← デモの自動ログアウト(分)
+
+# /api/* を CGI(api/index.cgi)へ。PATH_INFO に元のパスを渡す
+RewriteEngine On
+# 既に index.cgi へ向いている書き換え後のURLは再書き換えしない(無限ループ防止)
+RewriteRule ^api/index\.cgi - [L]
+RewriteRule ^api/?$       api/index.cgi/ [QSA,L]
+RewriteRule ^api/(.+)$    api/index.cgi/$1 [QSA,L]
+
+# CGI を有効化。FollowSymLinks は当サーバーで禁止なので付けない(付けると 500)。
+# ExecCGI のみ指定する。
+Options +ExecCGI
+AddHandler cgi-script .cgi
+
+# 機微ファイルへの直接アクセスを禁止
+<FilesMatch "\.(py|sql)$">
+  Require all denied
+</FilesMatch>
+<Files "config.py">
+  Require all denied
+</Files>
+
+# キャッシュ制御(自動運用)
+# i18n.js(翻訳)と各HTMLは毎回サーバーへ再検証させ、更新を自動反映する。
+# これにより i18n.js を更新しても ?v= を手で上げる必要がなくなる
+# (変更が無ければ 304 で軽量、変更時は新しい内容を取得)。
+<IfModule mod_headers.c>
+  <FilesMatch "^i18n\.js$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>

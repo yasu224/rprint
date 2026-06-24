@@ -1,0 +1,559 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-835577852"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-835577852');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>公図色付け｜マイソクの公図が、ひと目で伝わる</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.1.0/dist/tabler-icons.min.css">
+<script src="i18n.js?v=20260617"></script>
+<style>
+  :root{
+    --ink:#15323a; --ink-soft:#46565b; --ink-faint:#7e8c8f;
+    --teal:#0f6e56; --teal-bright:#1d9e75; --teal-tint:#e1f5ee;
+    --coral:#d85a30; --coral-deep:#993c1d; --coral-tint:#faece7;
+    --blue:#0c447c; --blue-tint:#e6f1fb;
+    --amber:#854f0b; --amber-tint:#faeeda;
+    --surface:#ffffff; --page:#f4f7f5;
+    --line:rgba(21,50,58,.12); --line-soft:rgba(21,50,58,.07);
+    --radius:16px; --radius-md:12px; --radius-sm:9px;
+    --maxw:1060px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Noto Sans JP",-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    color:var(--ink-soft); background:var(--page); line-height:1.75;
+    -webkit-font-smoothing:antialiased; font-size:16px;
+  }
+  h1,h2,h3{color:var(--ink); font-weight:700; line-height:1.45; letter-spacing:.01em}
+  a{color:inherit; text-decoration:none}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px}
+  .eyebrow{
+    display:inline-block; font-size:12.5px; font-weight:700; color:var(--teal);
+    background:var(--teal-tint); padding:5px 13px; border-radius:var(--radius-sm); margin-bottom:14px;
+  }
+  .center{text-align:center}
+  .btn{display:inline-flex; align-items:center; gap:8px; border:none; cursor:pointer; font-family:inherit;
+    font-weight:700; border-radius:var(--radius-sm); transition:.18s ease}
+  .btn-primary{background:var(--teal-bright); color:#fff; padding:13px 24px; font-size:15px}
+  .btn-primary:hover{background:var(--teal); transform:translateY(-1px)}
+  .btn-primary:disabled{opacity:.6; cursor:default; transform:none}
+  .btn-ghost{background:var(--surface); color:var(--ink); border:1px solid var(--line); padding:12px 20px; font-size:15px; font-weight:500}
+  .btn-ghost:hover{border-color:var(--ink-faint)}
+  .btn:focus-visible{outline:3px solid rgba(29,158,117,.45); outline-offset:2px}
+
+  header{position:sticky; top:0; z-index:50; background:rgba(244,247,245,.86);
+    backdrop-filter:blur(10px); border-bottom:1px solid var(--line-soft)}
+  .nav{display:flex; align-items:center; justify-content:space-between; height:64px}
+  .logo{display:flex; align-items:center; gap:9px; font-weight:700; color:var(--ink); font-size:17px}
+  .logo .mk{width:26px; height:26px; border-radius:7px; background:var(--teal); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:15px}
+  .nav-links{display:flex; align-items:center; gap:26px; font-size:14px; font-weight:500; color:var(--ink-soft)}
+  .nav-links a{cursor:pointer}
+  .nav-links a:hover{color:var(--teal)}
+  .nav-cta{padding:9px 18px; font-size:14px}
+  .nav-login{color:var(--teal); border-color:var(--teal-bright); font-weight:700}
+  .nav-login:hover{background:var(--teal-tint); border-color:var(--teal)}
+
+  section{padding:78px 0}
+  .sec-tint{background:var(--surface)}
+  .sec-head{max-width:560px; margin:0 auto 40px}
+  h2.title{font-size:27px}
+  .lead{font-size:16px; color:var(--ink-soft); margin-top:12px}
+
+  /* hero */
+  .hero{padding:64px 0 78px}
+  .hero-grid{display:grid; grid-template-columns:1.04fr .96fr; gap:50px; align-items:center}
+  .hero h1{font-size:40px; line-height:1.34; letter-spacing:.005em}
+  .hero .sub{font-size:17px; color:var(--ink-soft); margin:18px 0 26px; max-width:30em}
+  .cta-row{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:20px}
+  .trust{display:flex; flex-wrap:wrap; gap:16px; font-size:13.5px; color:var(--ink-faint)}
+  .trust i{color:var(--teal-bright); margin-right:5px; vertical-align:-2px}
+  /* 言語別ヒーロー: 日本語はキャッチコピー、非日本語は汎用タイトルを中央寄せ */
+  .i18n-only{display:none}
+  html:not([lang="ja"]) .ja-only{display:none}
+  html:not([lang="ja"]) .i18n-only{display:block}
+  html:not([lang="ja"]) .hero-grid{grid-template-columns:1fr; text-align:center}
+  html:not([lang="ja"]) .hero .sub{margin-left:auto; margin-right:auto}
+  html:not([lang="ja"]) .hero .cta-row,
+  html:not([lang="ja"]) .hero .trust{justify-content:center}
+  html:not([lang="ja"]) .hero .maisoku{max-width:520px; margin:0 auto}
+
+  /* maisoku card / map */
+  .maisoku{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; box-shadow:0 18px 44px -28px rgba(21,50,58,.32)}
+  .maisoku-bar{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+  .maisoku-bar .lbl{font-size:13px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:7px}
+  .tag-teal{font-size:11.5px; font-weight:500; background:var(--teal-tint); color:var(--teal); padding:3px 10px; border-radius:var(--radius-sm)}
+  .map-cap{font-size:12.5px; color:var(--ink-faint); margin:12px 4px 2px; display:flex; align-items:center; gap:6px}
+  svg.map{width:100%; height:auto; display:block}
+
+  /* cards grid */
+  .grid{display:grid; gap:16px}
+  .g4{grid-template-columns:repeat(auto-fit,minmax(228px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(258px,1fr))}
+  .card{background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-md); padding:22px}
+  .ico{width:44px; height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:23px; margin-bottom:14px}
+  .ico-coral{background:var(--coral-tint); color:var(--coral-deep)}
+  .ico-teal{background:var(--teal-tint); color:var(--teal)}
+  .ico-blue{background:var(--blue-tint); color:var(--blue)}
+  .ico-amber{background:var(--amber-tint); color:var(--amber)}
+  .card h3{font-size:17px; font-weight:700; margin-bottom:7px}
+  .card p{font-size:14px; color:var(--ink-soft); line-height:1.7}
+
+  /* steps */
+  .step{text-align:center; padding:26px 20px}
+  .step-no{width:32px; height:32px; margin:0 auto 16px; border-radius:50%; background:var(--teal-bright); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px}
+  .step i{font-size:32px; color:var(--teal)}
+  .step h3{font-size:16px; margin:14px 0 7px}
+  .step p{font-size:13.5px; color:var(--ink-soft)}
+
+  /* before after */
+  .ba-head{display:flex; align-items:center; gap:9px; margin-bottom:12px; font-size:12.5px; color:var(--ink-faint)}
+  .ba-pill{font-size:12px; font-weight:700; padding:3px 11px; border-radius:var(--radius-sm)}
+  .ba-before{background:#eef1f0; color:var(--ink-faint)}
+  .ba-after{background:var(--teal-tint); color:var(--teal)}
+
+  /* pricing */
+  .price-card{max-width:400px; margin:0 auto; background:var(--surface); border:2px solid var(--teal-bright);
+    border-radius:var(--radius); padding:30px 28px; text-align:center; box-shadow:0 20px 50px -30px rgba(15,110,86,.4)}
+  .price-name{font-size:16px; font-weight:700; color:var(--ink)}
+  .price-for{font-size:13px; color:var(--ink-faint); margin-bottom:14px}
+  .price-num{font-size:44px; font-weight:700; color:var(--ink); letter-spacing:.01em}
+  .price-unit{font-size:14px; color:var(--ink-soft)}
+  .price-note{font-size:12.5px; color:var(--ink-faint); margin-top:4px}
+  .price-list{border-top:1px solid var(--line-soft); margin-top:20px; padding-top:18px;
+    display:flex; flex-direction:column; gap:12px; text-align:left; font-size:14px; color:var(--ink-soft)}
+  .price-list i{color:var(--teal-bright); margin-right:9px; vertical-align:-2px}
+  .price-card .btn-primary{width:100%; justify-content:center; margin-top:22px; padding:14px}
+
+  /* final cta */
+  .final{background:var(--teal); border-radius:0; padding:84px 0}
+  .final h2{color:#fff; font-size:30px}
+  .final p{color:#9fe1cb; font-size:16px; margin:14px 0 28px; max-width:34em; margin-left:auto; margin-right:auto}
+  .final .btn-light{background:#fff; color:var(--teal); padding:15px 32px; font-size:16px; border-radius:var(--radius-sm)}
+  .final .btn-light:hover{transform:translateY(-1px)}
+  .final .trust{justify-content:center; color:#9fe1cb}
+  .final .trust i{color:#9fe1cb}
+
+  footer{padding:40px 0; background:var(--page); border-top:1px solid var(--line-soft)}
+  .foot{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; font-size:13px; color:var(--ink-faint)}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease}
+  .reveal.in{opacity:1; transform:none}
+
+  /* login modal */
+  .modal{position:fixed; inset:0; z-index:100; background:rgba(21,50,58,.5); backdrop-filter:blur(3px);
+    display:none; align-items:center; justify-content:center; padding:20px}
+  .modal.open{display:flex}
+  .modal-card{position:relative; background:var(--surface); border-radius:var(--radius); padding:30px 28px 26px;
+    width:380px; max-width:94vw; box-shadow:0 30px 70px -30px rgba(21,50,58,.5)}
+  .modal-x{position:absolute; top:13px; right:13px; background:none; border:none; cursor:pointer;
+    color:var(--ink-faint); font-size:20px; line-height:1; padding:4px}
+  .modal-x:hover{color:var(--ink)}
+  .modal-card h3{font-size:19px; margin-bottom:4px}
+  .modal-sub{font-size:13px; color:var(--ink-faint); margin-bottom:18px}
+  .fld-label{display:block; font-size:12.5px; color:var(--ink-soft); margin:12px 0 6px; font-weight:500}
+  .fld{width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:var(--radius-sm);
+    font-size:15px; font-family:inherit; color:var(--ink); background:#fbfdfc; outline:none}
+  .fld:focus{border-color:var(--teal-bright)}
+  .modal-card .btn-primary, .modal-card .btn-ghost{width:100%; justify-content:center}
+  .err{margin-top:13px; min-height:18px; color:var(--coral-deep); font-size:13px; text-align:center}
+  .err.ok{color:var(--teal)}
+  .modal-alt{font-size:13px; text-align:center; margin-top:14px; color:var(--ink-faint)}
+  .modal-alt a{color:var(--teal); font-weight:600}
+  /* 新規登録への導線(目立たせる) */
+  .modal-or{display:flex; align-items:center; gap:10px; margin:18px 0 12px; font-size:12.5px; color:var(--ink-faint)}
+  .modal-or::before,.modal-or::after{content:""; flex:1; height:1px; background:var(--line)}
+  .btn-reg{width:100%; justify-content:center; background:var(--coral-tint); color:var(--coral-deep);
+    border:1.5px solid var(--coral); padding:13px; font-size:15px; font-weight:700}
+  .btn-reg:hover{background:#f6ddd2; border-color:var(--coral-deep)}
+
+  @media(max-width:860px){
+    .hero-grid{grid-template-columns:1fr; gap:36px}
+    .hero h1{font-size:32px}
+    .nav-links{gap:16px}
+    .nav-links .hide-sp{display:none}
+    section{padding:60px 0}
+    h2.title{font-size:23px}
+    .final h2{font-size:25px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .reveal{opacity:1; transform:none; transition:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo"><span class="mk"><i class="ti ti-map-2"></i></span><span data-i18n="brand">公図色付け</span></div>
+    <nav class="nav-links">
+      <a href="#features" class="hide-sp" data-i18n="nav.features">機能</a>
+      <a href="#steps" class="hide-sp" data-i18n="nav.howto">使い方</a>
+      <a href="#price" class="hide-sp" data-i18n="nav.price">料金</a>
+      <a href="help.html" target="_blank" rel="noopener" class="hide-sp" data-i18n="nav.help">操作説明</a>
+      <select id="langSel" aria-label="Language" style="font-size:13px;border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:#fff;color:var(--ink);cursor:pointer"></select>
+      <a data-act="login" class="btn btn-ghost nav-cta nav-login"><i class="ti ti-login-2"></i><span data-i18n="auth.loginreg">ログイン / 新規登録</span></a>
+    </nav>
+    <button class="btn btn-primary nav-cta" data-act="demo" data-i18n="nav.free"><i class="ti ti-player-play"></i>無料で試す</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="reveal">
+      <span class="eyebrow"><i class="ti ti-building-estate" style="vertical-align:-2px"></i> <span data-i18n="hero.eyebrow">不動産仲介のための公図ツール</span></span>
+      <h1 class="ja-only">「この土地、どこ?」を<br>なくすマイソクへ。</h1>
+      <h1 class="i18n-only" data-i18n="hero.title">公図 色塗り・文字入れエディター</h1>
+      <p class="sub ja-only">公図に色を塗って、文字を入れて、そのまま印刷。お客様に物件の位置が、ひと目で伝わります。</p>
+      <p class="sub i18n-only" data-i18n="hero.sub">公図に色を塗り、文字を入れて、そのまま印刷。物件の位置がひと目で伝わります。</p>
+      <div class="cta-row">
+        <button class="btn btn-primary" data-act="demo"><i class="ti ti-player-play"></i><span data-i18n="hero.demo">DEMOを無料で試す</span></button>
+        <a href="#features" class="btn btn-ghost"><span data-i18n="hero.features">機能を見る</span></a>
+      </div>
+      <div class="trust">
+        <span><i class="ti ti-check"></i><span data-i18n="trust.noreg">登録不要</span></span>
+        <span><i class="ti ti-check"></i><span data-i18n="trust.try">15分でお試し</span></span>
+        <span><i class="ti ti-check"></i><span data-i18n="trust.browser">ブラウザで完結</span></span>
+      </div>
+    </div>
+
+    <div class="reveal maisoku">
+      <div class="maisoku-bar">
+        <span class="lbl"><i class="ti ti-file-description" style="font-size:16px"></i><span data-i18n="mai.label">物件資料（マイソク）</span></span>
+        <span class="tag-teal" data-i18n="mai.tag">色付け済み</span>
+      </div>
+      <svg class="map" viewBox="0 0 340 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m1t">
+        <title id="m1t">対象地（本物件）を色付けした公図</title>
+        <polygon points="30,32 113,30 116,119 28,121" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.2"/>
+        <polygon points="113,30 207,32 204,122 116,119" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.2"/>
+        <polygon points="207,32 290,30 292,120 204,122" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.2"/>
+        <polygon points="28,121 116,119 118,212 30,210" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.2"/>
+        <polygon points="204,122 292,120 290,211 202,209" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.2"/>
+        <polygon points="116,119 204,122 202,209 118,212" fill="#d85a30" fill-opacity="0.28" stroke="#d85a30" stroke-width="2.4"/>
+        <polygon points="20,214 300,210 302,244 18,248" fill="#eceeec"/>
+        <text x="160" y="231" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#9aa6a3" font-family="Noto Sans JP, sans-serif">道　路</text>
+        <text x="71" y="78" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#869490" font-family="sans-serif">12-1</text>
+        <text x="160" y="76" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#869490" font-family="sans-serif">12-2</text>
+        <text x="248" y="76" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#869490" font-family="sans-serif">12-3</text>
+        <text x="73" y="166" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#869490" font-family="sans-serif">12-4</text>
+        <text x="248" y="166" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#869490" font-family="sans-serif">12-6</text>
+        <text x="160" y="180" text-anchor="middle" dominant-baseline="central" font-size="11.5" font-weight="700" fill="#993c1d" font-family="sans-serif">12-5</text>
+        <rect x="125" y="126" width="70" height="21" rx="10" fill="#d85a30"/>
+        <text x="160" y="137" text-anchor="middle" dominant-baseline="central" font-size="11.5" font-weight="700" fill="#fff" font-family="Noto Sans JP, sans-serif">本物件</text>
+        <path d="M155,147 L165,147 L160,153 Z" fill="#d85a30"/>
+      </svg>
+      <p class="map-cap"><i class="ti ti-color-swatch" style="font-size:14px"></i><span data-i18n="mai.cap">対象地をワンクリックで着色 → マイソクにそのまま貼り付け</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="sec-tint">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow" data-i18n="feat.eyebrow">できること</span>
+      <h2 class="title" data-i18n="feat.head">塗る・書く・刷る。公図まわりの作業を、これ一つで。</h2>
+    </div>
+    <div class="grid g4">
+      <div class="card reveal">
+        <div class="ico ico-coral"><i class="ti ti-color-swatch"></i></div>
+        <h3 data-i18n="feat1.t">公図に色付け</h3>
+        <p data-i18n="feat1.d">対象地をワンクリックで着色。「この物件です」がひと目で伝わるマイソクに。</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico ico-teal"><i class="ti ti-typography"></i></div>
+        <h3 data-i18n="feat2.t">公図に文字入れ</h3>
+        <p data-i18n="feat2.d">地番・方位・コメントを自由に追記。手書きの書き込みは、もう要りません。</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico ico-blue"><i class="ti ti-file-text"></i></div>
+        <h3 data-i18n="feat3.t">PDFに文字入れ</h3>
+        <p data-i18n="feat3.d">受け取ったPDF資料にそのまま記入。印刷→手書き→スキャンの往復をカット。</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico ico-amber"><i class="ti ti-printer"></i></div>
+        <h3 data-i18n="feat4.t">定型用紙へ重ね刷り</h3>
+        <p data-i18n="feat4.d">印刷済みの用紙に、文字だけをピッタリ位置合わせ。申込書・契約書類の記入を自動化。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section id="steps">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow" data-i18n="step.eyebrow">使い方</span>
+      <h2 class="title" data-i18n="step.head">開いて、塗って、印刷するだけ。</h2>
+    </div>
+    <div class="grid g3">
+      <div class="card step reveal">
+        <div class="step-no">1</div>
+        <i class="ti ti-file-upload"></i>
+        <h3 data-i18n="step1.t">公図・PDFを開く</h3>
+        <p data-i18n="step1.d">取得した公図やPDFを読み込むだけ。</p>
+      </div>
+      <div class="card step reveal">
+        <div class="step-no">2</div>
+        <i class="ti ti-brush"></i>
+        <h3 data-i18n="step2.t">塗る・書く</h3>
+        <p data-i18n="step2.d">対象地を着色し、地番やコメントを記入。</p>
+      </div>
+      <div class="card step reveal">
+        <div class="step-no">3</div>
+        <i class="ti ti-printer"></i>
+        <h3 data-i18n="step3.t">印刷・保存</h3>
+        <p data-i18n="step3.d">そのまま印刷、または画像で保存してマイソクへ。</p>
+      </div>
+    </div>
+    <div class="center reveal" style="margin-top:26px">
+      <a href="help.html" target="_blank" rel="noopener" class="btn btn-primary" style="padding:13px 22px">
+        <i class="ti ti-book-2"></i><span data-i18n="step.help">詳しい操作説明を見る</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE / AFTER -->
+<section class="sec-tint">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow" style="color:var(--coral-deep);background:var(--coral-tint)" data-i18n="ba.eyebrow">ビフォー・アフター</span>
+      <h2 class="title" data-i18n="ba.head">色をひと塗りで、伝わり方が変わる。</h2>
+    </div>
+    <div class="grid g2">
+      <div class="card reveal" style="padding:16px">
+        <div class="ba-head"><span class="ba-pill ba-before" data-i18n="ba.before">塗る前</span><span data-i18n="ba.beforeT">どの土地か分かりにくい</span></div>
+        <svg class="map" viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="b1t">
+          <title id="b1t">色付け前の公図</title>
+          <polygon points="24,26 96,24 98,100 22,102" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="96,24 178,26 176,102 98,100" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="178,26 256,24 258,100 176,102" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="22,102 98,100 100,176 24,178" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="98,100 176,102 174,175 100,176" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="176,102 258,100 256,177 174,175" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="16,180 262,176 264,200 14,204" fill="#eceeec"/>
+          <text x="60" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-1</text>
+          <text x="137" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-2</text>
+          <text x="217" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-3</text>
+          <text x="61" y="139" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-4</text>
+          <text x="137" y="139" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-5</text>
+          <text x="216" y="139" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-6</text>
+        </svg>
+      </div>
+      <div class="card reveal" style="padding:16px">
+        <div class="ba-head"><span class="ba-pill ba-after" data-i18n="ba.after">塗った後</span><span data-i18n="ba.afterT">対象地がひと目で分かる</span></div>
+        <svg class="map" viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="a1t">
+          <title id="a1t">色付け後の公図</title>
+          <polygon points="24,26 96,24 98,100 22,102" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="96,24 178,26 176,102 98,100" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="178,26 256,24 258,100 176,102" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="22,102 98,100 100,176 24,178" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="176,102 258,100 256,177 174,175" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
+          <polygon points="98,100 176,102 174,175 100,176" fill="#d85a30" fill-opacity="0.30" stroke="#d85a30" stroke-width="2.2"/>
+          <polygon points="16,180 262,176 264,200 14,204" fill="#eceeec"/>
+          <text x="60" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-1</text>
+          <text x="137" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-2</text>
+          <text x="217" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-3</text>
+          <text x="61" y="139" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-4</text>
+          <text x="137" y="139" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="700" fill="#993c1d" font-family="sans-serif">12-5</text>
+          <text x="216" y="139" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-6</text>
+          <rect x="104" y="88" width="66" height="19" rx="9.5" fill="#d85a30"/>
+          <text x="137" y="98" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#fff" font-family="Noto Sans JP, sans-serif">本物件</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="price">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow" data-i18n="price.eyebrow">料金プラン</span>
+      <h2 class="title" data-i18n="price.head">シンプルに、ひとり月1,000円。</h2>
+    </div>
+    <div class="price-card reveal">
+      <p class="price-name" data-i18n="price.name">スタンダードプラン</p>
+      <p class="price-for" data-i18n="price.for">1ユーザーあたり</p>
+      <p><span class="price-num">¥1,000</span><span class="price-unit" data-i18n="price.unit"> / 月（税別）</span></p>
+      <p class="price-note" data-i18n="price.note">全機能込み・追加料金なし</p>
+      <div class="price-list">
+        <span><i class="ti ti-check"></i><span data-i18n="price.f1">公図の色付け・文字入れ</span></span>
+        <span><i class="ti ti-check"></i><span data-i18n="price.f2">PDFへの文字入れ</span></span>
+        <span><i class="ti ti-check"></i><span data-i18n="price.f3">定型用紙への重ね刷り印刷</span></span>
+        <span><i class="ti ti-check"></i><span data-i18n="price.f4">インストール不要・ブラウザで完結</span></span>
+      </div>
+      <button class="btn btn-primary" data-act="register" data-i18n="price.cta">このプランで始める</button>
+    </div>
+    <p class="center" style="font-size:12.5px;color:var(--ink-faint);margin-top:18px" data-i18n="price.demo">まずは無料DEMOでお試しいただけます。</p>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final">
+  <div class="wrap center reveal">
+    <h2 data-i18n="final.head">まずは15分、無料で試す。</h2>
+    <p data-i18n="final.sub">登録不要。お手元の公図を読み込んで、色付けの手軽さをそのまま体験してください。</p>
+    <button class="btn btn-light" data-act="demo"><i class="ti ti-player-play"></i><span data-i18n="hero.demo">DEMOを無料で試す</span></button>
+    <div class="trust" style="margin-top:24px">
+      <span><i class="ti ti-check"></i><span data-i18n="final.t1">クレジットカード不要</span></span>
+      <span><i class="ti ti-check"></i><span data-i18n="final.t2">インストール不要</span></span>
+      <span><i class="ti ti-check"></i><span data-i18n="final.t3">すぐに使える</span></span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="logo" style="font-size:15px"><span class="mk" style="width:22px;height:22px;font-size:13px"><i class="ti ti-map-2"></i></span><span data-i18n="brand">公図色付け</span></div>
+    <a href="help.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline" data-i18n="nav.help">操作説明</a>
+    <span>© 2026 mary inc.</span>
+  </div>
+</footer>
+
+<!-- 重複ログイン確認ダイアログ -->
+<div class="modal" id="concurrentModal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" style="max-width:380px">
+    <h3 style="font-size:17px">⚠ ログイン中のセッションがあります</h3>
+    <p class="modal-sub" style="margin-top:8px;line-height:1.65">このアカウントは別の端末またはブラウザでログイン中です。<br>このブラウザで続けると既存のセッションは終了します。</p>
+    <button class="btn btn-primary" id="concurrentOk" style="margin-top:4px;padding:13px;justify-content:center">OK（このブラウザで続ける）</button>
+    <button class="btn btn-ghost" id="concurrentCancel" style="margin-top:10px;width:100%;justify-content:center">NG（キャンセル）</button>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="lmTitle">
+    <button class="modal-x" id="loginClose" aria-label="閉じる"><i class="ti ti-x"></i></button>
+    <h3 id="lmTitle" data-i18n="auth.login">ログイン</h3>
+    <p class="modal-sub" data-i18n="auth.subtitle">公図色付けにログインします</p>
+    <form id="loginForm" autocomplete="off">
+      <label class="fld-label" for="u" data-i18n="auth.username">ユーザー名</label>
+      <input class="fld" type="text" id="u" autocomplete="username">
+      <label class="fld-label" for="p" data-i18n="auth.password">パスワード</label>
+      <input class="fld" type="password" id="p" autocomplete="current-password">
+      <button type="submit" class="btn btn-primary" id="loginBtn" style="margin-top:18px;padding:13px" data-i18n="auth.login">ログイン</button>
+      <button type="button" class="btn btn-ghost" id="demoBtn2" style="margin-top:10px" data-i18n="auth.demo">🎬 DEMOでお試し（15分）</button>
+      <div class="err" id="err"></div>
+      <div class="modal-or"><span data-i18n="auth.noacct">アカウントをお持ちでない方は</span></div>
+      <a href="register.html" class="btn btn-reg"><i class="ti ti-user-plus"></i><span data-i18n="auth.register">新規登録</span></a>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ---- アクセス記録(login.html 閲覧をビーコンでサーバーに記録) ----
+  try{ fetch('api/pageview', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ page:'login' }), keepalive:true }); }catch(e){}
+
+  // ---- スクロール表示アニメーション ----
+  (function(){
+    var els = document.querySelectorAll('.reveal');
+    if(!('IntersectionObserver' in window)){ els.forEach(function(e){e.classList.add('in')}); return; }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, {threshold:.14});
+    els.forEach(function(e){ io.observe(e); });
+  })();
+
+  // ---- ログイン / DEMO / 登録 ----
+  var modal = document.getElementById('loginModal');
+  function openLogin(){ modal.classList.add('open'); var u=document.getElementById('u'); if(u) setTimeout(function(){u.focus();},50); }
+  function closeLogin(){ modal.classList.remove('open'); }
+
+  var _pendingUser = null, _pendingPass = null, _pendingBtn = null;
+  var concurrentModal = document.getElementById('concurrentModal');
+
+  async function login(username, password, btn, force){
+    var err = document.getElementById('err'); err.className='err'; err.textContent='';
+    if(btn){ btn.disabled = true; }
+    try{
+      var res = await fetch('api/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ username: username, password: password, force: !!force })
+      });
+      var data = await res.json().catch(function(){ return {}; });
+      if(res.ok && data.ok){ location.href = 'index.html'; return; }
+      if(res.ok && data.concurrent){
+        _pendingUser = username; _pendingPass = password; _pendingBtn = btn;
+        closeLogin();
+        concurrentModal.classList.add('open');
+        return;
+      }
+      err.textContent = data.error || (window.I18N?I18N.t('msg.badcreds'):'ユーザー名またはパスワードが違います');
+      openLogin();
+    }catch(e){
+      err.textContent = (window.I18N?I18N.t('msg.neterr'):'通信エラーが発生しました');
+      openLogin();
+    }finally{
+      if(btn && !concurrentModal.classList.contains('open')){ btn.disabled = false; }
+    }
+  }
+  function demo(btn){ login('DEMO', 'DEMO', btn); }
+
+  document.getElementById('concurrentOk').addEventListener('click', async function(){
+    concurrentModal.classList.remove('open');
+    await login(_pendingUser, _pendingPass, _pendingBtn, true);
+    _pendingUser = _pendingPass = _pendingBtn = null;
+  });
+  document.getElementById('concurrentCancel').addEventListener('click', function(){
+    concurrentModal.classList.remove('open');
+    if(_pendingBtn) _pendingBtn.disabled = false;
+    _pendingUser = _pendingPass = _pendingBtn = null;
+  });
+  concurrentModal.addEventListener('click', function(e){ if(e.target===concurrentModal){ document.getElementById('concurrentCancel').click(); } });
+
+  // ボタン配線(data-act)
+  document.querySelectorAll('[data-act="demo"]').forEach(function(b){
+    b.addEventListener('click', function(e){ e.preventDefault(); demo(b); });
+  });
+  document.querySelectorAll('[data-act="register"]').forEach(function(b){
+    b.addEventListener('click', function(e){ e.preventDefault(); location.href = 'register.html'; });
+  });
+  document.querySelectorAll('[data-act="login"]').forEach(function(b){
+    b.addEventListener('click', function(e){ e.preventDefault(); openLogin(); });
+  });
+
+  document.getElementById('loginClose').addEventListener('click', closeLogin);
+  modal.addEventListener('click', function(e){ if(e.target === modal) closeLogin(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLogin(); });
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    login(document.getElementById('u').value, document.getElementById('p').value, document.getElementById('loginBtn'));
+  });
+  document.getElementById('demoBtn2').addEventListener('click', function(){ demo(this); });
+
+  // すでにログイン済みならアプリへ
+  (async function(){
+    try{ var me = await (await fetch('api/me')).json();
+      if(me && me.authenticated){ location.replace('index.html'); } }catch(e){}
+  })();
+
+  // 登録完了後の案内
+  if(new URLSearchParams(location.search).get('registered') === '1'){
+    openLogin();
+    var err = document.getElementById('err'); err.className = 'err ok';
+    err.textContent = (window.I18N?I18N.t('msg.registered'):'登録が完了しました。ログインしてください。');
+  }
+</script>
+</body>
+</html>

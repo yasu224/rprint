@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Secrets — never commit live credentials or backup codes
+api/config.py
+stripe_backup_code.txt
+
+# Server / account info (may contain credentials)
+api/サーバーコントロールパネル.pdf
+
+# pip bootstrap (not part of the app source)
+api/get-pip.py
+
+# OS junk
+.DS_Store
+Thumbs.db
