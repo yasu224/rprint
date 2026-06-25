@@ -118,15 +118,6 @@
   #brushCursor { position:fixed; display:none; border-radius:50%; pointer-events:none; z-index:9999;
                  transform:translate(-50%,-50%); border:1.5px solid #333; box-shadow:0 0 0 1px rgba(255,255,255,.7); }
   #brushCursor.eraser { background:transparent !important; border-style:dashed; }
-  #levelPanel { position:fixed; right:14px; top:64px; z-index:10000; background:#1b2230; border:1px solid var(--line);
-    border-radius:10px; padding:10px 12px; width:280px; box-shadow:0 8px 26px #0009; color:#eaeef7; }
-  #levelPanel .lvhead { font-size:13px; font-weight:bold; margin-bottom:6px; }
-  #levelHist { width:256px; height:70px; display:block; border:1px solid var(--line); border-radius:4px; }
-  #levelPanel .lvrow { display:flex; align-items:center; gap:6px; margin-top:8px; }
-  #levelPanel .lvrow label { font-size:12px; }
-  #levelPanel input[type=range]{ flex:1; }
-  #levelPanel .mini { background:var(--bar2); color:#eaeef7; border:1px solid var(--line); border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer; }
-  #levelPanel .lvhint { font-size:11px; opacity:.65; margin-top:6px; line-height:1.4; }
   #demoBanner { position:fixed; left:50%; bottom:14px; transform:translateX(-50%);
     background:#b54708; color:#fff; padding:8px 16px; border-radius:20px; font-size:13px;
     box-shadow:0 4px 14px rgba(0,0,0,.35); z-index:9998; white-space:nowrap; }
@@ -203,7 +194,6 @@
     button.tool, .filebtn { padding:9px 12px; font-size:14px; }
     .swatch { width:30px; height:30px; }
     .group label { min-width:44px; }
-    #levelPanel { right:8px; left:8px; width:auto; }
   }
 </style>
 <script src="i18n.js?v=20260617"></script>
@@ -942,11 +932,6 @@ window.addEventListener('drop', e=>{
 
 // ---- backend ブリッジ (デスクトップ版=pywebview API / ブラウザ版=HTTPサーバー) ----
 function pyApi(){ return (window.pywebview && window.pywebview.api) || null; }
-function abToB64(buf){
-  let bin=''; const bytes=new Uint8Array(buf), CH=0x8000;
-  for(let i=0;i<bytes.length;i+=CH) bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+CH));
-  return btoa(bin);
-}
 function blobToB64(blob){
   return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.readAsDataURL(blob); });
 }
@@ -1635,7 +1620,7 @@ document.addEventListener('pointerleave', ()=>{ const bc=document.getElementById
 const WALL_TH   = 230;  // 輝度がこれ未満 = 線(壁)。スキャンの薄い灰線も拾う
 const FILL_GROW = 2;    // 塗り領域を線際まで広げる
 // 「線を濃く」: 薄い線も壁として拾う閾値の引き上げ量 / 細い線を太らせる膨張量
-function effWallTh(){ return Math.min(252, WALL_TH + state.lineBoost*5); }   // 230..252
+// 230..252
 function lineThicken(){ return state.lineBoost>=5 ? 2 : (state.lineBoost>=3 ? 1 : 0); }
 
 // 分離可能なボックス膨張。半径 r に依らず O(W*H)(各方向の最近傍1までの距離で判定)
@@ -1658,16 +1643,6 @@ function dilateBox(src, W, H, r){
   return out;
 }
 // クロージング(膨張→収縮)。収縮=補集合の膨張の補集合。隙間を塞ぐが既存の壁は保持(extensive)
-function closeMask(src, W, H, r){
-  if (r<=0) return src;
-  const d = dilateBox(src, W, H, r);
-  const inv = new Uint8Array(W*H);
-  for (let i=0;i<W*H;i++) inv[i] = d[i]?0:1;
-  const ed = dilateBox(inv, W, H, r);
-  const out = new Uint8Array(W*H);
-  for (let i=0;i<W*H;i++) out[i] = ed[i]?0:1;
-  return out;
-}
 // 方向別の隙間つなぎ: 線に沿う方向(水平/垂直/2斜め)の "同一直線上のギャップ(<=2r)" だけを橋渡し。
 // 2次元の凹みは埋めないので、角を削らず、離れた線も繋がない。
 function bridge1D(src, out, W, H, r, dx, dy){
@@ -1885,108 +1860,7 @@ function otsuThreshold(hist){
     sumB+=t*hist[t]; const mB=sumB/wB, mF=(sum-sumB)/wF; const v=wB*wF*(mB-mF)*(mB-mF); if(v>maxVar){maxVar=v;th=t;} }
   return th;
 }
-function drawHistogram(hist){
-  const cv=document.getElementById('levelHist'); if(!cv) return;
-  const W=cv.width, H=cv.height, ctx=cv.getContext('2d');
-  ctx.clearRect(0,0,W,H); ctx.fillStyle='#11151c'; ctx.fillRect(0,0,W,H);
-  let mx=0; for(let i=0;i<256;i++) if(hist[i]>mx) mx=hist[i];
-  const sc=H/Math.log(mx+1);
-  ctx.fillStyle='#9fb4d6';
-  for(let i=0;i<256;i++){ const h=Math.log(hist[i]+1)*sc; ctx.fillRect(i*(W/256), H-h, Math.ceil(W/256), h); }
-  const tx=state.levelTh*(W/256);
-  ctx.strokeStyle='#ff4d4d'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(tx,0); ctx.lineTo(tx,H); ctx.stroke();
-  ctx.fillStyle='rgba(255,77,77,.15)'; ctx.fillRect(0,0,tx,H);
-}
 function invalidateDetect(pg){ if(pg){ pg._dark=null; pg.wall=null; pg.detCanvas=null; pg.textMask=null; } }
-function openLevelPanel(){
-  const pg=state.pages[state.active]; if(!pg){ alert(I18N.t('m.loadfirst')); return; }
-  const panel=$('#levelPanel'); if(!panel) return;
-  const show=()=>{
-    const hist=lumHistogram(pg); pg._lumHist=hist; drawHistogram(hist);
-    $('#levelTh').value=state.levelTh; $('#levelThVal').textContent=state.levelTh;
-    panel.style.display='block';
-    if(!state.showWall){ state.showWall=true; const b=$('#wallBtn'); if(b) b.classList.add('active'); }
-    refreshWallLayer();
-  };
-  if(!pg.boundary){ ensureBoundary(pg).then(show); } else show();
-}
-function applyLevel(){
-  const pg=state.pages[state.active];
-  $('#levelThVal').textContent=state.levelTh;
-  if(pg && pg._lumHist) drawHistogram(pg._lumHist);
-  invalidateDetect(pg);
-  if(state.textLayerOn) ensureTextDetect(pg, refreshDetLayer);
-  if(state.showWall) refreshWallLayer();
-}
-// 直線補完: ハフ変換で(任意角度の)直線を検出し、その直線上の「実在区間内」の
-// 薄い/途切れた部分だけを補完する。区間の外へは延ばさないので、無い線は描かない。
-function completeStraightLines(src, W, H){
-  const N=W*H; let cnt=0; for(let i=0;i<N;i++) if(src[i]) cnt++;
-  if (cnt<80) return src;
-  const sub = cnt>120000 ? 2 : 1;
-  const TH=180;
-  const cosT=new Float32Array(TH), sinT=new Float32Array(TH);
-  for(let a=0;a<TH;a++){ const r=a*Math.PI/180; cosT[a]=Math.cos(r); sinT[a]=Math.sin(r); }
-  const diag=Math.ceil(Math.hypot(W,H)), R=2*diag+1;
-  const acc=new Int32Array(TH*R);
-  for(let y=0;y<H;y+=sub){ const row=y*W;
-    for(let x=0;x<W;x+=sub){ if(!src[row+x]) continue;
-      for(let a=0;a<TH;a++){ let rho=((x*cosT[a]+y*sinT[a])|0)+diag; acc[a*R+rho]++; }
-    }
-  }
-  const minLen=Math.round(Math.max(W,H)*0.15);
-  const thr=Math.max(12, Math.round(minLen/sub));
-  const win=Math.max(2, Math.round(diag*0.008));
-  const peaks=[];
-  for(let a=0;a<TH;a++){ const base=a*R;
-    for(let rho=1;rho<R-1;rho++){ const v=acc[base+rho]; if(v<thr) continue;
-      let isMax=true;
-      for(let da=-2; da<=2 && isMax; da++){ const aa=((a+da)%TH+TH)%TH;
-        for(let dr=-win; dr<=win; dr++){ const rr=rho+dr; if(rr<0||rr>=R) continue;
-          if(acc[aa*R+rr] > v){ isMax=false; break; } } }
-      if(isMax) peaks.push([a,rho,v]);
-    }
-  }
-  peaks.sort((p,q)=>q[2]-p[2]);
-  const out=src.slice();
-  const maxgap=Math.round(Math.max(W,H)*0.03);
-  const tol=3;
-  const limit=Math.min(peaks.length, 250);
-  const OCC=0.55;
-  for(let pi=0; pi<limit; pi++){
-    const a=peaks[pi][0], rho=peaks[pi][1]-diag, ca=cosT[a], sa=sinT[a];
-    const px=rho*ca, py=rho*sa, dx=-sa, dy=ca;
-    let n=0,Sx=0,Sy=0,Sxx=0,Syy=0,Sxy=0;
-    for(let t=-diag; t<=diag; t++){
-      const xf=px+dx*t, yf=py+dy*t; if(xf<-1||yf<-1||xf>W||yf>H) continue;
-      let fx=-1,fy=-1; for(const s of [0,-1,1,-2,2,-3,3]){ const xx=(xf+ca*s+0.5)|0, yy=(yf+sa*s+0.5)|0; if(xx>=0&&yy>=0&&xx<W&&yy<H&&src[yy*W+xx]){fx=xx;fy=yy;break;} }
-      if(fx>=0){ n++; Sx+=fx;Sy+=fy;Sxx+=fx*fx;Syy+=fy*fy;Sxy+=fx*fy; }
-    }
-    if(n<Math.max(8,thr*0.4)) continue;
-    const mx=Sx/n, my=Sy/n, cxx=Sxx/n-mx*mx, cyy=Syy/n-my*my, cxy=Sxy/n-mx*my;
-    const tr2=(cxx+cyy)/2, dd=Math.sqrt(Math.max(0,tr2*tr2-(cxx*cyy-cxy*cxy)));
-    const l1=tr2+dd; let ux=cxy, uy=l1-cxx; const ul=Math.hypot(ux,uy); if(ul<1e-6){ux=1;uy=0;} else {ux/=ul;uy/=ul;}
-    const nx=-uy, ny=ux;
-    let Tlo=1e9,Thi=-1e9,hits=0;
-    for(let t=-diag;t<=diag;t++){ const xf=mx+ux*t, yf=my+uy*t; const xi=(xf+0.5)|0, yi=(yf+0.5)|0;
-      if(xi<0||yi<0||xi>=W||yi>=H) continue;
-      let here=false; for(let s=-tol;s<=tol;s++){ const xx=(xf+nx*s+0.5)|0, yy=(yf+ny*s+0.5)|0; if(xx>=0&&yy>=0&&xx<W&&yy<H&&src[yy*W+xx]){here=true;break;} }
-      if(here){ hits++; if(t<Tlo)Tlo=t; if(t>Thi)Thi=t; }
-    }
-    if(Thi-Tlo<minLen) continue;
-    if(hits/(Thi-Tlo+1) < OCC) continue;
-    let t=Tlo;
-    while(t<=Thi){
-      const xf=mx+ux*t, yf=my+uy*t; let here=false;
-      for(let s=-tol;s<=tol;s++){ const xx=(xf+nx*s+0.5)|0, yy=(yf+ny*s+0.5)|0; if(xx>=0&&yy>=0&&xx<W&&yy<H&&src[yy*W+xx]){here=true;break;} }
-      if(here){ t++; continue; }
-      let g=t; while(g<=Thi){ const gx=mx+ux*g, gy=my+uy*g; let h2=false; for(let s=-tol;s<=tol;s++){ const xx=(gx+nx*s+0.5)|0, yy=(gy+ny*s+0.5)|0; if(xx>=0&&yy>=0&&xx<W&&yy<H&&src[yy*W+xx]){h2=true;break;} } if(h2)break; g++; }
-      if(g-t<=maxgap){ for(let j=t;j<g;j++){ const bx=mx+ux*j, by=my+uy*j; for(let s=-1;s<=1;s++){ const xi=(bx+nx*s+0.5)|0, yi=(by+ny*s+0.5)|0; if(xi>=0&&yi>=0&&xi<W&&yi<H) out[yi*W+xi]=1; } } }
-      t=g;
-    }
-  }
-  return out;
-}
 function buildWall(pg){
   const W=pg.overlay.width, H=pg.overlay.height;
   // 文字レイヤーON時は検出した文字・数字を壁から除外(数字を跨いで塗れる)。
@@ -3347,16 +3221,6 @@ function hitTestFrames(pg, px, py){
 }
 
 // 選択フレームのハンドル hit test (SVG表示座標)
-function hitTestHandles(pg, sx, sy){
-  if (!frameSel||!pg||!pg.frames) return -1;
-  const fr=pg.frames.find(f=>f.id===frameSel); if(!fr) return -1;
-  const R=12;
-  for (let i=0;i<fr.pts.length;i++){
-    const s=framePageToSvg(fr.pts[i].x,fr.pts[i].y,pg);
-    if (Math.hypot(sx-s.sx,sy-s.sy)<=R) return i;
-  }
-  return -1;
-}
 
 // 始点への距離チェック (SVG表示座標)
 function nearFrameStart(sx, sy, pg){
