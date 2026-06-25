@@ -977,6 +977,8 @@ async function svgPages(file){
 function loadImg(src){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(new Error('img')); im.src=src; }); }
 async function restoreEditable(pg, ed){
   pg.texts = (ed.texts||[]).map((t,i)=>Object.assign({}, t, { id:'r'+Date.now()+'_'+i }));
+  // ベクター図形(塗り/枠塗り/長方形/墨消し)を復元。idは衝突回避のため再採番。
+  pg.frames = (ed.frames||[]).map((f,i)=>Object.assign({}, f, { id:'rf'+Date.now().toString(36)+'_'+i }));
   // overlay/brush は PNG のまま _oData/_bData に保持し、hydratePage で描き戻す(キャンバス不要)
   pg._oData = ed.overlay || null;
   pg._bData = ed.brush || null;
@@ -1576,7 +1578,7 @@ function attachPointer(ov, pg){
       // ブラシ専用レイヤーにも同じ不透明度で確定(塗りつぶしとは分離して保持)
       if (pg.brush && temp){ const bc=pg.brush.getContext('2d'); bc.globalAlpha=state.alpha; bc.drawImage(temp,0,0); bc.globalAlpha=1; }
       temp=null; tctx=null; committed=null;
-      autoVectorizeIfOn();   // 自動ベクター化ON時はブラシ確定直後に図形化
+      // ブラシは自動ベクター化しない(brush層にラスター保持→「文字だけ」印刷・再編集SVGで保全)。自動ベクター化はバケツ塗りのみ。
     } else {
       ctx.restore(); if (erbc){ erbc.restore(); erbc=null; }
     }
@@ -1985,7 +1987,7 @@ function updateAlignBar(){
   setD('stampGroup', inc(['text','stamp']));
   const ag=document.getElementById('alignGroup'); if(ag) ag.style.display = (t==='select' || n>=2) ? 'flex':'none';
 }
-function setSelection(ids, primary){ selIds.clear(); (ids||[]).forEach(i=>selIds.add(i)); selText=(primary!==undefined)?primary:((ids&&ids.length)?ids[ids.length-1]:null); refreshSelClasses(); updateAlignBar(); syncTextControlsToSelection(); }
+function setSelection(ids, primary, skipSync){ selIds.clear(); (ids||[]).forEach(i=>selIds.add(i)); selText=(primary!==undefined)?primary:((ids&&ids.length)?ids[ids.length-1]:null); refreshSelClasses(); updateAlignBar(); if(!skipSync) syncTextControlsToSelection(); }
 function clearSelection(){ selIds.clear(); selText=null; refreshSelClasses(); updateAlignBar(); }
 function selectedTexts(){ const pg=state.pages[state.active]; return pg ? pg.texts.filter(x=>selIds.has(x.id)) : []; }
 function removeSelected(){ const pg=state.pages[state.active]; if(!pg||!selIds.size) return; snapTexts(pg); pg.texts=pg.texts.filter(x=>!selIds.has(x.id)); clearSelection(); renderTexts(); }
@@ -2041,7 +2043,7 @@ function startRubberBand(e){
     const ids=new Set(prior);
     if (selKindEnabled('text')) document.querySelectorAll('.textbox').forEach(b=>{ const r=b.getBoundingClientRect();
       if(!(r.right<x||r.left>x+w||r.bottom<y||r.top>y+h)) ids.add(b.dataset.id); });
-    setSelection([...ids]);
+    setSelection([...ids], undefined, true);   // ドラッグ中は同期しない(確定時に1回)
     // 図形(枠塗り・長方形・墨消し・塗り)の範囲選択: マーキー矩形と外接矩形が交差するもの
     if (pg && pg.frames && pg.frames.length){
       const a=pageCoords(x0,y0), c=pageCoords(ev.clientX,ev.clientY);
@@ -2058,7 +2060,7 @@ function startRubberBand(e){
     }
   }
   const move=ev=>apply(ev);
-  const up=ev=>{ apply(ev); band.remove(); tl.removeEventListener('pointermove',move); tl.removeEventListener('pointerup',up); updateAlignBar(); };
+  const up=ev=>{ apply(ev); band.remove(); tl.removeEventListener('pointermove',move); tl.removeEventListener('pointerup',up); updateAlignBar(); syncTextControlsToSelection(); };
   tl.addEventListener('pointermove',move); tl.addEventListener('pointerup',up);
 }
 
@@ -2441,12 +2443,15 @@ function traceOverlayRegions(pg, src){
     const ALPHA_MIN = 40;
     const q=v=>Math.min(255,Math.round(v/24)*24);
     const hist=new Map(); let painted=0;
+    let bx0=W,by0=H,bx1=-1,by1=-1;   // 塗り済み画素の外接矩形(空領域の走査を省く高速化)
     for (let i=0;i<W*H;i++){
       const p=i*4, a=data[p+3]; if (a<ALPHA_MIN) continue; painted++;
+      const x=i%W, y=(i-x)/W; if(x<bx0)bx0=x; if(x>bx1)bx1=x; if(y<by0)by0=y; if(y>by1)by1=y;
       const r=q(data[p]),g=q(data[p+1]),b=q(data[p+2]); const k=(r<<16)|(g<<8)|b;
       let o=hist.get(k); if(!o){ o={r,g,b,n:0,aSum:0}; hist.set(k,o); } o.n++; o.aSum+=a;
     }
     if (!painted) return [];
+    bx0=Math.max(0,bx0-1); by0=Math.max(0,by0-1); bx1=Math.min(W-1,bx1+1); by1=Math.min(H-1,by1+1);
     let all=[...hist.values()].sort((a,b)=>b.n-a.n);
     const minN=Math.max(40, painted*0.002);
     let cols=all.filter(c=>c.n>=minN).slice(0,16);
@@ -2454,8 +2459,8 @@ function traceOverlayRegions(pg, src){
     cols.forEach((c,i)=>{ c.idx=i; c.a=Math.round(c.aSum/c.n); });
     const idxOf = new Int32Array(W*H).fill(-1);
     const MAXD2 = 120*120;
-    for (let i=0;i<W*H;i++){
-      const p=i*4, a=data[p+3]; if (a<ALPHA_MIN) continue;
+    for (let y=by0;y<=by1;y++) for (let x=bx0;x<=bx1;x++){
+      const i=y*W+x, p=i*4, a=data[p+3]; if (a<ALPHA_MIN) continue;
       const r=data[p],g=data[p+1],b=data[p+2]; let best=-1, bd=MAXD2;
       for (const c of cols){ const dr=r-c.r,dg=g-c.g,db=b-c.b, d=dr*dr+dg*dg+db*db; if(d<bd){bd=d;best=c.idx;} }
       idxOf[i]=best;
@@ -2469,7 +2474,7 @@ function traceOverlayRegions(pg, src){
       const inside=(x,y)=> x>=0&&y>=0&&x<W&&y<H && idxOf[y*W+x]===id;
       const edges=new Map();
       const add=(ax,ay,bx,by)=>{ const s=ay*VW+ax; let arr=edges.get(s); if(!arr){arr=[];edges.set(s,arr);} arr.push(by*VW+bx); };
-      for (let y=0;y<H;y++) for (let x=0;x<W;x++){
+      for (let y=by0;y<=by1;y++) for (let x=bx0;x<=bx1;x++){
         if (idxOf[y*W+x]!==id) continue;
         if(!inside(x,y-1)) add(x,y, x+1,y);
         if(!inside(x+1,y)) add(x+1,y, x+1,y+1);
@@ -2729,7 +2734,8 @@ function buildPageSvg(withBase, editable){
       const ed = { v:1, w:W, h:H, textLayerOn:!!state.textLayerOn,
         overlay: pg.overlay.toDataURL('image/png'),
         brush: pg.brush ? pg.brush.toDataURL('image/png') : null,
-        texts: pg.texts.map(tt=>({ x:tt.x, y:tt.y, text:tt.text, size:tt.size, font:tt.font, vertical:!!tt.vertical, color:tt.color, bold:!!tt.bold })) };
+        frames: (pg.frames||[]).map(f=>({ pts:f.pts, color:f.color, alpha:f.alpha, strokeW:f.strokeW||0, strokeColor:f.strokeColor||null, rect:!!f.rect, redact:!!f.redact, paint:!!f.paint })),
+        texts: pg.texts.map(tt=>({ x:tt.x, y:tt.y, text:tt.text, size:tt.size, font:tt.font, vertical:!!tt.vertical, color:tt.color, bold:!!tt.bold, letterSpacing:tt.letterSpacing||0 })) };
       metaMarkup = `\n<metadata id="ks-editable" data-app="kouzu-color">${btoa(unescape(encodeURIComponent(JSON.stringify(ed))))}</metadata>`;
     }
     body = `<g transform="${t}">\n${basePart}\n${overlayMarkup}\n${framePathsMarkup}\n${detMarkup}\n</g>\n${textsMarkup}`;
@@ -3048,8 +3054,9 @@ async function savePdfAll(){
       const c=rotateCanvas(await compositeCanvas(2400,false,!useVec), state.rotation);
       if(!hasJP) drawTextsOnCanvas(c.getContext('2d'), 2400/Math.max(pg.w,pg.h), proj);
       doc.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,ph);
-      if(useVec){ const regs=traceOverlayRegions(pg)||[]; const regions=regs.map(rg=>({r:rg.r,g:rg.g,b:rg.b,a:rg.a,loops:rg.loops.map(loop=>loop.map(pt=>{const P=projectToRotated(pt[0],pt[1],pg.w,pg.h,r);return[P.X,P.Y];}))})); drawRegionsOnPdf(doc,regions); drawRegionsOnPdf(doc, framesToRegions(pg, r)); }
+      if(useVec){ const regs=traceOverlayRegions(pg)||[]; const regions=regs.map(rg=>({r:rg.r,g:rg.g,b:rg.b,a:rg.a,loops:rg.loops.map(loop=>loop.map(pt=>{const P=projectToRotated(pt[0],pt[1],pg.w,pg.h,r);return[P.X,P.Y];}))})); drawRegionsOnPdf(doc,regions); drawRegionsOnPdf(doc, framesToRegions(pg, r, ['paint','frame'])); }   // 塗り・枠塗りは地番の下
       if(useVec && state.textLayerOn && pg.detCanvas){ const dc=rotateCanvas(pg.detCanvas,state.rotation); doc.addImage(dc.toDataURL('image/png'),'PNG',0,0,pw,ph); }
+      if(useVec) drawRegionsOnPdf(doc, framesToRegions(pg, r, ['rect','redact']));   // 長方形・墨消しは地番の上
       if(hasJP) drawTextsOnPdf(doc, proj);
       drawWatermarkOnPdf(doc, pw, ph);   // デモ透かし(各ページ)
       if(i!==saved) dehydratePage(pg);                         // 開いていたページ以外は再び解放
@@ -3093,13 +3100,14 @@ async function savePdf(){
       const regions = regs.map(rg=>({ r:rg.r, g:rg.g, b:rg.b, a:rg.a,
         loops: rg.loops.map(loop=> loop.map(pt=>{ const P=projectToRotated(pt[0],pt[1],pg.w,pg.h,r); return [P.X,P.Y]; })) }));
       drawRegionsOnPdf(doc, regions);   // ベクター塗り(evenoddの穴・不透明度)
-      drawRegionsOnPdf(doc, framesToRegions(pg, r));   // 枠塗りもベクターで重ねる
+      drawRegionsOnPdf(doc, framesToRegions(pg, r, ['paint','frame']));   // 塗り・枠塗りは地番の下
     }
     // 文字検出ON＋ベクター時: 地番などを塗りの上に画像で重ねる(ラスター時はcompositeで焼込済)
     if (useVec && state.textLayerOn && pg.detCanvas){
       const dc = rotateCanvas(pg.detCanvas, state.rotation);
       doc.addImage(dc.toDataURL('image/png'), 'PNG', 0, 0, pw, ph);
     }
+    if (useVec) drawRegionsOnPdf(doc, framesToRegions(pg, r, ['rect','redact']));   // 長方形・墨消しは地番の上
     if (hasJP) drawTextsOnPdf(doc, proj);   // 本物の文字列を上に重ねる
     drawWatermarkOnPdf(doc, pw, ph);   // デモ透かし
     doc.save(outName('pdf'));
@@ -3710,8 +3718,8 @@ function framesToSvgPaths(pg){
 }
 // 枠塗りを drawRegionsOnPdf 用の regions(投影済み座標・a=0..255)へ変換。
 // ベクターPDF出力時は overlay と同様にベクターで枠塗りを描く(ラスター時は compositeCanvas で焼込済)。
-function framesToRegions(pg, rot){
-  return framesInDrawOrder(pg).filter(fr=>fr.pts&&fr.pts.length>=3).map(fr=>{
+function framesToRegions(pg, rot, kinds){
+  return framesInDrawOrder(pg).filter(fr=>fr.pts&&fr.pts.length>=3 && (!kinds||kinds.indexOf(frameKind(fr))>=0)).map(fr=>{
     const loop=fr.pts.map(p=>{ const P=projectToRotated(p.x,p.y,pg.w,pg.h,rot); return [P.X,P.Y]; });
     const noFill = fr.color==='transparent';
     const [r,g,b] = noFill ? [0,0,0] : hexRgb(fr.color);
