@@ -514,3 +514,16 @@ def cleanup_access_logs(keep_days=180):
                         (int(keep_days),))
     finally:
         con.close()
+
+
+# ---- 定期メンテナンス用CLI(cronから実行可) ----
+# 例(さくら等のcron): cd ~/www/<domain>/rpaint/api && python3 appdb.py cleanup
+if __name__ == "__main__":
+    import sys as _sys
+    _cmd = _sys.argv[1] if len(_sys.argv) > 1 else "cleanup"
+    if _cmd in ("cleanup", "cleanup-sessions"):
+        cleanup_sessions(); print("sessions cleaned")
+    elif _cmd == "cleanup-all":
+        cleanup_sessions(); cleanup_login_logs(); cleanup_access_logs(); print("sessions+logs cleaned")
+    else:
+        print("usage: python3 appdb.py [cleanup|cleanup-all]")

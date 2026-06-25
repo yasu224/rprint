@@ -14,6 +14,7 @@
 """
 import json
 import os
+import random
 import re
 import sys
 import time
@@ -577,7 +578,19 @@ def _handle_webhook(event):
         return
 
 
+def _maybe_cleanup():
+    """常駐不可の共有サーバ向け: cron無しでも定期的に掃除する。
+    リクエストの約1%で期限切れセッションを削除(失敗してもリクエストには影響させない)。
+    cronが使える場合は `python3 appdb.py cleanup` を定期実行してもよい。"""
+    try:
+        if random.random() < 0.01:
+            appdb.cleanup_sessions()
+    except Exception:
+        pass
+
+
 def main():
+    _maybe_cleanup()
     try:
         route()
     except Exception as e:  # noqa
