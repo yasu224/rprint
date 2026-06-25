@@ -1,0 +1,6 @@
+# サーバー側スクリプトは必ず LF で扱う。
+# CRLF だと CGI の shebang(#!/usr/local/bin/python3) が壊れ、CGIが起動しない。
+*.cgi   text eol=lf
+api/*.py text eol=lf
+*.htaccess text eol=lf
+.htaccess  text eol=lf
