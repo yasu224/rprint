@@ -89,7 +89,13 @@ HELP.ja = `
 <h2>11. スマートフォン</h2><p>画面が狭いときは左上の <b>☰</b> でメニューを開閉します。</p>
 <h2>12. 注意点</h2>
 <div class="note warn"><b>⬛ 墨消し：</b>墨消しは<b>PDF出力時のみ</b>枠内を実際に削除して黒で塗ります(復元不可)。画面・PNG/SVGでは濃いグレーの目印です。重要情報を隠す場合は<b>必ずPDFで出力</b>してください。</div>
-<ul><li>対応形式：読込=PDF/SVG/PNG/JPEG、保存=PDF/PNG/SVG。</li><li>複数ページ表示中は、表示外のページはメモリ節約のため一時的に畳まれます(切替時に自動復元)。</li></ul>`;
+<ul><li>対応形式：読込=PDF/SVG/PNG/JPEG、保存=PDF/PNG/SVG。</li><li>複数ページ表示中は、表示外のページはメモリ節約のため一時的に畳まれます(切替時に自動復元)。</li></ul>
+<h2>★ 新機能</h2><ul>
+<li><b>塗りの自動ベクター化</b>：🪣塗りは自動で図形になり、<b>🔲選択</b>ツールで移動・サイズ調整・削除できます。同じ区画を塗り直すと前の塗りは置き換わります(重なりません)。</li>
+<li><b>枠線・線色</b>：塗り・枠塗り・長方形に<b>枠線(線なし/小/中/大)</b>と<b>線色</b>を設定できます(線色は塗り色と独立)。</li>
+<li><b>範囲選択(エリア選択)</b>：🔲選択ツールでドラッグすると、図形(塗り・枠塗り・長方形・墨消し)や文字を<b>まとめて選択</b>→移動・<kbd>Delete</kbd>で一括削除。上部の<b>「選択対象」</b>チェックで対象の種類を切替(初期は文字のみ)。</li>
+<li><b>字間</b>：文字ツールの<b>字間</b>で文字間隔を調整できます(マイナスで詰め)。枠ごとに個別設定。</li>
+<li><b>編集中データの保持</b>：<b>👤マイページ</b>・<b>❓操作説明</b>へ移動してアプリに戻っても、編集中のデータは保持されます。</li></ul>`;
 
 HELP.en = `
 <div class="lead">A tool to load cadastral-map PDFs/images and add color fills, text, area calculation and redaction. Saved PDF/PNG/SVG can be printed or submitted as-is. <b>All processing happens in your browser</b>; images are never sent to a server.</div>
@@ -129,7 +135,13 @@ HELP.en = `
 <h2>11. Smartphone</h2><p>On narrow screens, use the <b>☰</b> button (top-left) to open/close the menu.</p>
 <h2>12. Notes</h2>
 <div class="note warn"><b>⬛ Redaction:</b> redaction truly deletes and blacks out the area <b>only on PDF export</b> (unrecoverable). On screen and in PNG/SVG it is just a dark-gray marker. To hide sensitive data, <b>always export as PDF</b>.</div>
-<ul><li>Formats: load = PDF/SVG/PNG/JPEG, save = PDF/PNG/SVG.</li><li>With multiple pages, off-screen pages are temporarily folded to save memory (restored on switch).</li></ul>`;
+<ul><li>Formats: load = PDF/SVG/PNG/JPEG, save = PDF/PNG/SVG.</li><li>With multiple pages, off-screen pages are temporarily folded to save memory (restored on switch).</li></ul>
+<h2>★ New features</h2><ul>
+<li><b>Auto-vectorized fill</b>: 🪣 fills become shapes automatically and can be moved, resized and deleted with the <b>🔲 Select</b> tool. Re-filling the same area replaces the previous fill (no stacking).</li>
+<li><b>Border &amp; line color</b>: set a <b>border (none/S/M/L)</b> and a <b>line color</b> on fills, frame fills and rectangles (line color is independent of the fill color).</li>
+<li><b>Marquee (area) select</b>: with the 🔲 Select tool, drag to <b>select multiple</b> shapes (fill/frame/rectangle/redaction) and text, then move or <kbd>Delete</kbd> them together. Use the <b>“Selectable”</b> checkboxes to choose which types (text only by default).</li>
+<li><b>Letter spacing</b>: adjust character spacing with <b>Spacing</b> (negative tightens); set per text box.</li>
+<li><b>Your work is kept</b>: going to <b>👤 My page</b> or <b>❓ Help</b> and back keeps your in-progress editing data.</li></ul>`;
 
 HELP.zh = `
 <div class="lead">用于载入地图(公图)PDF/图片，进行涂色、加文字、面积计算与涂黑遮盖的工具。保存的 PDF/PNG/SVG 可直接打印或提交。<b>所有处理都在您的浏览器内完成</b>，图片不会上传到服务器。</div>
@@ -169,7 +181,13 @@ HELP.zh = `
 <h2>11. 智能手机</h2><p>屏幕较窄时，用左上角 <b>☰</b> 开关菜单。</p>
 <h2>12. 注意事项</h2>
 <div class="note warn"><b>⬛ 涂黑：</b>仅在<b>导出 PDF 时</b>真正删除框内内容并填黑(不可恢复)。屏幕与 PNG/SVG 中只是深灰标记。隐藏敏感信息请<b>务必导出 PDF</b>。</div>
-<ul><li>格式：载入=PDF/SVG/PNG/JPEG，保存=PDF/PNG/SVG。</li><li>多页时，非当前页会临时折叠以节省内存(切换时自动恢复)。</li></ul>`;
+<ul><li>格式：载入=PDF/SVG/PNG/JPEG，保存=PDF/PNG/SVG。</li><li>多页时，非当前页会临时折叠以节省内存(切换时自动恢复)。</li></ul>
+<h2>★ 新功能</h2><ul>
+<li><b>涂色自动矢量化</b>：🪣涂色会自动变为图形，可用<b>🔲选择</b>工具移动、调整大小和删除。重涂同一区域会替换之前的涂色(不重叠)。</li>
+<li><b>边框与线色</b>：可为涂色、框涂、矩形设置<b>边框(无/小/中/大)</b>和<b>线色</b>(线色与填充色独立)。</li>
+<li><b>框选(区域选择)</b>：用🔲选择工具拖动可<b>批量选择</b>图形(涂色/框/矩形/涂黑)和文字，然后一起移动或<kbd>Delete</kbd>删除。用顶部<b>“可选”</b>复选框切换可选类型(默认仅文字)。</li>
+<li><b>字间</b>：用文字工具的<b>字间</b>调整字符间距(负值收紧)，每个文字框可单独设置。</li>
+<li><b>保留编辑数据</b>：前往<b>👤我的页面</b>或<b>❓操作说明</b>再返回，编辑中的数据会保留。</li></ul>`;
 
 HELP.ko = `
 <div class="lead">지적도(공도) PDF·이미지를 불러와 색칠·문자 입력·면적 계산·검정칠을 할 수 있는 도구입니다. 저장한 PDF/PNG/SVG는 그대로 인쇄·제출할 수 있습니다. <b>모든 처리는 브라우저 안에서만</b> 이루어지며 이미지는 서버로 전송되지 않습니다.</div>
@@ -209,7 +227,13 @@ HELP.ko = `
 <h2>11. 스마트폰</h2><p>화면이 좁을 때 왼쪽 위 <b>☰</b>로 메뉴를 엽니다.</p>
 <h2>12. 주의</h2>
 <div class="note warn"><b>⬛ 검정칠:</b> <b>PDF 출력 시에만</b> 영역 내용을 실제로 삭제하고 검정으로 채웁니다(복원 불가). 화면·PNG/SVG에서는 진회색 표시일 뿐입니다. 민감 정보는 <b>반드시 PDF로 출력</b>하세요.</div>
-<ul><li>형식: 불러오기=PDF/SVG/PNG/JPEG, 저장=PDF/PNG/SVG.</li><li>여러 페이지일 때 화면 밖 페이지는 메모리 절약을 위해 일시적으로 접힙니다(전환 시 자동 복원).</li></ul>`;
+<ul><li>형식: 불러오기=PDF/SVG/PNG/JPEG, 저장=PDF/PNG/SVG.</li><li>여러 페이지일 때 화면 밖 페이지는 메모리 절약을 위해 일시적으로 접힙니다(전환 시 자동 복원).</li></ul>
+<h2>★ 새 기능</h2><ul>
+<li><b>칠 자동 벡터화</b>: 🪣칠은 자동으로 도형이 되며 <b>🔲선택</b> 도구로 이동·크기조정·삭제할 수 있습니다. 같은 구역을 다시 칠하면 이전 칠을 대체합니다(겹치지 않음).</li>
+<li><b>테두리·선 색</b>: 칠·틀칠·사각형에 <b>테두리(없음/소/중/대)</b>와 <b>선 색</b>을 설정할 수 있습니다(선 색은 칠 색과 독립).</li>
+<li><b>범위 선택</b>: 🔲선택 도구로 드래그하면 도형(칠/틀/사각형/검정칠)과 문자를 <b>한꺼번에 선택</b>해 이동하거나 <kbd>Delete</kbd>로 일괄 삭제. 상단 <b>‘선택 대상’</b> 체크로 종류 전환(기본은 문자만).</li>
+<li><b>자간</b>: 문자 도구의 <b>자간</b>으로 문자 간격을 조정(음수는 좁힘), 문자 상자마다 개별 설정.</li>
+<li><b>편집 데이터 유지</b>: <b>👤마이페이지</b>·<b>❓사용법</b>으로 이동했다가 돌아와도 편집 중 데이터가 유지됩니다.</li></ul>`;
 
 HELP.vi = `
 <div class="lead">Công cụ tải PDF/ảnh bản đồ địa chính để tô màu, thêm chữ, tính diện tích và bôi đen. PDF/PNG/SVG đã lưu có thể in hoặc nộp trực tiếp. <b>Mọi xử lý diễn ra trong trình duyệt của bạn</b>; ảnh không được gửi lên máy chủ.</div>
@@ -249,7 +273,13 @@ HELP.vi = `
 <h2>11. Điện thoại</h2><p>Khi màn hình hẹp, dùng nút <b>☰</b> (trên trái) để mở/đóng menu.</p>
 <h2>12. Lưu ý</h2>
 <div class="note warn"><b>⬛ Bôi đen:</b> chỉ <b>khi xuất PDF</b> mới xóa thật và tô đen vùng đó (không khôi phục được). Trên màn hình và PNG/SVG chỉ là dấu xám đậm. Để che thông tin nhạy cảm, <b>luôn xuất PDF</b>.</div>
-<ul><li>Định dạng: tải = PDF/SVG/PNG/JPEG, lưu = PDF/PNG/SVG.</li><li>Khi có nhiều trang, các trang ngoài màn hình tạm được gấp lại để tiết kiệm bộ nhớ (tự khôi phục khi chuyển).</li></ul>`;
+<ul><li>Định dạng: tải = PDF/SVG/PNG/JPEG, lưu = PDF/PNG/SVG.</li><li>Khi có nhiều trang, các trang ngoài màn hình tạm được gấp lại để tiết kiệm bộ nhớ (tự khôi phục khi chuyển).</li></ul>
+<h2>★ Tính năng mới</h2><ul>
+<li><b>Tự động vector hóa vùng tô</b>: tô 🪣 sẽ tự thành hình và có thể di chuyển, đổi cỡ, xóa bằng công cụ <b>🔲 Chọn</b>. Tô lại cùng vùng sẽ thay thế vùng tô trước (không chồng).</li>
+<li><b>Viền &amp; màu viền</b>: đặt <b>viền (không/nhỏ/vừa/lớn)</b> và <b>màu viền</b> cho vùng tô, khung tô, chữ nhật (màu viền độc lập với màu tô).</li>
+<li><b>Chọn theo vùng</b>: dùng công cụ 🔲 Chọn, kéo để <b>chọn nhiều</b> hình (tô/khung/chữ nhật/bôi đen) và chữ rồi di chuyển hoặc <kbd>Delete</kbd> cùng lúc. Dùng ô <b>“Chọn được”</b> để chọn loại (mặc định chỉ chữ).</li>
+<li><b>Giãn chữ</b>: chỉnh khoảng cách ký tự bằng <b>Giãn chữ</b> (số âm để thu hẹp), đặt riêng cho từng ô chữ.</li>
+<li><b>Giữ dữ liệu</b>: vào <b>👤 Trang của tôi</b> hoặc <b>❓ Hướng dẫn</b> rồi quay lại vẫn giữ dữ liệu đang chỉnh sửa.</li></ul>`;
 
 HELP.es = `
 <div class="lead">Herramienta para cargar PDF/imágenes de planos catastrales y añadir rellenos de color, texto, cálculo de área y tachado. Los PDF/PNG/SVG guardados se pueden imprimir o presentar tal cual. <b>Todo el procesamiento ocurre en tu navegador</b>; las imágenes nunca se envían a un servidor.</div>
@@ -289,7 +319,13 @@ HELP.es = `
 <h2>11. Smartphone</h2><p>En pantallas estrechas, usa el botón <b>☰</b> (arriba a la izquierda) para abrir/cerrar el menú.</p>
 <h2>12. Notas</h2>
 <div class="note warn"><b>⬛ Tachado:</b> el tachado borra realmente y ennegrece el área <b>solo al exportar PDF</b> (irrecuperable). En pantalla y en PNG/SVG es solo una marca gris oscuro. Para ocultar datos sensibles, <b>exporta siempre como PDF</b>.</div>
-<ul><li>Formatos: cargar = PDF/SVG/PNG/JPEG, guardar = PDF/PNG/SVG.</li><li>Con varias páginas, las que no se ven se pliegan temporalmente para ahorrar memoria (se restauran al cambiar).</li></ul>`;
+<ul><li>Formatos: cargar = PDF/SVG/PNG/JPEG, guardar = PDF/PNG/SVG.</li><li>Con varias páginas, las que no se ven se pliegan temporalmente para ahorrar memoria (se restauran al cambiar).</li></ul>
+<h2>★ Novedades</h2><ul>
+<li><b>Relleno autovectorizado</b>: el relleno 🪣 se convierte en formas automáticamente y se puede mover, redimensionar y borrar con la herramienta <b>🔲 Selección</b>. Volver a rellenar la misma zona reemplaza el relleno anterior (sin apilar).</li>
+<li><b>Borde y color de línea</b>: define un <b>borde (ninguno/P/M/G)</b> y un <b>color de línea</b> en rellenos, marcos y rectángulos (color de línea independiente del relleno).</li>
+<li><b>Selección por área</b>: con la herramienta 🔲 Selección, arrastra para <b>seleccionar varias</b> formas (relleno/marco/rectángulo/tachado) y textos, y muévelos o bórralos juntos con <kbd>Delete</kbd>. Usa las casillas <b>“Seleccionable”</b> para elegir los tipos (solo texto por defecto).</li>
+<li><b>Espaciado</b>: ajusta el espacio entre caracteres con <b>Espaciado</b> (negativo aprieta); por cada cuadro de texto.</li>
+<li><b>Tu trabajo se conserva</b>: ir a <b>👤 Mi página</b> o <b>❓ Ayuda</b> y volver conserva los datos en edición.</li></ul>`;
 
 HELP.de = `
 <div class="lead">Werkzeug zum Laden von Katasterplan-PDFs/Bildern für Farbflächen, Text, Flächenberechnung und Schwärzung. Gespeicherte PDF/PNG/SVG können direkt gedruckt oder eingereicht werden. <b>Die gesamte Verarbeitung erfolgt in Ihrem Browser</b>; Bilder werden nie an einen Server gesendet.</div>
@@ -329,7 +365,13 @@ HELP.de = `
 <h2>11. Smartphone</h2><p>Bei schmalem Bildschirm das <b>☰</b>-Symbol (oben links) zum Öffnen/Schließen des Menüs nutzen.</p>
 <h2>12. Hinweise</h2>
 <div class="note warn"><b>⬛ Schwärzung:</b> Die Schwärzung löscht und schwärzt den Bereich wirklich <b>nur beim PDF-Export</b> (nicht wiederherstellbar). Am Bildschirm und in PNG/SVG ist es nur eine dunkelgraue Markierung. Zum Verbergen sensibler Daten <b>immer als PDF exportieren</b>.</div>
-<ul><li>Formate: Laden = PDF/SVG/PNG/JPEG, Speichern = PDF/PNG/SVG.</li><li>Bei mehreren Seiten werden nicht sichtbare Seiten zur Speicherersparnis vorübergehend zusammengeklappt (beim Wechsel automatisch wiederhergestellt).</li></ul>`;
+<ul><li>Formate: Laden = PDF/SVG/PNG/JPEG, Speichern = PDF/PNG/SVG.</li><li>Bei mehreren Seiten werden nicht sichtbare Seiten zur Speicherersparnis vorübergehend zusammengeklappt (beim Wechsel automatisch wiederhergestellt).</li></ul>
+<h2>★ Neue Funktionen</h2><ul>
+<li><b>Auto-Vektorisierung der Füllung</b>: 🪣-Füllungen werden automatisch zu Formen und lassen sich mit dem <b>🔲 Auswahl</b>-Werkzeug verschieben, skalieren und löschen. Erneutes Füllen derselben Fläche ersetzt die vorherige Füllung (kein Stapeln).</li>
+<li><b>Rahmen &amp; Linienfarbe</b>: Lege einen <b>Rahmen (keine/S/M/L)</b> und eine <b>Linienfarbe</b> für Füllungen, Rahmen und Rechtecke fest (Linienfarbe unabhängig von der Füllfarbe).</li>
+<li><b>Bereichsauswahl</b>: Ziehe mit dem 🔲 Auswahl-Werkzeug, um mehrere Formen (Füllung/Rahmen/Rechteck/Schwärzung) und Texte <b>gemeinsam auszuwählen</b> und zusammen zu verschieben oder mit <kbd>Delete</kbd> zu löschen. Mit den <b>„Auswählbar“</b>-Kästchen die Typen wählen (standardmäßig nur Text).</li>
+<li><b>Abstand</b>: Zeichenabstand mit <b>Abstand</b> anpassen (negativ verengt); je Textfeld einstellbar.</li>
+<li><b>Bearbeitung bleibt erhalten</b>: Zu <b>👤 Meine Seite</b> oder <b>❓ Hilfe</b> wechseln und zurück – die Bearbeitungsdaten bleiben erhalten.</li></ul>`;
 
 HELP.fr = `
 <div class="lead">Outil pour charger des PDF/images de plans cadastraux et ajouter des remplissages de couleur, du texte, le calcul de surface et le caviardage. Les PDF/PNG/SVG enregistrés peuvent être imprimés ou soumis tels quels. <b>Tout le traitement se fait dans votre navigateur</b> ; les images ne sont jamais envoyées à un serveur.</div>
@@ -369,7 +411,13 @@ HELP.fr = `
 <h2>11. Smartphone</h2><p>Sur petit écran, utilisez le bouton <b>☰</b> (en haut à gauche) pour ouvrir/fermer le menu.</p>
 <h2>12. Remarques</h2>
 <div class="note warn"><b>⬛ Caviardage :</b> le caviardage efface et noircit réellement la zone <b>uniquement à l’export PDF</b> (irrécupérable). À l’écran et en PNG/SVG, ce n’est qu’un repère gris foncé. Pour masquer des données sensibles, <b>exportez toujours en PDF</b>.</div>
-<ul><li>Formats : charger = PDF/SVG/PNG/JPEG, enregistrer = PDF/PNG/SVG.</li><li>Avec plusieurs pages, les pages hors écran sont temporairement repliées pour économiser la mémoire (restaurées au changement).</li></ul>`;
+<ul><li>Formats : charger = PDF/SVG/PNG/JPEG, enregistrer = PDF/PNG/SVG.</li><li>Avec plusieurs pages, les pages hors écran sont temporairement repliées pour économiser la mémoire (restaurées au changement).</li></ul>
+<h2>★ Nouveautés</h2><ul>
+<li><b>Remplissage auto-vectorisé</b> : les remplissages 🪣 deviennent automatiquement des formes, déplaçables, redimensionnables et supprimables avec l’outil <b>🔲 Sélection</b>. Re-remplir la même zone remplace le remplissage précédent (pas d’empilement).</li>
+<li><b>Bordure &amp; couleur de ligne</b> : définissez une <b>bordure (aucune/P/M/G)</b> et une <b>couleur de ligne</b> sur les remplissages, cadres et rectangles (couleur de ligne indépendante du remplissage).</li>
+<li><b>Sélection par zone</b> : avec l’outil 🔲 Sélection, glissez pour <b>sélectionner plusieurs</b> formes (remplissage/cadre/rectangle/caviardage) et textes, puis déplacez-les ou supprimez-les ensemble avec <kbd>Delete</kbd>. Utilisez les cases <b>« Sélectionnable »</b> pour choisir les types (texte seul par défaut).</li>
+<li><b>Espacement</b> : ajustez l’espacement des caractères avec <b>Espacement</b> (négatif resserre) ; réglable par zone de texte.</li>
+<li><b>Votre travail est conservé</b> : aller dans <b>👤 Mon espace</b> ou <b>❓ Aide</b> et revenir conserve les données en cours d’édition.</li></ul>`;
 
 HELP.ar = `
 <div class="lead">أداة لتحميل ملفات PDF/صور خرائط المساحة وإضافة التعبئة اللونية والنص وحساب المساحة والتعتيم. يمكن طباعة أو تقديم ملفات PDF/PNG/SVG المحفوظة كما هي. <b>تتم كل المعالجة داخل متصفحك</b>، ولا تُرسل الصور إلى أي خادم.</div>
@@ -409,7 +457,13 @@ HELP.ar = `
 <h2>11. الهاتف الذكي</h2><p>عند ضيق الشاشة، استخدم زر <b>☰</b> (أعلى اليسار) لفتح/إغلاق القائمة.</p>
 <h2>12. ملاحظات</h2>
 <div class="note warn"><b>⬛ التعتيم:</b> يحذف التعتيم المنطقة فعليًا ويسوّدها <b>عند تصدير PDF فقط</b> (غير قابل للاسترجاع). على الشاشة وفي PNG/SVG هو مجرد علامة رمادية داكنة. لإخفاء البيانات الحساسة، <b>صدّر دائمًا كـ PDF</b>.</div>
-<ul><li>الصيغ: التحميل = PDF/SVG/PNG/JPEG، الحفظ = PDF/PNG/SVG.</li><li>مع عدة صفحات، تُطوى الصفحات غير الظاهرة مؤقتًا لتوفير الذاكرة (تُستعاد عند التبديل).</li></ul>`;
+<ul><li>الصيغ: التحميل = PDF/SVG/PNG/JPEG، الحفظ = PDF/PNG/SVG.</li><li>مع عدة صفحات، تُطوى الصفحات غير الظاهرة مؤقتًا لتوفير الذاكرة (تُستعاد عند التبديل).</li></ul>
+<h2>★ ميزات جديدة</h2><ul>
+<li><b>تحويل التعبئة تلقائيًا إلى متجه</b>: تتحول تعبئة 🪣 تلقائيًا إلى أشكال ويمكن تحريكها وتغيير حجمها وحذفها بأداة <b>🔲 التحديد</b>. إعادة تعبئة نفس المنطقة تستبدل التعبئة السابقة (دون تراكم).</li>
+<li><b>الإطار ولون الخط</b>: عيّن <b>إطارًا (بلا/صغير/وسط/كبير)</b> و<b>لون خط</b> للتعبئة والإطار والمستطيل (لون الخط مستقل عن لون التعبئة).</li>
+<li><b>التحديد بالمساحة</b>: بأداة 🔲 التحديد، اسحب <b>لتحديد عدة</b> أشكال (تعبئة/إطار/مستطيل/تعتيم) ونصوص ثم حرّكها أو احذفها معًا بـ <kbd>Delete</kbd>. استخدم مربعات <b>«قابل للتحديد»</b> لاختيار الأنواع (النص فقط افتراضيًا).</li>
+<li><b>تباعد الأحرف</b>: اضبط المسافة بين الأحرف عبر <b>تباعد</b> (السالب يضيّق)، لكل مربع نص على حدة.</li>
+<li><b>حفظ عملك</b>: الانتقال إلى <b>👤 صفحتي</b> أو <b>❓ المساعدة</b> والعودة يحافظ على بيانات التحرير الجارية.</li></ul>`;
 
 (function(){
   var sel = document.getElementById('langSel');

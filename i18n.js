@@ -95,7 +95,7 @@
     'btn.logout':     ['⎋ ログアウト','⎋ Log out','⎋ 退出','⎋ 로그아웃','⎋ Đăng xuất','⎋ Salir','⎋ Abmelden','⎋ Déconnexion','⎋ تسجيل الخروج'],
     'btn.mypage':     ['👤 マイページ','👤 My Page','👤 我的页面','👤 마이페이지','👤 Trang của tôi','👤 Mi página','👤 Mein Konto','👤 Mon espace','👤 صفحتي'],
     'btn.help':       ['❓ 操作説明','❓ Help','❓ 操作说明','❓ 사용법','❓ Hướng dẫn','❓ Ayuda','❓ Hilfe','❓ Aide','❓ مساعدة'],
-    'tip.help':       ['操作説明を新しいタブで開く','Open the help guide in a new tab','在新标签页打开操作说明','사용법을 새 탭에서 열기','Mở hướng dẫn trong tab mới','Abrir la ayuda en una pestaña nueva','Hilfe in neuem Tab öffnen','Ouvrir l’aide dans un nouvel onglet','افتح دليل الاستخدام في علامة تبويب جديدة'],
+    'tip.help':       ['操作説明を開く(編集中のデータは保持)','Open the help guide (your work is kept)','打开操作说明(保留编辑中的数据)','사용법 열기(편집 중 데이터 유지)','Mở hướng dẫn (giữ dữ liệu đang chỉnh sửa)','Abrir la ayuda (se conserva tu trabajo)','Hilfe öffnen (Bearbeitung bleibt erhalten)','Ouvrir l’aide (votre travail est conservé)','افتح دليل الاستخدام (مع حفظ عملك)'],
     'btn.admin':      ['🛠 管理','🛠 Admin','🛠 管理','🛠 관리','🛠 Quản trị','🛠 Admin','🛠 Verwaltung','🛠 Admin','🛠 الإدارة'],
     // ---- ログイン/登録/マイページ 共通 ----
     'auth.login':     ['ログイン','Log in','登录','로그인','Đăng nhập','Iniciar sesión','Anmelden','Connexion','تسجيل الدخول'],

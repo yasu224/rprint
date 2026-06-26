@@ -402,7 +402,7 @@
   <div class="sec" id="logoutGroup">
     <div class="sectitle" data-i18n="sec.account">アカウント</div>
     <div class="group">
-      <button class="tool" id="helpBtn" data-i18n="btn.help" title="操作説明を新しいタブで開く" data-i18n-title="tip.help" onclick="window.open('help.html','_blank','noopener')">❓ 操作説明</button>
+      <button class="tool" id="helpBtn" data-i18n="btn.help" title="操作説明を開く(編集中のデータは保持)" data-i18n-title="tip.help">❓ 操作説明</button>
       <button class="tool" id="mypage" data-i18n="btn.mypage" title="マイページ（契約・パスワード）" data-i18n-title="tip.mypage">👤 マイページ</button>
       <button class="tool" id="contactBtn" data-i18n="btn.contact" title="ご質問・ご要望をお送りください" data-i18n-title="tip.contact">📧 お問い合わせ</button>
       <button class="tool" id="adminBtn" data-i18n="btn.admin" title="ユーザー管理" data-i18n-title="tip.admin" style="display:none">🛠 管理</button>
@@ -1979,9 +1979,9 @@ function updateAlignBar(){
   setD('colorGroup', inc(['fill','brush','frame','rect','select']));
   setD('alphaGroup', inc(['fill','brush','frame','rect','select']));
   setD('sizeGroup',  inc(['brush','eraser']));   // 太さは枠塗りでは使わない
-  setD('strokeGroup',inc(['frame','rect','select']));   // 枠線はオブジェクト系のみ
-  setD('strokeColorGroup',inc(['frame','rect','select']));   // 線色ピッカー
-  setD('strokePalette',inc(['frame','rect','select']));      // 線色パレット
+  setD('strokeGroup',inc(['fill','frame','rect','select']));   // 枠線(塗り=ベクター化後の輪郭にも適用)
+  setD('strokeColorGroup',inc(['fill','frame','rect','select']));   // 線色ピッカー
+  setD('strokePalette',inc(['fill','frame','rect','select']));      // 線色パレット
   setD('selKindGroup', t==='select');   // 選択対象の種類は選択モードのみ
   setD('textCtl',    inc(['text','stamp']));
   setD('stampGroup', inc(['text','stamp']));
@@ -2590,7 +2590,7 @@ function paintToVector(opts){
       for (const loop of rg.loops){
         if (!loop || loop.length<3) continue;
         newFrames.push({ id:'fv'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-          pts: loop.map(p=>({x:p[0], y:p[1]})), color, alpha, strokeW:0, strokeColor:color, paint:true });
+          pts: loop.map(p=>({x:p[0], y:p[1]})), color, alpha, strokeW:state.strokeW||0, strokeColor:strokeColorNow(), paint:true });
       }
     }
     if (!newFrames.length){ if(!opts.silent) alert(I18N.t('m.nopaint')); return; }
@@ -3779,11 +3779,54 @@ function framesToRegions(pg, rot, kinds){
     location.href = 'login.html';
   }
   if (b) b.onclick = doLogout;
+
+  // ---- 編集セッションの一時保存/復元 (マイページ等へ遷移→アプリに戻っても編集中データを保持) ----
+  // 大きなスキャン画像も扱えるよう IndexedDB に保存。復元は hydrate 機構を再利用。
+  function _sessDB(){ return new Promise((res,rej)=>{ const r=indexedDB.open('rpaint_session',1);
+    r.onupgradeneeded=()=>{ try{ r.result.createObjectStore('s'); }catch(_){} };
+    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+  async function serializeSession(){
+    const pages=[];
+    for (let i=0;i<state.pages.length;i++){
+      const p=state.pages[i]; let o=p._oData||null, b2=p._bData||null;
+      if (i===state.active && p._hydrated){   // 開いているページは現在のキャンバスを書き出す
+        try{ if(p.overlay) o=p.overlay.toDataURL('image/png'); }catch(e){}
+        try{ if(p.brush)   b2=p.brush.toDataURL('image/png'); }catch(e){}
+      }
+      pages.push({ svg:p.svgText, w:p.w, h:p.h, rscale:p.rscale, o, b:b2, frames:p.frames||[], texts:p.texts||[] });
+    }
+    return { v:1, ts:Date.now(), active:state.active, zoom:state.zoom, rotation:state.rotation,
+      baseName:state.baseName, textLayerOn:!!state.textLayerOn, pages };
+  }
+  async function saveSessionToIDB(){
+    if (state.active<0 || !state.pages.length) return;   // 何も無ければ保存しない
+    const data=await serializeSession(); const db=await _sessDB();
+    await new Promise((res,rej)=>{ const tx=db.transaction('s','readwrite'); tx.objectStore('s').put(data,'session'); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); });
+    db.close();
+  }
+  window._rpaintSaveSession = saveSessionToIDB;   // 他の遷移ボタンからも呼べるように
+  async function resumeSessionIfAny(){
+    let s=null; try{ const db=await _sessDB();
+      s=await new Promise((res,rej)=>{ const tx=db.transaction('s','readonly'); const rq=tx.objectStore('s').get('session'); rq.onsuccess=()=>res(rq.result); rq.onerror=()=>rej(rq.error); });
+      db.close(); }catch(e){ return false; }
+    if (!s || !s.pages || !s.pages.length) return false;
+    state.pages = s.pages.map(p=>({ svgText:p.svg, w:p.w, h:p.h, rscale:p.rscale,
+      overlay:null, brush:null, frameCanvas:null, frameCanvasLow:null,
+      frames:p.frames||[], boundary:null, undo:[], redo:[], tundo:[], tredo:[], texts:p.texts||[],
+      _editable:null, _hydrated:false, _oData:p.o||null, _bData:p.b||null, _dirty:false }));
+    state.zoom=s.zoom||1; state.rotation=s.rotation||0; state.baseName=s.baseName||'colored'; state.textLayerOn=!!s.textLayerOn;
+    const tb=document.getElementById('textLayerBtn'); if(tb) tb.classList.toggle('active', state.textLayerOn);
+    buildTabs(); await showPage((s.active>=0 && s.active<state.pages.length)?s.active:0);
+    return true;
+  }
+
   // 認証チェック(未ログインはログイン画面へ) + 自動ログアウト + デモ制限/バナー
   (async () => {
     try {
       const me = await (await fetch('api/me')).json();
       if (!me || !me.authenticated) { location.replace('login.html'); return; }
+      // マイページ等から戻ってきたら編集中データを復元(遷移時にフラグを立てている)
+      try { if (sessionStorage.getItem('rpaint_resume')==='1'){ sessionStorage.removeItem('rpaint_resume'); await resumeSessionIfAny(); } } catch(e){}
       if (typeof me.expires_in === 'number' && me.expires_in > 0 && me.expires_in < 24*3600) {
         setTimeout(async () => {
           if (!me.demo && state.pages.length > 0) {
@@ -3794,7 +3837,8 @@ function framesToRegions(pg, rot, kinds){
           location.href = 'login.html';
         }, me.expires_in * 1000);
       }
-      const mp = document.getElementById('mypage'); if (mp) mp.onclick = () => location.href = 'mypage.html';
+      const mp = document.getElementById('mypage'); if (mp) mp.onclick = async () => { try{ sessionStorage.setItem('rpaint_resume','1'); await saveSessionToIDB(); }catch(e){} location.href = 'mypage.html'; };
+      const hb = document.getElementById('helpBtn'); if (hb) hb.onclick = async () => { try{ sessionStorage.setItem('rpaint_resume','1'); await saveSessionToIDB(); }catch(e){} location.href = 'help.html'; };
       const ab = document.getElementById('adminBtn');
       if (ab && me.admin) { ab.style.display = ''; ab.onclick = () => location.href = 'admin.html'; }
       // デモアカウント=従来のデモ(残時間カウントダウン)。
