@@ -231,6 +231,7 @@
       <button class="tool" data-tool="frame" data-i18n="tool.frame" title="クリックでポイントを追加→始点クリックで枠を閉じて色付け。枠を選択してポイントを調整できます" data-i18n-title="tip.frame">🔷 枠塗り</button>
       <button class="tool" data-tool="rect" data-i18n="tool.rect" title="長方形を塗る。始点クリック→対角を動かしてクリックで確定。作成済みの長方形はクリックで選択し、ハンドルでサイズ調整・Deleteで削除（Escで取消/選択解除）" data-i18n-title="tip.rect">▭ 長方形</button>
       <button class="tool" data-tool="redact" data-i18n="tool.redact" title="墨消し（黒塗り）。長方形ツールと同じ操作で範囲を指定。画面は濃いグレー表示。PDF出力時、枠内の全レイヤー・地図・文字を実際に消去して黒で塗りつぶす（復元不可）" data-i18n-title="tip.redact">⬛ 墨消し</button>
+      <button class="tool" data-tool="line" data-i18n="tool.line" title="直線・矢印を引く。ドラッグで始点→終点。端の形（直線/右矢印/左矢印）と太さ（小/中/大）を切替。線色パレットで色指定" data-i18n-title="tip.line">📏 直線</button>
       <button class="tool" data-tool="brush" data-i18n="tool.brush" title="自由に塗る(太さは「太さ」スライダーで調整)" data-i18n-title="tip.brush">🖌 ブラシ</button>
       <button class="tool" data-tool="eraser" data-i18n="tool.eraser" title="塗り・ブラシを消す(太さは「太さ」スライダーで調整)" data-i18n-title="tip.eraser">🧽 消しゴム</button>
       <button class="tool" data-tool="text" data-i18n="tool.text" title="文字を書き込む(クリックで追加)" data-i18n-title="tip.text">✏️ 文字</button>
@@ -269,6 +270,18 @@
       <input type="color" id="strokeCustom" value="#000000">
     </div>
     <div class="group" id="strokePalette" title="枠線(線)の色を選択" data-i18n-title="tip.strokepalette"></div>
+    <div class="group" id="lineArrowGroup" title="直線の端の形" data-i18n-title="tip.linearrow">
+      <label data-i18n="lbl.linearrow">端</label>
+      <button class="tool active" data-arrow="none" data-i18n="arrow.line">直線</button>
+      <button class="tool" data-arrow="end" data-i18n="arrow.right">→ 右矢印</button>
+      <button class="tool" data-arrow="start" data-i18n="arrow.left">← 左矢印</button>
+    </div>
+    <div class="group" id="lineWGroup" title="直線の太さ" data-i18n-title="tip.linew">
+      <label data-i18n="lbl.linew">太さ</label>
+      <button class="tool" data-linew="1" data-i18n="stroke.s">小</button>
+      <button class="tool active" data-linew="2" data-i18n="stroke.m">中</button>
+      <button class="tool" data-linew="3" data-i18n="stroke.l">大</button>
+    </div>
   </div>
 
   <div class="sec" id="secText">
@@ -280,6 +293,7 @@
       <label class="ckb"><input type="checkbox" id="selRect"> <span data-i18n="kind.rect">長方形</span></label>
       <label class="ckb"><input type="checkbox" id="selRedact"> <span data-i18n="kind.redact">墨消し</span></label>
       <label class="ckb"><input type="checkbox" id="selPaint"> <span data-i18n="kind.paint">塗り</span></label>
+      <label class="ckb"><input type="checkbox" id="selLine"> <span data-i18n="kind.line">直線</span></label>
     </div>
     <div class="group" id="textCtl" title="文字ツールの設定" data-i18n-title="tip.textcfg">
       <label for="font" data-i18n="lbl.text">文字</label>
@@ -341,7 +355,7 @@
     <div class="sectitle" data-i18n="sec.area">面積（㎡・坪）</div>
     <div class="group" title="公図の縮尺（1/○○）。タイトル枠の縮尺を入力してください" data-i18n-title="tip.scale">
       <label for="areaScale" data-i18n="lbl.scale">縮尺 1/</label>
-      <input type="number" id="areaScale" value="600" min="1" max="100000" step="50" style="width:74px">
+      <input type="number" id="areaScale" value="500" min="1" max="100000" step="100" style="width:74px">
     </div>
     <div class="group">
       <button class="tool" id="calcArea" data-i18n="btn.area" title="色ごとに塗りつぶした面積を㎡・坪で計算" data-i18n-title="tip.area">📐 面積を計算</button>
@@ -477,6 +491,20 @@ function selFrameIds(){ return frameSelSet.size ? [...frameSelSet] : (frameSel ?
 let rectStart = null;      // 始点(overlayキャンバス座標) / 未開始は null
 let rectPreviewEl = null;  // プレビュー用DIV
 function clearRectPreview(){ if(rectPreviewEl){ rectPreviewEl.remove(); rectPreviewEl=null; } }
+// ---- 直線ツール状態 ----
+let lineStart = null;      // 始点(overlay座標) / 未開始は null
+function clearLinePreview(){ const el=document.getElementById('linePrev'); if(el) el.remove(); }
+function updateLinePreview(pg, p0, p1){   // p0,p1: overlay座標
+  const fl=document.getElementById('framelayer'); if(!fl||!pg) return;
+  const a=framePageToSvg(p0.x/pg.rscale, p0.y/pg.rscale, pg);
+  const b=framePageToSvg(p1.x/pg.rscale, p1.y/pg.rscale, pg);
+  let el=document.getElementById('linePrev');
+  if(!el){ el=document.createElementNS('http://www.w3.org/2000/svg','line'); el.id='linePrev'; el.setAttribute('stroke-linecap','round'); fl.appendChild(el); }
+  el.setAttribute('x1',a.sx.toFixed(1)); el.setAttribute('y1',a.sy.toFixed(1)); el.setAttribute('x2',b.sx.toFixed(1)); el.setAttribute('y2',b.sy.toFixed(1));
+  el.setAttribute('stroke', strokeColorNow());
+  el.setAttribute('stroke-width', ((LINE_W[state.lineW]||6)*state.zoom).toFixed(1));
+  el.setAttribute('opacity','0.75');
+}
 // 現在の対角点(overlay座標)でプレビュー長方形を更新。座標は #rot 内の表示pxへ換算。
 function updateRectPreview(p){
   if (!rectStart) return;
@@ -508,6 +536,8 @@ function rectBox(fr){
 const REDACT_COLOR = '#3a3a3a';   // 濃いグレー(画面表示)
 // オブジェクトの枠線(ストローク)の太さ(ページ座標pt)。0=線なし / 小 / 中 / 大
 const STROKE_W = { 0:0, 1:1.5, 2:3, 3:6 };
+// 直線ツールの太さ(ページ座標pt)。小 / 中 / 大
+const LINE_W = { 1:3, 2:6, 3:11 };
 // 現在の枠線色: 専用の線色パレット/ピッカーで選んだ色(塗り色とは独立)
 function strokeColorNow(){
   return toHex(state.strokeColor || '#000000');
@@ -526,6 +556,48 @@ function addRectFrame(pg, p0, p1, redact){
   pg.frames=pg.frames||[]; pg.frames.push(fr);
   frameSel=fr.id;
   redrawFrameCanvas(pg); renderFrameLayer();
+}
+// 始点・終点(overlay座標)から直線/矢印を作成。arrow: 'none'|'end'(右矢印)|'start'(左矢印)
+function addLine(pg, p0, p1){
+  const x0=p0.x/pg.rscale, y0=p0.y/pg.rscale, x1=p1.x/pg.rscale, y1=p1.y/pg.rscale;
+  if (Math.hypot(x1-x0,y1-y0) < 3) return;   // 短すぎ(誤クリック)は無視
+  snapshot(pg);
+  const fr={ id:'ln'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+    line:true, pts:[{x:x0,y:y0},{x:x1,y:y1}], color:'transparent', alpha:1,
+    strokeW:state.lineW||2, strokeColor:strokeColorNow(), arrow:state.lineArrow||'none' };
+  pg.frames=pg.frames||[]; pg.frames.push(fr);
+  frameSel=fr.id;
+  redrawFrameCanvas(pg); renderFrameLayer();
+}
+// 矢印の頭(三角形)を tox,toy に描く(fromx,fromy は向きの基準)
+function drawArrowHead(ctx, fromx, fromy, tox, toy, size){
+  const ang=Math.atan2(toy-fromy, tox-fromx), a1=ang-Math.PI/7, a2=ang+Math.PI/7;
+  ctx.beginPath();
+  ctx.moveTo(tox, toy);
+  ctx.lineTo(tox-size*Math.cos(a1), toy-size*Math.sin(a1));
+  ctx.lineTo(tox-size*Math.cos(a2), toy-size*Math.sin(a2));
+  ctx.closePath(); ctx.fill();
+}
+// 直線/矢印を ctx に描画(pts はページ座標, sc=表示倍率: キャンバス=rscale)
+function drawLineOnCtx(ctx, fr, sc){
+  if(!fr.pts||fr.pts.length<2) return;
+  const a=fr.pts[0], b=fr.pts[1];
+  const ax=a.x*sc, ay=a.y*sc, bx=b.x*sc, by=b.y*sc;
+  const w=(LINE_W[fr.strokeW||2]||6)*sc;
+  const head=Math.max(w*3, 8*sc);
+  const len=Math.hypot(bx-ax,by-ay)||1, ux=(bx-ax)/len, uy=(by-ay)/len;
+  const cut=Math.min(head*0.85, len*0.8);   // 矢印がある端は線を矢印の根元まで短くし、先端を端点に置く
+  let sx=ax, sy=ay, ex=bx, ey=by;
+  if (fr.arrow==='end'){   ex=bx-ux*cut; ey=by-uy*cut; }
+  if (fr.arrow==='start'){ sx=ax+ux*cut; sy=ay+uy*cut; }
+  const [r,g,bl]=hexRgb(fr.strokeColor||'#000000');
+  ctx.save();
+  ctx.strokeStyle=`rgb(${r},${g},${bl})`; ctx.fillStyle=`rgb(${r},${g},${bl})`;
+  ctx.lineWidth=w; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); ctx.stroke();
+  if (fr.arrow==='end')   drawArrowHead(ctx, ax,ay, bx,by, head);
+  if (fr.arrow==='start') drawArrowHead(ctx, bx,by, ax,ay, head);
+  ctx.restore();
 }
 // 選択中rectフレームの8リサイズハンドル(ページ座標＋キー)
 function rectHandles(fr){
@@ -566,7 +638,9 @@ const state = {
   size: 16,
   strokeW: 0,       // オブジェクトの枠線の太さ(0=なし/1=小/2=中/3=大)
   strokeColor: '#000000',   // 枠線(線)の色(塗り色とは独立)
-  selKinds: { text:true, frame:false, rect:false, redact:false, paint:false },   // 選択モードで選べる種類(初期は文字のみ)
+  lineArrow: 'none',        // 直線ツールの端: none=直線 / end=右矢印 / start=左矢印
+  lineW: 2,                 // 直線ツールの太さ(1=小/2=中/3=大)
+  selKinds: { text:true, frame:false, rect:false, redact:false, paint:false, line:false },   // 選択モードで選べる種類(初期は文字のみ)
   autoVec: true,   // 塗るたびに自動でベクター図形化(既定ON)
   gap: 3,           // 塗りつぶしの隙間を塞ぐ強さ(クロージング半径)
   zoom: 1,          // 表示倍率
@@ -669,7 +743,7 @@ const FILL_CURSOR = "url('data:image/svg+xml;utf8," + encodeURIComponent(BUCKET_
 // ツール別のオーバーレイ用カーソル(塗りつぶし=バケツ)
 function cursorForTool(){
   if (state.tool==='fill') return FILL_CURSOR;
-  if (state.tool==='select' || state.tool==='frame' || state.tool==='rect' || state.tool==='redact') return 'crosshair';
+  if (state.tool==='select' || state.tool==='frame' || state.tool==='rect' || state.tool==='redact' || state.tool==='line') return 'crosshair';
   if (state.tool==='text') return 'text';
   if (state.tool==='stamp') return 'default';
   if (state.tool==='move') return 'grab';   // 表示エリアの移動(ドラッグでスクロール)
@@ -767,6 +841,7 @@ document.querySelectorAll('.tool[data-tool]').forEach(b=>{
       renderFrameLayer();
       // 長方形/墨消しツールから離れたら作成中の始点・プレビューをリセット
       if (state.tool !== 'rect' && state.tool !== 'redact') { rectStart = null; clearRectPreview(); }
+      if (state.tool !== 'line') { lineStart = null; clearLinePreview(); }
     }
     // 編集対象をツール単位に分離: 文字系ツール以外へ移ったら文字選択を解除し、
     // Delete/Ctrl+A 等の文字操作が他ツールへ漏れないようにする
@@ -817,13 +892,30 @@ document.querySelectorAll('.stampbtn').forEach(b=>{
 // 整列ボタン(複数選択時に表示)
 document.querySelectorAll('[data-align]').forEach(b=>{ b.onclick = () => alignSelected(b.dataset.align); });
 document.querySelectorAll('#strokeGroup .tool[data-stroke]').forEach(b=>{ b.onclick = () => setStroke(+b.dataset.stroke); });
+// 直線ツール: 端の形(直線/右矢印/左矢印)・太さ(小/中/大)。選択中の直線にも反映。
+function recolorSelectedLine(prop, val){
+  if (state.tool!=='line' && state.tool!=='select') return;
+  if (!frameSel) return; const pg=framePg(); if(!pg) return;
+  const fr=(pg.frames||[]).find(f=>f.id===frameSel); if(!fr||!fr.line) return;
+  snapshot(pg); fr[prop]=val; redrawFrameCanvas(pg); renderFrameLayer();
+}
+document.querySelectorAll('#lineArrowGroup .tool[data-arrow]').forEach(b=>{ b.onclick = () => {
+  state.lineArrow=b.dataset.arrow;
+  document.querySelectorAll('#lineArrowGroup .tool').forEach(x=>x.classList.toggle('active', x===b));
+  recolorSelectedLine('arrow', state.lineArrow);
+}; });
+document.querySelectorAll('#lineWGroup .tool[data-linew]').forEach(b=>{ b.onclick = () => {
+  state.lineW=+b.dataset.linew;
+  document.querySelectorAll('#lineWGroup .tool').forEach(x=>x.classList.toggle('active', x===b));
+  recolorSelectedLine('strokeW', state.lineW);
+}; });
 // 選択モード: 選べるオブジェクトの種類(チェックボックス)
 function selKindEnabled(kind){ return !!(state.selKinds && state.selKinds[kind]); }
 function applySelKindUI(){
   const tl=document.getElementById('textlayer');   // 文字を選択対象外にしたら、クリックを下のオブジェクトへ通す
   if (tl) tl.classList.toggle('notext', state.tool==='select' && !selKindEnabled('text'));
 }
-[['selText','text'],['selFrame','frame'],['selRect','rect'],['selRedact','redact'],['selPaint','paint']].forEach(([id,k])=>{
+[['selText','text'],['selFrame','frame'],['selRect','rect'],['selRedact','redact'],['selPaint','paint'],['selLine','line']].forEach(([id,k])=>{
   const el=document.getElementById(id); if(el) el.onchange=()=>{ state.selKinds[k]=el.checked; applySelKindUI(); };
 });
 $('#font').onchange   = e => { state.font = e.target.value; applySelStyle(); };
@@ -1176,6 +1268,7 @@ async function buildPages(pages, append){
     buildTabs(); await showPage(at);
   } else {
     state.pages=newPgs; state.rotation=0; state.zoom=1;
+    const _ar=document.getElementById('areaResult'); if(_ar) _ar.innerHTML='';   // 選択し直したら面積計算結果をクリア
     buildTabs(); await showPage(0);
     autoPrep(state.pages[0]);                           // 読み込み後: 自動レベル補正＋直線補完
   }
@@ -1245,6 +1338,7 @@ async function showPage(idx){
   const empty = $('#empty');
   frameDrawing = []; frameSel = null; frameSelSet.clear();   // 枠塗りの描画中状態はページ固有。ページ切替/削除で必ずリセット
   rectStart = null; clearRectPreview();  // 長方形塗りの作成中状態もリセット
+  lineStart = null; clearLinePreview();   // 直線の作成中状態もリセット
   wrap.innerHTML = '';
   // 回転ラッパー(#rot)に svg と overlay を入れ、CSS transform で拡大/回転する
   const rot = document.createElement('div'); rot.id = 'rot';
@@ -1473,6 +1567,9 @@ function attachPointer(ov, pg){
       return;
     }
     const p = pos(e);
+    if (state.tool==='line'){   // 直線/矢印: ドラッグで始点→終点
+      lineStart = p; return;
+    }
     if (state.tool==='frame'){
       onFramePointerDown(e, pg, p);
       return;
@@ -1530,6 +1627,7 @@ function attachPointer(ov, pg){
       stageEl.scrollTop  = panStart.st - (e.clientY - panStart.y);
       return;
     }
+    if (state.tool==='line'){ if(lineStart) updateLinePreview(pg, lineStart, pos(e)); return; }
     if (state.tool==='rect' || state.tool==='redact'){
       const rp=pos(e);
       if (rectResizeKey){   // リサイズ中: 矩形を保ったままハンドルを追従
@@ -1568,9 +1666,10 @@ function attachPointer(ov, pg){
     }
     last = p;
   };
-  ov.onpointerup = ()=>{
+  ov.onpointerup = (e)=>{
     if (panning){ panning=false; ov.style.cursor=cursorForTool(); return; }
     if (rectResizeKey){ rectResizeKey=null; flushFrameCanvas(); renderFrameLayer(); return; }   // 長方形リサイズ確定(最終描画を確定)
+    if (state.tool==='line'){ if(lineStart){ clearLinePreview(); addLine(pg, lineStart, pos(e)); lineStart=null; } return; }   // 直線/矢印を確定
     if (!drawing) return;
     drawing=false;
     if (!eraseMode){
@@ -1972,7 +2071,7 @@ function refreshSelClasses(){ document.querySelectorAll('.textbox').forEach(b=>b
 function updateAlignBar(){
   const t=state.tool, n=selIds.size, inc=a=>a.indexOf(t)>=0;
   const setD=(id,on)=>{ const e=document.getElementById(id); if(e) e.style.display=on?'':'none'; };
-  setD('secColor', inc(['fill','brush','eraser','frame','rect','select']));    // 色・不透明度・太さ・枠線
+  setD('secColor', inc(['fill','brush','eraser','frame','rect','select','line']));    // 色・不透明度・太さ・枠線
   setD('secText',  inc(['text','stamp','select']) || n>=2);    // 文字・スタンプ・整列
   setD('secFill',  inc(['fill']));                             // 塗り設定(隙間塞ぎ・線を濃く)
   setD('palette',    inc(['fill','brush','frame','rect','select']));
@@ -1980,8 +2079,10 @@ function updateAlignBar(){
   setD('alphaGroup', inc(['fill','brush','frame','rect','select']));
   setD('sizeGroup',  inc(['brush','eraser']));   // 太さは枠塗りでは使わない
   setD('strokeGroup',inc(['fill','frame','rect','select']));   // 枠線(塗り=ベクター化後の輪郭にも適用)
-  setD('strokeColorGroup',inc(['fill','frame','rect','select']));   // 線色ピッカー
-  setD('strokePalette',inc(['fill','frame','rect','select']));      // 線色パレット
+  setD('strokeColorGroup',inc(['fill','frame','rect','select','line']));   // 線色ピッカー
+  setD('strokePalette',inc(['fill','frame','rect','select','line']));      // 線色パレット
+  setD('lineArrowGroup', t==='line');   // 直線の端(直線/右矢印/左矢印)
+  setD('lineWGroup', t==='line');       // 直線の太さ(小/中/大)
   setD('selKindGroup', t==='select');   // 選択対象の種類は選択モードのみ
   setD('textCtl',    inc(['text','stamp']));
   setD('stampGroup', inc(['text','stamp']));
@@ -2404,7 +2505,7 @@ function calcAreas(){
   const pg=state.pages[state.active];
   const el=$('#areaResult'); if(!el) return;
   if(!pg){ el.innerHTML='<div style="opacity:.6">'+I18N.t('m.loadfirst')+'</div>'; return; }
-  const scale=parseFloat($('#areaScale').value)||600;
+  const scale=parseFloat($('#areaScale').value)||500;
   const W=pg.overlay.width, H=pg.overlay.height;
   // 塗りつぶし(overlay)に枠塗り(frameCanvas)を合成してから集計(枠塗りも面積に算入)
   let srcCtx;
@@ -2734,7 +2835,7 @@ function buildPageSvg(withBase, editable){
       const ed = { v:1, w:W, h:H, textLayerOn:!!state.textLayerOn,
         overlay: pg.overlay.toDataURL('image/png'),
         brush: pg.brush ? pg.brush.toDataURL('image/png') : null,
-        frames: (pg.frames||[]).map(f=>({ pts:f.pts, color:f.color, alpha:f.alpha, strokeW:f.strokeW||0, strokeColor:f.strokeColor||null, rect:!!f.rect, redact:!!f.redact, paint:!!f.paint })),
+        frames: (pg.frames||[]).map(f=>({ pts:f.pts, color:f.color, alpha:f.alpha, strokeW:f.strokeW||0, strokeColor:f.strokeColor||null, rect:!!f.rect, redact:!!f.redact, paint:!!f.paint, line:!!f.line, arrow:f.arrow||'none' })),
         texts: pg.texts.map(tt=>({ x:tt.x, y:tt.y, text:tt.text, size:tt.size, font:tt.font, vertical:!!tt.vertical, color:tt.color, bold:!!tt.bold, letterSpacing:tt.letterSpacing||0 })) };
       metaMarkup = `\n<metadata id="ks-editable" data-app="kouzu-color">${btoa(unescape(encodeURIComponent(JSON.stringify(ed))))}</metadata>`;
     }
@@ -3057,6 +3158,7 @@ async function savePdfAll(){
       if(useVec){ const regs=traceOverlayRegions(pg)||[]; const regions=regs.map(rg=>({r:rg.r,g:rg.g,b:rg.b,a:rg.a,loops:rg.loops.map(loop=>loop.map(pt=>{const P=projectToRotated(pt[0],pt[1],pg.w,pg.h,r);return[P.X,P.Y];}))})); drawRegionsOnPdf(doc,regions); drawRegionsOnPdf(doc, framesToRegions(pg, r, ['paint','frame'])); }   // 塗り・枠塗りは地番の下
       if(useVec && state.textLayerOn && pg.detCanvas){ const dc=rotateCanvas(pg.detCanvas,state.rotation); doc.addImage(dc.toDataURL('image/png'),'PNG',0,0,pw,ph); }
       if(useVec) drawRegionsOnPdf(doc, framesToRegions(pg, r, ['rect','redact']));   // 長方形・墨消しは地番の上
+      if(useVec) drawLinesOnPdf(doc, pg, r);   // 直線/矢印
       if(hasJP) drawTextsOnPdf(doc, proj);
       drawWatermarkOnPdf(doc, pw, ph);   // デモ透かし(各ページ)
       if(i!==saved) dehydratePage(pg);                         // 開いていたページ以外は再び解放
@@ -3108,6 +3210,7 @@ async function savePdf(){
       doc.addImage(dc.toDataURL('image/png'), 'PNG', 0, 0, pw, ph);
     }
     if (useVec) drawRegionsOnPdf(doc, framesToRegions(pg, r, ['rect','redact']));   // 長方形・墨消しは地番の上
+    if (useVec) drawLinesOnPdf(doc, pg, r);   // 直線/矢印
     if (hasJP) drawTextsOnPdf(doc, proj);   // 本物の文字列を上に重ねる
     drawWatermarkOnPdf(doc, pw, ph);   // デモ透かし
     doc.save(outName('pdf'));
@@ -3133,6 +3236,31 @@ function drawRegionsOnPdf(doc, regions){
     }
   }
   try{ doc.setGState(new doc.GState({opacity:1})); }catch(_){}
+}
+// jsPDF に直線/矢印をベクターで描く(投影済み座標)。
+function drawLinesOnPdf(doc, pg, rot){
+  const lines=(pg.frames||[]).filter(f=>f.line && f.pts && f.pts.length>=2);
+  if(!lines.length) return;
+  try{ doc.setGState(new doc.GState({opacity:1})); }catch(_){}
+  for(const fr of lines){
+    const P0=projectToRotated(fr.pts[0].x,fr.pts[0].y,pg.w,pg.h,rot);
+    const P1=projectToRotated(fr.pts[1].x,fr.pts[1].y,pg.w,pg.h,rot);
+    const w=LINE_W[fr.strokeW||2]||6, [r,g,b]=hexRgb(fr.strokeColor||'#000000');
+    const head=Math.max(w*3,8);
+    const len=Math.hypot(P1.X-P0.X,P1.Y-P0.Y)||1, ux=(P1.X-P0.X)/len, uy=(P1.Y-P0.Y)/len;
+    const cut=Math.min(head*0.85, len*0.8);   // 矢印がある端は線を根元まで短く
+    let sX=P0.X, sY=P0.Y, eX=P1.X, eY=P1.Y;
+    if(fr.arrow==='end'){   eX=P1.X-ux*cut; eY=P1.Y-uy*cut; }
+    if(fr.arrow==='start'){ sX=P0.X+ux*cut; sY=P0.Y+uy*cut; }
+    doc.setDrawColor(r,g,b); doc.setFillColor(r,g,b); doc.setLineWidth(w);
+    try{ doc.setLineCap('round'); }catch(_){}
+    doc.line(sX,sY,eX,eY);
+    const tri=(fx,fy,tx,ty)=>{ const ang=Math.atan2(ty-fy,tx-fx),a1=ang-Math.PI/7,a2=ang+Math.PI/7;
+      doc.triangle(tx,ty, tx-head*Math.cos(a1),ty-head*Math.sin(a1), tx-head*Math.cos(a2),ty-head*Math.sin(a2),'F'); };
+    if(fr.arrow==='end')   tri(P0.X,P0.Y,P1.X,P1.Y);
+    if(fr.arrow==='start') tri(P1.X,P1.Y,P0.X,P0.Y);
+  }
+  doc.setLineWidth(0);
 }
 // jsPDF に本物の文字列を描く(横/縦・太字・色)。座標は pt、投影済み(正立)。
 function drawTextsOnPdf(doc, texts){
@@ -3216,6 +3344,13 @@ function polyContains(pts, x, y){
   }
   return inside;
 }
+// 点(px,py)が線分 a-b から tol 以内か(直線の当たり判定)
+function segNear(a, b, px, py, tol){
+  const dx=b.x-a.x, dy=b.y-a.y, L2=dx*dx+dy*dy;
+  let t = L2>0 ? ((px-a.x)*dx+(py-a.y)*dy)/L2 : 0; t=Math.max(0,Math.min(1,t));
+  const cx=a.x+t*dx, cy=a.y+t*dy;
+  return Math.hypot(px-cx, py-cy) <= tol;
+}
 
 // クリック位置に一番後ろのフレームを返す (ページ座標)
 function hitTestFrames(pg, px, py){
@@ -3253,9 +3388,9 @@ function commitFramePolygon(pg){
 }
 
 // フレームの種類(レイヤー): 枠塗り / 長方形 / 墨消し
-function frameKind(f){ return f.redact ? 'redact' : (f.rect ? 'rect' : (f.paint ? 'paint' : 'frame')); }
-// 重なり順を固定: 枠塗り(下) → 長方形 → 墨消し(上)。種類内は作成順を保持(安定ソート)。
-const _LAYER_ORDER = { paint:0, frame:1, rect:2, redact:3 };   // 塗り(ベクター化)は最下層
+function frameKind(f){ return f.redact ? 'redact' : (f.rect ? 'rect' : (f.line ? 'line' : (f.paint ? 'paint' : 'frame'))); }
+// 重なり順を固定: 塗り(下) → 枠塗り → 直線 → 長方形 → 墨消し(上)。種類内は作成順を保持(安定ソート)。
+const _LAYER_ORDER = { paint:0, frame:1, line:2, rect:3, redact:4 };   // 塗り(ベクター化)は最下層
 function framesInDrawOrder(pg){
   return (pg.frames||[]).slice().sort((a,b)=>_LAYER_ORDER[frameKind(a)]-_LAYER_ORDER[frameKind(b)]);
 }
@@ -3270,9 +3405,11 @@ function redrawFrameCanvas(pg){
   ctxH.clearRect(0,0,W,H);
   if (low!==pg.frameCanvas) ctxL.clearRect(0,0,low.width,low.height);
   for (const fr of framesInDrawOrder(pg)){
-    if (!fr.pts||fr.pts.length<3) continue;
+    if (!fr.pts) continue;
     const k=frameKind(fr);
-    const ctx = (k==='paint'||k==='frame') ? ctxL : ctxH;   // 塗り/枠塗り→低層, 長方形/墨消し→高層
+    const ctx = (k==='paint'||k==='frame') ? ctxL : ctxH;   // 塗り/枠塗り→低層, 直線/長方形/墨消し→高層
+    if (k==='line'){ drawLineOnCtx(ctx, fr, pg.rscale); continue; }   // 直線/矢印
+    if (fr.pts.length<3) continue;
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(fr.pts[0].x*pg.rscale, fr.pts[0].y*pg.rscale);
@@ -3485,7 +3622,10 @@ function handleSelectObject(e){
   }
   // 2) 既存オブジェクトの内側をクリック → 選択(後ろ優先)＋本体ドラッグで移動
   let hit=null;
-  for (let i=pg.frames.length-1;i>=0;i--){ const f=pg.frames[i]; if(f.pts && selKindEnabled(frameKind(f)) && polyContains(f.pts,pc.x,pc.y)){ hit=f; break; } }
+  for (let i=pg.frames.length-1;i>=0;i--){ const f=pg.frames[i];
+    if(!f.pts || !selKindEnabled(frameKind(f))) continue;
+    const ok = f.line ? segNear(f.pts[0], f.pts[1], pc.x, pc.y, (LINE_W[f.strokeW||2]||6)/2 + 6) : polyContains(f.pts,pc.x,pc.y);
+    if(ok){ hit=f; break; } }
   if (hit){
     // 既に複数選択の一部を掴んだ → グループごと移動
     if (frameSelSet.size>1 && frameSelSet.has(hit.id)){
@@ -3705,6 +3845,7 @@ function setStroke(w){
 function framesToSvgPaths(pg){
   if (!pg||!pg.frames||!pg.frames.length) return '';
   return framesInDrawOrder(pg).map(fr=>{
+    if (fr.line) return lineToSvg(fr);   // 直線/矢印
     if (!fr.pts||fr.pts.length<3) return '';
     const d='M'+fr.pts.map(p=>p.x.toFixed(2)+','+p.y.toFixed(2)).join('L')+'Z';
     let fill='none', fo='';
@@ -3715,6 +3856,24 @@ function framesToSvgPaths(pg){
     if (fill==='none' && sw<=0) return '';   // 塗りも線も無いなら出力しない
     return `<path d="${d}" fill="${fill}"${fo}${st}/>`;
   }).filter(Boolean).join('\n');
+}
+// 直線/矢印をSVG(<line>＋矢印<polygon>)へ。座標はページpt。
+function lineToSvg(fr){
+  if(!fr.pts||fr.pts.length<2) return '';
+  const a=fr.pts[0], b=fr.pts[1], w=LINE_W[fr.strokeW||2]||6;
+  const [r,g,bl]=hexRgb(fr.strokeColor||'#000000'), col=`rgb(${r},${g},${bl})`;
+  const head=Math.max(w*3, 8);
+  const len=Math.hypot(b.x-a.x,b.y-a.y)||1, ux=(b.x-a.x)/len, uy=(b.y-a.y)/len;
+  const cut=Math.min(head*0.85, len*0.8);   // 矢印がある端は線を根元まで短く
+  let sx=a.x, sy=a.y, ex=b.x, ey=b.y;
+  if(fr.arrow==='end'){   ex=b.x-ux*cut; ey=b.y-uy*cut; }
+  if(fr.arrow==='start'){ sx=a.x+ux*cut; sy=a.y+uy*cut; }
+  let s=`<line x1="${sx.toFixed(2)}" y1="${sy.toFixed(2)}" x2="${ex.toFixed(2)}" y2="${ey.toFixed(2)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
+  const tri=(fromx,fromy,tox,toy)=>{ const ang=Math.atan2(toy-fromy,tox-fromx), a1=ang-Math.PI/7, a2=ang+Math.PI/7;
+    return `<polygon points="${tox.toFixed(2)},${toy.toFixed(2)} ${(tox-head*Math.cos(a1)).toFixed(2)},${(toy-head*Math.sin(a1)).toFixed(2)} ${(tox-head*Math.cos(a2)).toFixed(2)},${(toy-head*Math.sin(a2)).toFixed(2)}" fill="${col}"/>`; };
+  if(fr.arrow==='end')   s+=tri(a.x,a.y,b.x,b.y);
+  if(fr.arrow==='start') s+=tri(b.x,b.y,a.x,a.y);
+  return s;
 }
 // 枠塗りを drawRegionsOnPdf 用の regions(投影済み座標・a=0..255)へ変換。
 // ベクターPDF出力時は overlay と同様にベクターで枠塗りを描く(ラスター時は compositeCanvas で焼込済)。
