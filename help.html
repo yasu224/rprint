@@ -3,15 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
-<title>Help — 公図色付け</title>
+<title>PDFの文字入れ・色塗り・墨消しのやり方｜操作説明 — 公図色付け</title>
+<meta name="description" content="PDFや公図への文字入れ・色付け・面積計算・墨消しのやり方を解説。ファイルの読み込みから保存・印刷まで、操作方法をステップごとに紹介します。">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://mary-inc.com/rpaint/help.html">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#1f2430">
+
+<!-- OGP -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="公図色付け">
+<meta property="og:title" content="PDFの文字入れ・色塗り・墨消しのやり方｜操作説明 — 公図色付け">
+<meta property="og:description" content="PDFや公図への文字入れ・色付け・面積計算・墨消しのやり方を解説。ファイルの読み込みから保存・印刷まで、操作方法をステップごとに紹介します。">
+<meta property="og:url" content="https://mary-inc.com/rpaint/help.html">
+<meta property="og:image" content="https://mary-inc.com/rpaint/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PDFの文字入れ・色塗り・墨消しのやり方｜操作説明 — 公図色付け">
+<meta name="twitter:description" content="PDFや公図への文字入れ・色付け・面積計算・墨消しのやり方を解説。読み込みから保存・印刷まで操作方法を紹介します。">
+<meta name="twitter:image" content="https://mary-inc.com/rpaint/ogp.png">
 <style>
   :root{ --bar:#1f2430; --bar2:#2b3242; --accent:#4f8cff; --line:#3a4254; --ink:#1d2330; }
   *{ box-sizing:border-box; }
   html,body{ margin:0; background:#eef1f5; color:var(--ink); font-family:"Segoe UI","Meiryo",sans-serif; line-height:1.7; }
   header{ position:sticky; top:0; z-index:5; background:var(--bar); color:#eaeef7;
     display:flex; align-items:center; gap:12px; padding:12px 18px; box-shadow:0 1px 0 var(--line); flex-wrap:wrap; }
-  header .ttl{ font-weight:700; font-size:17px; }
+  header .ttl{ font-weight:700; font-size:17px; margin:0; }
   header .sp{ margin-left:auto; }
   header select{ background:var(--bar2); color:#eaeef7; border:1px solid var(--line); border-radius:8px; padding:5px 8px; font-size:13px; cursor:pointer; }
   header a.back{ background:var(--accent); color:#fff; text-decoration:none; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; }
@@ -33,25 +53,15 @@
 </head>
 <body>
 <header>
-  <span class="ttl">🗺 <span id="hdrTitle">操作説明</span></span>
+  <!-- SEO: ページに h1 を1つ置く（本文の見出しは h2 以下） -->
+  <h1 class="ttl">🗺 <span id="hdrTitle">操作説明</span></h1>
   <span class="sp"></span>
   <select id="langSel" aria-label="Language"></select>
   <a class="back" id="backLink" href="index.html">← アプリへ戻る</a>
 </header>
-<main id="content"></main>
-
-<script>
-// 言語: アプリと同じ ['ja','en','zh','ko','vi','es','de','fr','ar']
-var LANGS = [['ja','日本語'],['en','English'],['zh','简体中文'],['ko','한국어'],['vi','Tiếng Việt'],['es','Español'],['de','Deutsch'],['fr','Français'],['ar','العربية']];
-var UI = {
-  title: ['操作説明','Help','操作说明','사용법','Hướng dẫn','Ayuda','Hilfe','Aide','مساعدة'],
-  back:  ['← アプリへ戻る','← Back to app','← 返回应用','← 앱으로','← Về ứng dụng','← Volver a la app','← Zur App','← Retour à l’app','→ العودة للتطبيق']
-};
-
-// 各言語の本文(HTML)。構成は全言語共通。
-var HELP = {};
-
-HELP.ja = `
+<!-- 日本語本文は静的に出力（SEO: JSなしでクロール可能／LCP改善）。
+     他言語は下の HELP.xx から差し替える。日本語を直すときはここを直す。 -->
+<main id="content">
 <div class="lead">公図などのPDF・画像を読み込み、色塗り・文字入れ・面積計算・墨消しができるツールです。保存したPDF/PNG/SVGはそのまま印刷・提出に使えます。<b>データはお使いのブラウザ内だけで処理</b>され、サーバーへ画像は送られません。</div>
 <h2>1. ファイルを読み込む</h2><ul>
 <li><b>📂 ファイルを選択</b>、または画面にPDF / SVG / 画像(PNG・JPEG)を<b>ドラッグ＆ドロップ</b>。複数まとめて読み込めます。</li>
@@ -62,10 +72,11 @@ HELP.ja = `
 <li><b>🔷 枠塗り</b>：クリックで頂点を追加→始点クリックで閉じて塗ります。頂点ドラッグで調整。</li>
 <li><b>▭ 長方形</b>：始点クリック→対角を動かしてクリックで確定。作成後はクリックで選択しハンドルでサイズ調整、<kbd>Delete</kbd>で削除。</li>
 <li><b>⬛ 墨消し</b>：黒塗り。画面は濃いグレー、<b>PDF出力時に枠内の内容を実際に消去して黒で塗ります(復元不可)</b>。</li>
+<li><b>📏 直線</b>：ドラッグで始点→終点に引きます。端の形（直線／→右矢印／←左矢印）と太さ（小/中/大）・線色を設定でき、<b>🔲 選択</b>ツールで移動・<kbd>Delete</kbd>で削除できます。</li>
 <li><b>🖌 ブラシ</b>：自由に塗る(<kbd>Shift</kbd>で直線)。<b>🧽 消しゴム</b>：塗り・ブラシを消す。</li>
 <li><b>✏️ 文字</b>：クリックで文字枠を作成。枠はドラッグで移動(編集中も可)。</li>
 <li><b>🔲 選択</b>：範囲選択・文字枠の複数移動。<b>✋ 移動</b>：拡大時ドラッグで表示位置を移動(無操作が続くと自動で移動モード)。</li></ul>
-<p class="note">💡「枠塗り」「長方形」「墨消し」は独立レイヤーです。各ツールの「全消去」はそのツールの図形だけを消します。</p>
+<p class="note">💡「枠塗り」「長方形」「墨消し」「直線」は独立レイヤーです。各ツールの「全消去」はそのツールの図形だけを消します。</p>
 <h2>3. 色・不透明度・太さ</h2><ul><li>パレットまたはカラーピッカーで色を指定。不透明度で濃さ、太さでブラシ・消しゴムの太さを調整。枠塗り・長方形を選択中に色を変えるとその図形に反映。</li></ul>
 <h2>4. 文字・スタンプ・整列</h2><ul>
 <li>書体・サイズ・文字色・太字(B)・縦/横書きを設定。スタンプ◯✓×をクリックで配置。</li>
@@ -79,6 +90,7 @@ HELP.ja = `
 <h2>8. 編集(戻す・全消去)</h2><ul><li><b>↶戻す</b>(<kbd>Ctrl</kbd>+<kbd>Z</kbd>)・<b>↷進む</b>(<kbd>Ctrl</kbd>+<kbd>Y</kbd>)。<b>🗑全消去</b>は選択中のツールの内容だけを消します。</li></ul>
 <h2>9. 保存・印刷</h2><ul>
 <li><b>💾 SVG</b>(再編集可)・<b>🖼 PNG</b>・<b>📕 PDF</b>。複数ページは自動でまとめ(SVG/PNG=ZIP、PDF=1つ)。</li>
+<li><b>🖼 PNG</b>は<b>DEMOログイン時でも無料</b>で出力できます(「MARY DEMO」透かしなし)。PDF・印刷はデモだと透かしが入ります。</li>
 <li><b>ベクターで保存</b>で拡大しても劣化しません。<b>🖨 印刷</b>/<b>🖨 文字だけ</b>(重ね刷り用)。</li></ul>
 <h2>10. ショートカット</h2><table><tr><th>操作</th><th>キー</th></tr>
 <tr><td>戻す / やり直し</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
@@ -96,7 +108,47 @@ HELP.ja = `
 <li><b>枠線・線色</b>：塗り・枠塗り・長方形に<b>枠線(線なし/小/中/大)</b>と<b>線色</b>を設定できます(線色は塗り色と独立)。</li>
 <li><b>範囲選択(エリア選択)</b>：🔲選択ツールでドラッグすると、図形(塗り・枠塗り・長方形・墨消し)や文字を<b>まとめて選択</b>→移動・<kbd>Delete</kbd>で一括削除。上部の<b>「選択対象」</b>チェックで対象の種類を切替(初期は文字のみ)。</li>
 <li><b>字間</b>：文字ツールの<b>字間</b>で文字間隔を調整できます(マイナスで詰め)。枠ごとに個別設定。</li>
-<li><b>編集中データの保持</b>：<b>👤マイページ</b>・<b>❓操作説明</b>へ移動してアプリに戻っても、編集中のデータは保持されます。</li></ul>`;
+<li><b>編集中データの保持</b>：<b>👤マイページ</b>・<b>❓操作説明</b>へ移動してアプリに戻っても、編集中のデータは保持されます。</li>
+<li><b>多言語書体</b>：言語セレクターで切替えると、テキストツールの書体一覧が自動更新されます。中国語（黒体/宋体）・韓国語（고딕/명조）・アラビア語など、対応書体が先頭に表示されます。日本語書体（ゴシック・明朝）は常に選択できます。</li></ul>
+</main>
+
+<script>
+// 言語: アプリと同じ ['ja','en','zh','ko','vi','es','de','fr','ar']
+var LANGS = [['ja','日本語'],['en','English'],['zh','简体中文'],['ko','한국어'],['vi','Tiếng Việt'],['es','Español'],['de','Deutsch'],['fr','Français'],['ar','العربية']];
+var UI = {
+  title: ['操作説明','Help','操作说明','사용법','Hướng dẫn','Ayuda','Hilfe','Aide','مساعدة'],
+  back:  ['← アプリへ戻る','← Back to app','← 返回应用','← 앱으로','← Về ứng dụng','← Volver a la app','← Zur App','← Retour à l’app','→ العودة للتطبيق']
+};
+// SEO用: <title> / meta description に使う長めの説明(検索流入向け)
+var SEO_TITLE = [
+  'PDFの文字入れ・色塗り・墨消しのやり方｜操作説明',
+  'How to type, color and redact PDFs — Help',
+  'PDF文字输入・涂色・涂黑教程｜操作说明',
+  'PDF 문자 입력·색칠·검정칠 방법｜사용법',
+  'Cách thêm chữ, tô màu, bôi đen PDF｜Hướng dẫn',
+  'Cómo escribir, colorear y tachar en PDF｜Ayuda',
+  'PDFs beschriften, einfärben, schwärzen｜Hilfe',
+  'Écrire, colorier, caviarder un PDF｜Aide',
+  'كتابة وتلوين وتعتيم ملفات PDF｜مساعدة'
+];
+var SEO_DESC = [
+  'PDFや公図への文字入れ・色付け・面積計算・墨消しのやり方を解説。ファイルの読み込みから保存・印刷まで、操作方法をステップごとに紹介します。',
+  'How to type text, add color, calculate area, and redact PDFs and cadastral maps — a step-by-step guide from loading files to saving and printing.',
+  '详解如何为PDF与地图输入文字、上色、计算面积与涂黑遮盖，从载入文件到保存打印的分步说明。',
+  'PDF·지적도에 문자 입력·색칠·면적 계산·검정칠하는 방법을 단계별로 안내합니다.',
+  'Hướng dẫn từng bước cách thêm chữ, tô màu, tính diện tích và bôi đen trên PDF/bản đồ địa chính, từ tải tệp đến lưu và in.',
+  'Guía paso a paso para escribir texto, colorear, calcular áreas y tachar en PDF y planos catastrales, desde cargar archivos hasta guardar e imprimir.',
+  'Schritt-für-Schritt-Anleitung zum Beschriften, Einfärben, Flächenberechnen und Schwärzen von PDFs und Katasterkarten – vom Laden bis zum Speichern und Drucken.',
+  'Guide étape par étape pour écrire, colorier, calculer une surface et caviarder des PDF et plans cadastraux, du chargement à l’impression.',
+  'دليل خطوة بخطوة لكتابة النص وتلوينه وحساب المساحة وتعتيم ملفات PDF والخرائط المساحية، من التحميل إلى الحفظ والطباعة.'
+];
+
+// 各言語の本文(HTML)。構成は全言語共通。
+var HELP = {};
+
+// 日本語本文は <main id="content"> に静的出力済み。二重管理を避けるため、
+// そのDOMをそのまま ja の辞書として使う（他言語から戻したときの復元用）。
+HELP.ja = document.getElementById('content').innerHTML;
 
 HELP.en = `
 <div class="lead">A tool to load cadastral-map PDFs/images and add color fills, text, area calculation and redaction. Saved PDF/PNG/SVG can be printed or submitted as-is. <b>All processing happens in your browser</b>; images are never sent to a server.</div>
@@ -109,10 +161,11 @@ HELP.en = `
 <li><b>🔷 Frame fill</b>: click to add points, click the start point to close and fill. Drag points to adjust.</li>
 <li><b>▭ Rectangle</b>: click a corner, move the opposite corner, click to confirm. Select an existing one and resize with handles; <kbd>Delete</kbd> to remove.</li>
 <li><b>⬛ Redaction</b>: blackout. Shown dark gray on screen; <b>on PDF export the content inside is truly erased and filled black (unrecoverable)</b>.</li>
+<li><b>📏 Line</b>: drag from start to end point. Choose the end shape (line / → right arrow / ← left arrow), thickness (S/M/L) and line color. Move or delete with the <b>🔲 Select</b> tool (<kbd>Delete</kbd>).</li>
 <li><b>🖌 Brush</b>: free painting (<kbd>Shift</kbd> for a straight line). <b>🧽 Eraser</b>: remove fills/brush.</li>
 <li><b>✏️ Text</b>: click to create a text box. Drag to move (also while editing).</li>
 <li><b>🔲 Select</b>: marquee-select and move multiple text boxes. <b>✋ Pan</b>: drag to scroll when zoomed (auto-activates after idle).</li></ul>
-<p class="note">💡 Frame fill, Rectangle and Redaction are independent layers. Each tool's “Clear all” removes only that tool's shapes.</p>
+<p class=”note”>💡 Frame fill, Rectangle, Redaction and Line are independent layers. Each tool's “Clear all” removes only that tool's shapes.</p>
 <h2>3. Color, opacity, width</h2><ul><li>Pick a color from the palette or color picker. Opacity sets the strength; Width sets the brush/eraser size. Changing the color while a frame/rectangle is selected updates that shape.</li></ul>
 <h2>4. Text, stamps, align</h2><ul>
 <li>Set font, size, color, bold (B) and vertical/horizontal. Place stamps ◯ ✓ × by clicking.</li>
@@ -126,6 +179,7 @@ HELP.en = `
 <h2>8. Edit (undo, clear)</h2><ul><li><b>↶ Undo</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) / <b>↷ Redo</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 Clear all</b> removes only the active tool's content.</li></ul>
 <h2>9. Save &amp; print</h2><ul>
 <li><b>💾 SVG</b> (re-editable), <b>🖼 PNG</b>, <b>📕 PDF</b>. Multiple pages are bundled automatically (SVG/PNG = ZIP, PDF = one file).</li>
+<li><b>🖼 PNG</b> export is <b>free even with DEMO login</b> (no "MARY DEMO" watermark). PDF and printing still carry the watermark in DEMO.</li>
 <li><b>Save as vector</b> keeps quality when zoomed. <b>🖨 Print</b> / <b>🖨 Text only</b> (for overprinting).</li></ul>
 <h2>10. Shortcuts</h2><table><tr><th>Action</th><th>Key</th></tr>
 <tr><td>Undo / Redo</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
@@ -143,7 +197,8 @@ HELP.en = `
 <li><b>Border &amp; line color</b>: set a <b>border (none/S/M/L)</b> and a <b>line color</b> on fills, frame fills and rectangles (line color is independent of the fill color).</li>
 <li><b>Marquee (area) select</b>: with the 🔲 Select tool, drag to <b>select multiple</b> shapes (fill/frame/rectangle/redaction) and text, then move or <kbd>Delete</kbd> them together. Use the <b>“Selectable”</b> checkboxes to choose which types (text only by default).</li>
 <li><b>Letter spacing</b>: adjust character spacing with <b>Spacing</b> (negative tightens); set per text box.</li>
-<li><b>Your work is kept</b>: going to <b>👤 My page</b> or <b>❓ Help</b> and back keeps your in-progress editing data.</li></ul>`;
+<li><b>Your work is kept</b>: going to <b>👤 My page</b> or <b>❓ Help</b> and back keeps your in-progress editing data.</li>
+<li><b>Multilingual fonts</b>: switching the language selector auto-updates the font list in the text tool. Language-matched fonts (Chinese: 黑体/宋体; Korean: 고딕/명조; Arabic, etc.) appear first; Japanese fonts (Gothic/Mincho) are always available.</li></ul>`;
 
 HELP.zh = `
 <div class="lead">用于载入地图(公图)PDF/图片，进行涂色、加文字、面积计算与涂黑遮盖的工具。保存的 PDF/PNG/SVG 可直接打印或提交。<b>所有处理都在您的浏览器内完成</b>，图片不会上传到服务器。</div>
@@ -156,10 +211,11 @@ HELP.zh = `
 <li><b>🔷 框填充</b>：点击添加顶点→点击起点闭合并填充，拖动顶点可调整。</li>
 <li><b>▭ 矩形</b>：点击起点→移动对角点→再次点击确定。已创建的可点击选择并用手柄调整大小，<kbd>Delete</kbd>删除。</li>
 <li><b>⬛ 涂黑遮盖</b>：屏幕显示深灰，<b>导出 PDF 时真正擦除框内内容并填黑(不可恢复)</b>。</li>
+<li><b>📏 直线</b>：从起点拖到终点画线。可设置端点形状（直线／→右箭头／←左箭头）、粗细（小/中/大）和线色，用<b>🔲 选择</b>工具移动，<kbd>Delete</kbd>删除。</li>
 <li><b>🖌 画笔</b>：自由涂(<kbd>Shift</kbd>画直线)。<b>🧽 橡皮</b>：擦除涂色/画笔。</li>
 <li><b>✏️ 文字</b>：点击创建文字框，可拖动移动(编辑中也可)。</li>
 <li><b>🔲 选择</b>：框选并移动多个文字框。<b>✋ 平移</b>：放大时拖动滚动(空闲后自动启用)。</li></ul>
-<p class="note">💡 “框填充”“矩形”“涂黑”是独立图层，各工具的“全部清除”只清除该工具的图形。</p>
+<p class=”note”>💡 “框填充””矩形””涂黑””直线”是独立图层，各工具的”全部清除”只清除该工具的图形。</p>
 <h2>3. 颜色・不透明度・粗细</h2><ul><li>用调色板或取色器选色。不透明度调浓淡，粗细调画笔/橡皮大小。选中框填充/矩形时改色会应用到该图形。</li></ul>
 <h2>4. 文字・印章・对齐</h2><ul>
 <li>设置字体、字号、颜色、粗体(B)、竖/横排。点击放置印章 ◯ ✓ ×。</li>
@@ -173,6 +229,7 @@ HELP.zh = `
 <h2>8. 编辑(撤销・清除)</h2><ul><li><b>↶撤销</b>(<kbd>Ctrl</kbd>+<kbd>Z</kbd>)・<b>↷重做</b>(<kbd>Ctrl</kbd>+<kbd>Y</kbd>)。<b>🗑全部清除</b>只清除当前工具的内容。</li></ul>
 <h2>9. 保存・打印</h2><ul>
 <li><b>💾 SVG</b>(可再编辑)・<b>🖼 PNG</b>・<b>📕 PDF</b>。多页自动打包(SVG/PNG=ZIP，PDF=单个)。</li>
+<li><b>🖼 PNG</b> 在 <b>DEMO 登录时也可免费</b>输出（无「MARY DEMO」水印）。DEMO 下的 PDF 与打印仍带水印。</li>
 <li><b>矢量保存</b>放大不失真。<b>🖨 打印</b>/<b>🖨 仅文字</b>(套印用)。</li></ul>
 <h2>10. 快捷键</h2><table><tr><th>操作</th><th>按键</th></tr>
 <tr><td>撤销 / 重做</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
@@ -190,7 +247,8 @@ HELP.zh = `
 <li><b>边框与线色</b>：可为涂色、框涂、矩形设置<b>边框(无/小/中/大)</b>和<b>线色</b>(线色与填充色独立)。</li>
 <li><b>框选(区域选择)</b>：用🔲选择工具拖动可<b>批量选择</b>图形(涂色/框/矩形/涂黑)和文字，然后一起移动或<kbd>Delete</kbd>删除。用顶部<b>“可选”</b>复选框切换可选类型(默认仅文字)。</li>
 <li><b>字间</b>：用文字工具的<b>字间</b>调整字符间距(负值收紧)，每个文字框可单独设置。</li>
-<li><b>保留编辑数据</b>：前往<b>👤我的页面</b>或<b>❓操作说明</b>再返回，编辑中的数据会保留。</li></ul>`;
+<li><b>保留编辑数据</b>：前往<b>👤我的页面</b>或<b>❓操作说明</b>再返回，编辑中的数据会保留。</li>
+<li><b>多语言字体</b>：切换语言选择器后，文字工具的字体列表自动更新为对应语言字体。中文（黑体/宋体）、韩文（고딕/명조）、阿拉伯语等字体置于首位，日语字体（ゴシック・明朝）始终可选。</li></ul>`;
 
 HELP.ko = `
 <div class="lead">지적도(공도) PDF·이미지를 불러와 색칠·문자 입력·면적 계산·검정칠을 할 수 있는 도구입니다. 저장한 PDF/PNG/SVG는 그대로 인쇄·제출할 수 있습니다. <b>모든 처리는 브라우저 안에서만</b> 이루어지며 이미지는 서버로 전송되지 않습니다.</div>
@@ -203,10 +261,11 @@ HELP.ko = `
 <li><b>🔷 영역 채우기</b>: 클릭으로 점 추가→시작점 클릭으로 닫아 채우기. 점을 끌어 조정.</li>
 <li><b>▭ 사각형</b>: 시작점 클릭→대각점 이동→다시 클릭하여 확정. 만든 후 클릭 선택, 핸들로 크기 조정, <kbd>Delete</kbd> 삭제.</li>
 <li><b>⬛ 검정칠</b>: 화면은 진회색, <b>PDF 출력 시 영역 내 내용을 실제로 삭제하고 검정으로 채움(복원 불가)</b>.</li>
+<li><b>📏 직선</b>: 시작점에서 끝점으로 드래그합니다. 끝 모양(직선/→오른쪽/←왼쪽 화살표)·굵기(소/중/대)·선 색을 설정하고, <b>🔲 선택</b> 도구로 이동하거나 <kbd>Delete</kbd>로 삭제할 수 있습니다.</li>
 <li><b>🖌 브러시</b>: 자유롭게 칠(<kbd>Shift</kbd> 직선). <b>🧽 지우개</b>: 색·브러시 지우기.</li>
 <li><b>✏️ 문자</b>: 클릭으로 문자 상자 생성, 끌어서 이동(편집 중에도 가능).</li>
 <li><b>🔲 선택</b>: 범위 선택·여러 문자 이동. <b>✋ 이동</b>: 확대 시 끌어 화면 이동(무조작 시 자동 전환).</li></ul>
-<p class="note">💡 ‘영역 채우기’ ‘사각형’ ‘검정칠’은 독립 레이어입니다. 각 도구의 ‘전체 지우기’는 해당 도구 도형만 지웁니다.</p>
+<p class="note">💡 ‘영역 채우기’ ‘사각형’ ‘검정칠’ ‘직선’은 독립 레이어입니다. 각 도구의 ‘전체 지우기’는 해당 도구 도형만 지웁니다.</p>
 <h2>3. 색·불투명도·굵기</h2><ul><li>팔레트나 색 선택기로 색 지정. 불투명도로 농도, 굵기로 브러시/지우개 크기 조정. 영역/사각형 선택 중 색을 바꾸면 그 도형에 반영.</li></ul>
 <h2>4. 문자·스탬프·정렬</h2><ul>
 <li>글꼴·크기·색·굵게(B)·세로/가로 설정. 스탬프 ◯ ✓ × 클릭 배치.</li>
@@ -220,6 +279,7 @@ HELP.ko = `
 <h2>8. 편집(되돌리기·지우기)</h2><ul><li><b>↶되돌리기</b>(<kbd>Ctrl</kbd>+<kbd>Z</kbd>)·<b>↷다시</b>(<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑전체 지우기</b>는 현재 도구 내용만 지웁니다.</li></ul>
 <h2>9. 저장·인쇄</h2><ul>
 <li><b>💾 SVG</b>(재편집 가능)·<b>🖼 PNG</b>·<b>📕 PDF</b>. 여러 페이지는 자동 묶음(SVG/PNG=ZIP, PDF=하나).</li>
+<li><b>🖼 PNG</b>은 <b>DEMO 로그인 시에도 무료</b>로 출력할 수 있습니다("MARY DEMO" 워터마크 없음). DEMO에서 PDF·인쇄에는 워터마크가 들어갑니다.</li>
 <li><b>벡터로 저장</b>은 확대해도 깨지지 않음. <b>🖨 인쇄</b>/<b>🖨 문자만</b>(겹쳐 인쇄용).</li></ul>
 <h2>10. 단축키</h2><table><tr><th>동작</th><th>키</th></tr>
 <tr><td>되돌리기 / 다시</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
@@ -237,7 +297,8 @@ HELP.ko = `
 <li><b>테두리·선 색</b>: 칠·틀칠·사각형에 <b>테두리(없음/소/중/대)</b>와 <b>선 색</b>을 설정할 수 있습니다(선 색은 칠 색과 독립).</li>
 <li><b>범위 선택</b>: 🔲선택 도구로 드래그하면 도형(칠/틀/사각형/검정칠)과 문자를 <b>한꺼번에 선택</b>해 이동하거나 <kbd>Delete</kbd>로 일괄 삭제. 상단 <b>‘선택 대상’</b> 체크로 종류 전환(기본은 문자만).</li>
 <li><b>자간</b>: 문자 도구의 <b>자간</b>으로 문자 간격을 조정(음수는 좁힘), 문자 상자마다 개별 설정.</li>
-<li><b>편집 데이터 유지</b>: <b>👤마이페이지</b>·<b>❓사용법</b>으로 이동했다가 돌아와도 편집 중 데이터가 유지됩니다.</li></ul>`;
+<li><b>편집 데이터 유지</b>: <b>👤마이페이지</b>·<b>❓사용법</b>으로 이동했다가 돌아와도 편집 중 데이터가 유지됩니다.</li>
+<li><b>다국어 글꼴</b>: 언어 선택기를 변경하면 문자 도구의 글꼴 목록이 자동 업데이트됩니다. 해당 언어 글꼴(중국어: 黑体/宋体; 한국어: 고딕/명조; 아랍어 등)이 맨 앞에, 일본어 글꼴(Gothic/Mincho)은 항상 선택 가능합니다.</li></ul>`;
 
 HELP.vi = `
 <div class="lead">Công cụ tải PDF/ảnh bản đồ địa chính để tô màu, thêm chữ, tính diện tích và bôi đen. PDF/PNG/SVG đã lưu có thể in hoặc nộp trực tiếp. <b>Mọi xử lý diễn ra trong trình duyệt của bạn</b>; ảnh không được gửi lên máy chủ.</div>
@@ -250,10 +311,11 @@ HELP.vi = `
 <li><b>🔷 Tô khung</b>: nhấp để thêm điểm→nhấp điểm đầu để đóng và tô. Kéo điểm để chỉnh.</li>
 <li><b>▭ Chữ nhật</b>: nhấp điểm đầu→di chuyển điểm đối diện→nhấp để xác nhận. Chọn hình đã tạo và đổi cỡ bằng tay nắm; <kbd>Delete</kbd> để xóa.</li>
 <li><b>⬛ Bôi đen</b>: trên màn hình màu xám đậm; <b>khi xuất PDF nội dung bên trong bị xóa thật và tô đen (không khôi phục được)</b>.</li>
+<li><b>📏 Đường thẳng</b>: kéo từ điểm đầu đến điểm cuối. Chọn đầu (đường/→mũi tên phải/←trái), độ dày (nhỏ/vừa/lớn) và màu viền; di chuyển hoặc xóa (<kbd>Delete</kbd>) bằng công cụ <b>🔲 Chọn</b>.</li>
 <li><b>🖌 Cọ</b>: tô tự do (<kbd>Shift</kbd> để vẽ thẳng). <b>🧽 Tẩy</b>: xóa tô/cọ.</li>
 <li><b>✏️ Chữ</b>: nhấp để tạo ô chữ; kéo để di chuyển (cả khi đang sửa).</li>
 <li><b>🔲 Chọn</b>: chọn vùng và di chuyển nhiều ô chữ. <b>✋ Di chuyển</b>: kéo để cuộn khi phóng to (tự bật khi rảnh).</li></ul>
-<p class="note">💡 “Tô khung”, “Chữ nhật”, “Bôi đen” là các lớp độc lập. “Xóa tất cả” của mỗi công cụ chỉ xóa hình của công cụ đó.</p>
+<p class=”note”>💡 “Tô khung”, “Chữ nhật”, “Bôi đen” và “Đường thẳng” là các lớp độc lập. “Xóa tất cả” của mỗi công cụ chỉ xóa hình của công cụ đó.</p>
 <h2>3. Màu, độ mờ, độ dày</h2><ul><li>Chọn màu từ bảng màu hoặc bộ chọn. Độ mờ chỉnh đậm nhạt; độ dày chỉnh cỡ cọ/tẩy. Đổi màu khi đang chọn khung/chữ nhật sẽ áp dụng cho hình đó.</li></ul>
 <h2>4. Chữ, con dấu, căn chỉnh</h2><ul>
 <li>Đặt phông, cỡ, màu, đậm (B), dọc/ngang. Đặt con dấu ◯ ✓ × bằng cách nhấp.</li>
@@ -267,6 +329,7 @@ HELP.vi = `
 <h2>8. Sửa (hoàn tác, xóa)</h2><ul><li><b>↶ Hoàn tác</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) · <b>↷ Làm lại</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 Xóa tất cả</b> chỉ xóa nội dung của công cụ hiện tại.</li></ul>
 <h2>9. Lưu &amp; in</h2><ul>
 <li><b>💾 SVG</b> (sửa lại được) · <b>🖼 PNG</b> · <b>📕 PDF</b>. Nhiều trang được gộp tự động (SVG/PNG = ZIP, PDF = một tệp).</li>
+<li><b>🖼 PNG</b> được xuất <b>miễn phí ngay cả khi đăng nhập DEMO</b> (không có chữ chìm "MARY DEMO"). PDF và in vẫn có chữ chìm ở chế độ DEMO.</li>
 <li><b>Lưu dạng vector</b> không vỡ khi phóng to. <b>🖨 In</b> / <b>🖨 Chỉ chữ</b> (in chồng).</li></ul>
 <h2>10. Phím tắt</h2><table><tr><th>Thao tác</th><th>Phím</th></tr>
 <tr><td>Hoàn tác / Làm lại</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
@@ -284,7 +347,8 @@ HELP.vi = `
 <li><b>Viền &amp; màu viền</b>: đặt <b>viền (không/nhỏ/vừa/lớn)</b> và <b>màu viền</b> cho vùng tô, khung tô, chữ nhật (màu viền độc lập với màu tô).</li>
 <li><b>Chọn theo vùng</b>: dùng công cụ 🔲 Chọn, kéo để <b>chọn nhiều</b> hình (tô/khung/chữ nhật/bôi đen) và chữ rồi di chuyển hoặc <kbd>Delete</kbd> cùng lúc. Dùng ô <b>“Chọn được”</b> để chọn loại (mặc định chỉ chữ).</li>
 <li><b>Giãn chữ</b>: chỉnh khoảng cách ký tự bằng <b>Giãn chữ</b> (số âm để thu hẹp), đặt riêng cho từng ô chữ.</li>
-<li><b>Giữ dữ liệu</b>: vào <b>👤 Trang của tôi</b> hoặc <b>❓ Hướng dẫn</b> rồi quay lại vẫn giữ dữ liệu đang chỉnh sửa.</li></ul>`;
+<li><b>Giữ dữ liệu</b>: vào <b>👤 Trang của tôi</b> hoặc <b>❓ Hướng dẫn</b> rồi quay lại vẫn giữ dữ liệu đang chỉnh sửa.</li>
+<li><b>Phông đa ngôn ngữ</b>: chuyển bộ chọn ngôn ngữ sẽ tự cập nhật danh sách phông trong công cụ Chữ. Phông phù hợp ngôn ngữ (Trung: 黑体/宋体; Hàn: 고딕/명조; Ả Rập…) xuất hiện đầu tiên; phông tiếng Nhật (Gothic/Mincho) luôn có sẵn.</li></ul>`;
 
 HELP.es = `
 <div class="lead">Herramienta para cargar PDF/imágenes de planos catastrales y añadir rellenos de color, texto, cálculo de área y tachado. Los PDF/PNG/SVG guardados se pueden imprimir o presentar tal cual. <b>Todo el procesamiento ocurre en tu navegador</b>; las imágenes nunca se envían a un servidor.</div>
@@ -297,10 +361,11 @@ HELP.es = `
 <li><b>🔷 Relleno de marco</b>: clic para añadir puntos→clic en el inicio para cerrar y rellenar. Arrastra puntos para ajustar.</li>
 <li><b>▭ Rectángulo</b>: clic en una esquina→mueve la opuesta→clic para confirmar. Selecciona uno y cambia el tamaño con los tiradores; <kbd>Delete</kbd> para borrar.</li>
 <li><b>⬛ Tachado</b>: gris oscuro en pantalla; <b>al exportar PDF el contenido interior se borra realmente y se rellena de negro (irrecuperable)</b>.</li>
+<li><b>📏 Línea</b>: arrastra del punto inicial al final. Elige el extremo (línea/→flecha derecha/←izquierda), el grosor (P/M/G) y el color de línea; mueve o elimina (<kbd>Delete</kbd>) con la herramienta <b>🔲 Selección</b>.</li>
 <li><b>🖌 Pincel</b>: pintar libremente (<kbd>Shift</kbd> para línea recta). <b>🧽 Borrador</b>: quitar rellenos/pincel.</li>
 <li><b>✏️ Texto</b>: clic para crear un cuadro de texto; arrastra para moverlo (también al editar).</li>
 <li><b>🔲 Seleccionar</b>: selección por área y mover varios cuadros. <b>✋ Desplazar</b>: arrastra para desplazar al ampliar (se activa al estar inactivo).</li></ul>
-<p class="note">💡 Relleno de marco, Rectángulo y Tachado son capas independientes. El “Borrar todo” de cada herramienta solo borra sus propias formas.</p>
+<p class=”note”>💡 Relleno de marco, Rectángulo, Tachado y Línea son capas independientes. El “Borrar todo” de cada herramienta solo borra sus propias formas.</p>
 <h2>3. Color, opacidad, grosor</h2><ul><li>Elige color en la paleta o el selector. La opacidad ajusta la intensidad; el grosor, el tamaño de pincel/borrador. Cambiar el color con un marco/rectángulo seleccionado lo aplica a esa forma.</li></ul>
 <h2>4. Texto, sellos, alinear</h2><ul>
 <li>Ajusta fuente, tamaño, color, negrita (B) y vertical/horizontal. Coloca sellos ◯ ✓ × con clic.</li>
@@ -314,6 +379,7 @@ HELP.es = `
 <h2>8. Editar (deshacer, borrar)</h2><ul><li><b>↶ Deshacer</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) · <b>↷ Rehacer</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 Borrar todo</b> elimina solo el contenido de la herramienta activa.</li></ul>
 <h2>9. Guardar e imprimir</h2><ul>
 <li><b>💾 SVG</b> (reeditable), <b>🖼 PNG</b>, <b>📕 PDF</b>. Varias páginas se agrupan automáticamente (SVG/PNG = ZIP, PDF = un archivo).</li>
+<li><b>🖼 PNG</b> se exporta <b>gratis incluso con acceso DEMO</b> (sin marca de agua "MARY DEMO"). En DEMO, el PDF y la impresión sí la llevan.</li>
 <li><b>Guardar como vector</b> mantiene la calidad al ampliar. <b>🖨 Imprimir</b> / <b>🖨 Solo texto</b> (para sobreimpresión).</li></ul>
 <h2>10. Atajos</h2><table><tr><th>Acción</th><th>Tecla</th></tr>
 <tr><td>Deshacer / Rehacer</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
@@ -331,7 +397,8 @@ HELP.es = `
 <li><b>Borde y color de línea</b>: define un <b>borde (ninguno/P/M/G)</b> y un <b>color de línea</b> en rellenos, marcos y rectángulos (color de línea independiente del relleno).</li>
 <li><b>Selección por área</b>: con la herramienta 🔲 Selección, arrastra para <b>seleccionar varias</b> formas (relleno/marco/rectángulo/tachado) y textos, y muévelos o bórralos juntos con <kbd>Delete</kbd>. Usa las casillas <b>“Seleccionable”</b> para elegir los tipos (solo texto por defecto).</li>
 <li><b>Espaciado</b>: ajusta el espacio entre caracteres con <b>Espaciado</b> (negativo aprieta); por cada cuadro de texto.</li>
-<li><b>Tu trabajo se conserva</b>: ir a <b>👤 Mi página</b> o <b>❓ Ayuda</b> y volver conserva los datos en edición.</li></ul>`;
+<li><b>Tu trabajo se conserva</b>: ir a <b>👤 Mi página</b> o <b>❓ Ayuda</b> y volver conserva los datos en edición.</li>
+<li><b>Fuentes multilingüe</b>: cambiar el selector de idioma actualiza automáticamente la lista de fuentes de la herramienta de texto. Las fuentes del idioma (chino: 黑体/宋体; coreano: 고딕/명조; árabe, etc.) aparecen primero; las japonesas (Gothic/Mincho) siempre están disponibles.</li></ul>`;
 
 HELP.de = `
 <div class="lead">Werkzeug zum Laden von Katasterplan-PDFs/Bildern für Farbflächen, Text, Flächenberechnung und Schwärzung. Gespeicherte PDF/PNG/SVG können direkt gedruckt oder eingereicht werden. <b>Die gesamte Verarbeitung erfolgt in Ihrem Browser</b>; Bilder werden nie an einen Server gesendet.</div>
@@ -344,10 +411,11 @@ HELP.de = `
 <li><b>🔷 Rahmenfüllung</b>: klicken für Punkte→Startpunkt klicken zum Schließen und Füllen. Punkte ziehen zum Anpassen.</li>
 <li><b>▭ Rechteck</b>: Ecke klicken→Gegenecke bewegen→klicken zum Bestätigen. Vorhandenes auswählen und mit Griffen skalieren; <kbd>Delete</kbd> löscht.</li>
 <li><b>⬛ Schwärzung</b>: am Bildschirm dunkelgrau; <b>beim PDF-Export wird der Inhalt wirklich gelöscht und schwarz gefüllt (nicht wiederherstellbar)</b>.</li>
+<li><b>📏 Linie</b>: vom Startpunkt zum Endpunkt ziehen. Ende (Linie/→Pfeil rechts/←links), Dicke (S/M/L) und Linienfarbe wählen; mit dem <b>🔲 Auswahl</b>-Werkzeug verschieben oder <kbd>Delete</kbd> löschen.</li>
 <li><b>🖌 Pinsel</b>: frei malen (<kbd>Shift</kbd> für gerade Linie). <b>🧽 Radierer</b>: Füllungen/Pinsel entfernen.</li>
 <li><b>✏️ Text</b>: klicken für ein Textfeld; ziehen zum Verschieben (auch während der Bearbeitung).</li>
 <li><b>🔲 Auswahl</b>: Bereichsauswahl und mehrere Textfelder verschieben. <b>✋ Verschieben</b>: beim Zoomen ziehen zum Scrollen (aktiviert sich bei Inaktivität).</li></ul>
-<p class="note">💡 Rahmenfüllung, Rechteck und Schwärzung sind eigene Ebenen. „Alles löschen“ entfernt nur die Formen des jeweiligen Werkzeugs.</p>
+<p class=”note”>💡 Rahmenfüllung, Rechteck, Schwärzung und Linie sind eigene Ebenen. „Alles löschen” entfernt nur die Formen des jeweiligen Werkzeugs.</p>
 <h2>3. Farbe, Deckkraft, Stärke</h2><ul><li>Farbe aus der Palette oder dem Farbwähler. Deckkraft regelt die Intensität, Stärke die Pinsel-/Radierergröße. Farbänderung bei ausgewähltem Rahmen/Rechteck wirkt auf diese Form.</li></ul>
 <h2>4. Text, Stempel, Ausrichten</h2><ul>
 <li>Schrift, Größe, Farbe, Fett (B), vertikal/horizontal einstellen. Stempel ◯ ✓ × per Klick setzen.</li>
@@ -361,6 +429,7 @@ HELP.de = `
 <h2>8. Bearbeiten (Rückgängig, Löschen)</h2><ul><li><b>↶ Rückgängig</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) · <b>↷ Wiederholen</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 Alles löschen</b> entfernt nur den Inhalt des aktiven Werkzeugs.</li></ul>
 <h2>9. Speichern &amp; Drucken</h2><ul>
 <li><b>💾 SVG</b> (wiederbearbeitbar), <b>🖼 PNG</b>, <b>📕 PDF</b>. Mehrere Seiten werden automatisch gebündelt (SVG/PNG = ZIP, PDF = eine Datei).</li>
+<li><b>🖼 PNG</b> lässt sich <b>auch beim DEMO-Login kostenlos</b> exportieren (ohne "MARY DEMO"-Wasserzeichen). PDF und Druck tragen es im DEMO weiterhin.</li>
 <li><b>Als Vektor speichern</b> bleibt beim Zoomen scharf. <b>🖨 Drucken</b> / <b>🖨 Nur Text</b> (für Überdruck).</li></ul>
 <h2>10. Tastenkürzel</h2><table><tr><th>Aktion</th><th>Taste</th></tr>
 <tr><td>Rückgängig / Wiederholen</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
@@ -378,7 +447,8 @@ HELP.de = `
 <li><b>Rahmen &amp; Linienfarbe</b>: Lege einen <b>Rahmen (keine/S/M/L)</b> und eine <b>Linienfarbe</b> für Füllungen, Rahmen und Rechtecke fest (Linienfarbe unabhängig von der Füllfarbe).</li>
 <li><b>Bereichsauswahl</b>: Ziehe mit dem 🔲 Auswahl-Werkzeug, um mehrere Formen (Füllung/Rahmen/Rechteck/Schwärzung) und Texte <b>gemeinsam auszuwählen</b> und zusammen zu verschieben oder mit <kbd>Delete</kbd> zu löschen. Mit den <b>„Auswählbar“</b>-Kästchen die Typen wählen (standardmäßig nur Text).</li>
 <li><b>Abstand</b>: Zeichenabstand mit <b>Abstand</b> anpassen (negativ verengt); je Textfeld einstellbar.</li>
-<li><b>Bearbeitung bleibt erhalten</b>: Zu <b>👤 Meine Seite</b> oder <b>❓ Hilfe</b> wechseln und zurück – die Bearbeitungsdaten bleiben erhalten.</li></ul>`;
+<li><b>Bearbeitung bleibt erhalten</b>: Zu <b>👤 Meine Seite</b> oder <b>❓ Hilfe</b> wechseln und zurück – die Bearbeitungsdaten bleiben erhalten.</li>
+<li><b>Mehrsprachige Schriften</b>: Beim Wechsel des Sprachselektors wird die Schriftliste im Textwerkzeug automatisch aktualisiert. Passende Schriften (Chinesisch: 黑体/宋体; Koreanisch: 고딕/명조; Arabisch usw.) erscheinen zuerst; japanische Schriften (Gothic/Mincho) sind immer verfügbar.</li></ul>`;
 
 HELP.fr = `
 <div class="lead">Outil pour charger des PDF/images de plans cadastraux et ajouter des remplissages de couleur, du texte, le calcul de surface et le caviardage. Les PDF/PNG/SVG enregistrés peuvent être imprimés ou soumis tels quels. <b>Tout le traitement se fait dans votre navigateur</b> ; les images ne sont jamais envoyées à un serveur.</div>
@@ -391,10 +461,11 @@ HELP.fr = `
 <li><b>🔷 Remplissage de cadre</b> : cliquez pour ajouter des points→cliquez le point de départ pour fermer et remplir. Faites glisser les points pour ajuster.</li>
 <li><b>▭ Rectangle</b> : cliquez un coin→déplacez le coin opposé→cliquez pour valider. Sélectionnez-en un et redimensionnez avec les poignées ; <kbd>Delete</kbd> pour supprimer.</li>
 <li><b>⬛ Caviardage</b> : gris foncé à l’écran ; <b>à l’export PDF le contenu intérieur est réellement effacé et rempli en noir (irrécupérable)</b>.</li>
+<li><b>📏 Ligne</b> : faites glisser du point de départ au point d’arrivée. Choisissez l’extrémité (ligne/→flèche droite/←gauche), l’épaisseur (P/M/G) et la couleur ; déplacez ou supprimez (<kbd>Delete</kbd>) avec l’outil <b>🔲 Sélection</b>.</li>
 <li><b>🖌 Pinceau</b> : peindre librement (<kbd>Shift</kbd> pour une ligne droite). <b>🧽 Gomme</b> : effacer remplissages/pinceau.</li>
 <li><b>✏️ Texte</b> : cliquez pour créer une zone de texte ; glissez pour la déplacer (même en édition).</li>
 <li><b>🔲 Sélection</b> : sélection par zone et déplacement de plusieurs zones. <b>✋ Déplacer</b> : glisser pour faire défiler en zoom (s’active si inactif).</li></ul>
-<p class="note">💡 Remplissage de cadre, Rectangle et Caviardage sont des calques indépendants. « Tout effacer » de chaque outil ne supprime que ses propres formes.</p>
+<p class="note">💡 Remplissage de cadre, Rectangle, Caviardage et Ligne sont des calques indépendants. « Tout effacer » de chaque outil ne supprime que ses propres formes.</p>
 <h2>3. Couleur, opacité, épaisseur</h2><ul><li>Choisissez la couleur dans la palette ou le sélecteur. L’opacité règle l’intensité ; l’épaisseur, la taille du pinceau/gomme. Changer la couleur avec un cadre/rectangle sélectionné l’applique à cette forme.</li></ul>
 <h2>4. Texte, tampons, aligner</h2><ul>
 <li>Réglez police, taille, couleur, gras (B) et vertical/horizontal. Placez les tampons ◯ ✓ × en cliquant.</li>
@@ -408,6 +479,7 @@ HELP.fr = `
 <h2>8. Édition (annuler, effacer)</h2><ul><li><b>↶ Annuler</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) · <b>↷ Rétablir</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 Tout effacer</b> ne supprime que le contenu de l’outil actif.</li></ul>
 <h2>9. Enregistrer &amp; imprimer</h2><ul>
 <li><b>💾 SVG</b> (rééditable), <b>🖼 PNG</b>, <b>📕 PDF</b>. Plusieurs pages sont regroupées automatiquement (SVG/PNG = ZIP, PDF = un fichier).</li>
+<li><b>🖼 PNG</b> s’exporte <b>gratuitement même en connexion DEMO</b> (sans filigrane « MARY DEMO »). En DEMO, le PDF et l’impression le conservent.</li>
 <li><b>Enregistrer en vectoriel</b> reste net au zoom. <b>🖨 Imprimer</b> / <b>🖨 Texte seul</b> (pour surimpression).</li></ul>
 <h2>10. Raccourcis</h2><table><tr><th>Action</th><th>Touche</th></tr>
 <tr><td>Annuler / Rétablir</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
@@ -425,7 +497,8 @@ HELP.fr = `
 <li><b>Bordure &amp; couleur de ligne</b> : définissez une <b>bordure (aucune/P/M/G)</b> et une <b>couleur de ligne</b> sur les remplissages, cadres et rectangles (couleur de ligne indépendante du remplissage).</li>
 <li><b>Sélection par zone</b> : avec l’outil 🔲 Sélection, glissez pour <b>sélectionner plusieurs</b> formes (remplissage/cadre/rectangle/caviardage) et textes, puis déplacez-les ou supprimez-les ensemble avec <kbd>Delete</kbd>. Utilisez les cases <b>« Sélectionnable »</b> pour choisir les types (texte seul par défaut).</li>
 <li><b>Espacement</b> : ajustez l’espacement des caractères avec <b>Espacement</b> (négatif resserre) ; réglable par zone de texte.</li>
-<li><b>Votre travail est conservé</b> : aller dans <b>👤 Mon espace</b> ou <b>❓ Aide</b> et revenir conserve les données en cours d’édition.</li></ul>`;
+<li><b>Votre travail est conservé</b> : aller dans <b>👤 Mon espace</b> ou <b>❓ Aide</b> et revenir conserve les données en cours d’édition.</li>
+<li><b>Polices multilingues</b> : changer le sélecteur de langue met automatiquement à jour la liste des polices de l’outil de texte. Les polices correspondant à la langue (chinois : 黑体/宋体 ; coréen : 고딕/명조 ; arabe, etc.) apparaissent en premier ; les polices japonaises (Gothic/Mincho) sont toujours disponibles.</li></ul>`;
 
 HELP.ar = `
 <div class="lead">أداة لتحميل ملفات PDF/صور خرائط المساحة وإضافة التعبئة اللونية والنص وحساب المساحة والتعتيم. يمكن طباعة أو تقديم ملفات PDF/PNG/SVG المحفوظة كما هي. <b>تتم كل المعالجة داخل متصفحك</b>، ولا تُرسل الصور إلى أي خادم.</div>
@@ -438,10 +511,11 @@ HELP.ar = `
 <li><b>🔷 تعبئة إطار</b>: انقر لإضافة نقاط ثم انقر نقطة البداية للإغلاق والتعبئة. اسحب النقاط للتعديل.</li>
 <li><b>▭ مستطيل</b>: انقر زاوية ثم حرّك الزاوية المقابلة ثم انقر للتأكيد. اختر مستطيلًا موجودًا وغيّر حجمه بالمقابض؛ <kbd>Delete</kbd> للحذف.</li>
 <li><b>⬛ تعتيم</b>: يظهر رماديًا داكنًا على الشاشة؛ <b>وعند تصدير PDF يُمحى المحتوى داخله فعليًا ويُملأ بالأسود (غير قابل للاسترجاع)</b>.</li>
+<li><b>📏 خط</b>: اسحب من نقطة البداية إلى نقطة النهاية. اختر شكل الطرف (خط/→سهم يمين/←يسار) والسماكة (صغير/وسط/كبير) ولون الخط؛ حرّكه أو احذفه (<kbd>Delete</kbd>) بأداة <b>🔲 التحديد</b>.</li>
 <li><b>🖌 فرشاة</b>: رسم حر (<kbd>Shift</kbd> لخط مستقيم). <b>🧽 ممحاة</b>: محو التعبئة/الفرشاة.</li>
 <li><b>✏️ نص</b>: انقر لإنشاء مربع نص؛ اسحب لتحريكه (حتى أثناء التحرير).</li>
 <li><b>🔲 تحديد</b>: تحديد بمنطقة وتحريك عدة مربعات نص. <b>✋ تحريك</b>: اسحب للتمرير عند التكبير (يُفعّل تلقائيًا عند الخمول).</li></ul>
-<p class="note">💡 «تعبئة الإطار» و«المستطيل» و«التعتيم» طبقات مستقلة. «مسح الكل» لكل أداة يمسح أشكال تلك الأداة فقط.</p>
+<p class="note">💡 «تعبئة الإطار» و«المستطيل» و«التعتيم» و«الخط» طبقات مستقلة. «مسح الكل» لكل أداة يمسح أشكال تلك الأداة فقط.</p>
 <h2>3. اللون والشفافية والسماكة</h2><ul><li>اختر اللون من اللوحة أو منتقي الألوان. الشفافية تضبط الكثافة، والسماكة تضبط حجم الفرشاة/الممحاة. تغيير اللون أثناء تحديد إطار/مستطيل يطبّقه على ذلك الشكل.</li></ul>
 <h2>4. النص والأختام والمحاذاة</h2><ul>
 <li>اضبط الخط والحجم واللون والغامق (B) والاتجاه رأسي/أفقي. ضع الأختام ◯ ✓ × بالنقر.</li>
@@ -455,6 +529,7 @@ HELP.ar = `
 <h2>8. التحرير (تراجع، مسح)</h2><ul><li><b>↶ تراجع</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) · <b>↷ إعادة</b> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>). <b>🗑 مسح الكل</b> يمسح محتوى الأداة الحالية فقط.</li></ul>
 <h2>9. الحفظ والطباعة</h2><ul>
 <li><b>💾 SVG</b> (قابل لإعادة التحرير)، <b>🖼 PNG</b>، <b>📕 PDF</b>. تُجمَّع الصفحات المتعددة تلقائيًا (SVG/PNG = ZIP، PDF = ملف واحد).</li>
+<li><b>🖼 PNG</b> يمكن تصديره <b>مجانًا حتى مع الدخول بوضع DEMO</b> (بدون علامة "MARY DEMO"). أما PDF والطباعة فتحمل العلامة في وضع DEMO.</li>
 <li><b>الحفظ كمتجه</b> يبقى واضحًا عند التكبير. <b>🖨 طباعة</b> / <b>🖨 النص فقط</b> (للطباعة فوق).</li></ul>
 <h2>10. اختصارات</h2><table><tr><th>الإجراء</th><th>المفتاح</th></tr>
 <tr><td>تراجع / إعادة</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td></tr>
@@ -472,7 +547,8 @@ HELP.ar = `
 <li><b>الإطار ولون الخط</b>: عيّن <b>إطارًا (بلا/صغير/وسط/كبير)</b> و<b>لون خط</b> للتعبئة والإطار والمستطيل (لون الخط مستقل عن لون التعبئة).</li>
 <li><b>التحديد بالمساحة</b>: بأداة 🔲 التحديد، اسحب <b>لتحديد عدة</b> أشكال (تعبئة/إطار/مستطيل/تعتيم) ونصوص ثم حرّكها أو احذفها معًا بـ <kbd>Delete</kbd>. استخدم مربعات <b>«قابل للتحديد»</b> لاختيار الأنواع (النص فقط افتراضيًا).</li>
 <li><b>تباعد الأحرف</b>: اضبط المسافة بين الأحرف عبر <b>تباعد</b> (السالب يضيّق)، لكل مربع نص على حدة.</li>
-<li><b>حفظ عملك</b>: الانتقال إلى <b>👤 صفحتي</b> أو <b>❓ المساعدة</b> والعودة يحافظ على بيانات التحرير الجارية.</li></ul>`;
+<li><b>حفظ عملك</b>: الانتقال إلى <b>👤 صفحتي</b> أو <b>❓ المساعدة</b> والعودة يحافظ على بيانات التحرير الجارية.</li>
+<li><b>خطوط متعددة اللغات</b>: تغيير محدد اللغة يحدّث تلقائيًا قائمة الخطوط في أداة النص. تظهر الخطوط المناسبة للغة (صيني: 黑体/宋体؛ كوري: 고딕/명조؛ عربي…) أولًا، والخطوط اليابانية (Gothic/Mincho) متاحة دائمًا.</li></ul>`;
 
 (function(){
   var sel = document.getElementById('langSel');
@@ -489,7 +565,9 @@ HELP.ar = `
     document.getElementById('hdrTitle').textContent = UI.title[idx(l)];
     document.getElementById('backLink').textContent = UI.back[idx(l)];
     document.getElementById('content').innerHTML = HELP[l] || HELP.ja;
-    document.title = UI.title[idx(l)] + ' — 公図色付け';
+    document.title = (SEO_TITLE[idx(l)] || SEO_TITLE[0]) + ' — 公図色付け';
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', SEO_DESC[idx(l)] || SEO_DESC[0]);
     sel.value = l;
   }
   sel.addEventListener('change', function(){ try{ localStorage.setItem('lang', sel.value); }catch(e){} apply(sel.value); });

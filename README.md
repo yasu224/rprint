@@ -60,7 +60,7 @@ pdfcolor-shared/
 ## 認証・デモ仕様（VPS版と同等）
 - 初期画面=ログイン。`/api/login` 成功で HttpOnly セッションCookie発行（**MySQL保存**）。
 - `/api/me` `/api/logout` `/api/register` を CGI が処理。
-- **DEMO/DEMO** は5分で自動ログアウト、SVG/PDF出力を無効化（クライアントで制御）。
+- **DEMO/DEMO** は制限時間なし（通常アカウントと同じ `SESSION_TTL_MIN`）。保存・印刷は可能だが、出力に「MARY DEMO」透かしが入る。
 - 登録の可否は環境変数 `ALLOW_REGISTRATION`（既定有効）。
 
 ## PDFの日本語テキスト（選択・検索可能）

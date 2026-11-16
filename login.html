@@ -1,6 +1,44 @@
 ﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ===== SEO: 基本メタ ===== -->
+<title>公図色付け｜公図・PDFの色塗り・文字入れツール（マイソク作成）</title>
+<meta name="description" content="公図やPDFに色を塗り、文字を入れて、そのまま印刷・保存できるブラウザツール。対象地をワンクリックで着色し、ひと目で伝わるマイソクに。インストール不要・登録不要で時間制限なしの無料デモをすぐお試しいただけます。1ユーザー月額500円（税別）。">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+<link rel="canonical" href="https://mary-inc.com/rpaint/">
+<meta name="author" content="MARY Inc.">
+<meta name="theme-color" content="#0f6e56">
+<meta name="format-detection" content="telephone=no">
+
+<!-- ===== SEO: OGP / Twitter カード ===== -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="公図色付け">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:url" content="https://mary-inc.com/rpaint/">
+<meta property="og:title" content="公図色付け｜公図・PDFの色塗り・文字入れツール（マイソク作成）">
+<meta property="og:description" content="公図やPDFに色を塗り、文字を入れて、そのまま印刷。対象地をワンクリックで着色し、ひと目で伝わるマイソクへ。インストール不要・登録不要で無料デモをお試しいただけます。">
+<meta property="og:image" content="https://mary-inc.com/rpaint/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="公図色付け — 対象地を色付けした公図のイメージ">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="公図色付け｜公図・PDFの色塗り・文字入れツール">
+<meta name="twitter:description" content="公図やPDFに色を塗り、文字を入れて、そのまま印刷。ひと目で伝わるマイソクへ。登録不要で無料デモ。">
+<meta name="twitter:image" content="https://mary-inc.com/rpaint/ogp.png">
+
+<!-- ===== ファビコン ===== -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.1.0/dist/tabler-icons.min.css">
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-835577852"></script>
 <script>
@@ -10,14 +48,7 @@
 
   gtag('config', 'AW-835577852');
 </script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>公図色付け｜マイソクの公図が、ひと目で伝わる</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.1.0/dist/tabler-icons.min.css">
-<script src="i18n.js?v=20260617"></script>
+<script src="i18n.js?v=20260720"></script>
 <style>
   :root{
     --ink:#15323a; --ink-soft:#46565b; --ink-faint:#7e8c8f;
@@ -81,6 +112,13 @@
   .cta-row{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:20px}
   .trust{display:flex; flex-wrap:wrap; gap:16px; font-size:13.5px; color:var(--ink-faint)}
   .trust i{color:var(--teal-bright); margin-right:5px; vertical-align:-2px}
+  /* DEMOでもPNG出力が無料であることの訴求バッジ */
+  .png-free{display:inline-flex; align-items:center; gap:9px; font-weight:700; font-size:20px;
+    color:var(--teal); background:var(--teal-tint); border:1px solid rgba(29,158,117,.28);
+    padding:12px 20px; border-radius:var(--radius-md); line-height:1.4; letter-spacing:.01em}
+  .png-free.sm{font-size:15px; padding:9px 14px}
+  .png-free-note{font-size:12.5px; color:var(--ink-faint); margin-top:7px}
+  @media (max-width:720px){ .png-free{font-size:16.5px; padding:10px 15px} }
   /* 言語別ヒーロー: 日本語はキャッチコピー、非日本語は汎用タイトルを中央寄せ */
   .i18n-only{display:none}
   html:not([lang="ja"]) .ja-only{display:none}
@@ -197,6 +235,60 @@
     html{scroll-behavior:auto}
   }
 </style>
+
+<!-- ===== SEO: 構造化データ（JSON-LD） ===== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://mary-inc.com/#organization",
+      "name": "MARY Inc.",
+      "url": "https://mary-inc.com/"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://mary-inc.com/rpaint/#website",
+      "url": "https://mary-inc.com/rpaint/",
+      "name": "公図色付け",
+      "inLanguage": "ja",
+      "publisher": { "@id": "https://mary-inc.com/#organization" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://mary-inc.com/rpaint/#app",
+      "name": "公図色付け",
+      "url": "https://mary-inc.com/rpaint/",
+      "applicationCategory": "BusinessApplication",
+      "applicationSubCategory": "不動産業務支援ツール",
+      "operatingSystem": "Web ブラウザ（Windows / macOS / iOS / Android）",
+      "browserRequirements": "JavaScript 対応のモダンブラウザ",
+      "inLanguage": ["ja","en","zh","ko","vi","es","de","fr","ar"],
+      "description": "公図やPDFに色を塗り、文字を入れて、そのまま印刷・保存できるブラウザツール。対象地をワンクリックで着色し、ひと目で伝わるマイソクを作成できます。ファイルはブラウザ内だけで処理され、サーバーへ送信されません。",
+      "featureList": [
+        "公図に色付け",
+        "公図・PDFに文字入れ",
+        "定型用紙への重ね刷り",
+        "面積計算",
+        "墨消し",
+        "PDF / PNG / SVG 保存"
+      ],
+      "softwareHelp": { "@type": "CreativeWork", "url": "https://mary-inc.com/rpaint/help.html" },
+      "publisher": { "@id": "https://mary-inc.com/#organization" },
+      "offers": {
+        "@type": "Offer",
+        "name": "スタンダードプラン",
+        "price": "500",
+        "priceCurrency": "JPY",
+        "description": "1ユーザーあたり月額500円（税別）。全機能込み・追加料金なし。",
+        "availability": "https://schema.org/InStock",
+        "url": "https://mary-inc.com/rpaint/"
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -219,48 +311,55 @@
 <section class="hero">
   <div class="wrap hero-grid">
     <div class="reveal">
-      <span class="eyebrow"><i class="ti ti-building-estate" style="vertical-align:-2px"></i> <span data-i18n="hero.eyebrow">不動産仲介のための公図ツール</span></span>
-      <h1 class="ja-only">「この土地、どこ?」を<br>なくすマイソクへ。</h1>
-      <h1 class="i18n-only" data-i18n="hero.title">公図 色塗り・文字入れエディター</h1>
-      <p class="sub ja-only">公図に色を塗って、文字を入れて、そのまま印刷。お客様に物件の位置が、ひと目で伝わります。</p>
-      <p class="sub i18n-only" data-i18n="hero.sub">公図に色を塗り、文字を入れて、そのまま印刷。物件の位置がひと目で伝わります。</p>
+      <span class="eyebrow"><i class="ti ti-building-estate" style="vertical-align:-2px"></i> <span data-i18n="hero.eyebrow">不動産仲介のためのPDF加工ツール</span></span>
+      <!-- h1 はページに1つ。言語で表示を切り替える（SEO: 見出し階層 h1→h2→h3 を維持） -->
+      <h1><span class="ja-only">PDFに書き込むだけで、<br>伝わるマイソクへ。</span><span class="i18n-only" data-i18n="hero.title">PDF・画像の文字入れエディター</span></h1>
+      <p class="sub ja-only">PDFに文字を書き込み、色を塗って、そのまま印刷。公図はもちろん、あらゆる書類がそのまま仕上がります。</p>
+      <p class="sub i18n-only" data-i18n="hero.sub">PDFや画像に文字・注記を加えて、そのまま印刷。定型用紙への重ね刷りもできます。</p>
       <div class="cta-row">
         <button class="btn btn-primary" data-act="demo"><i class="ti ti-player-play"></i><span data-i18n="hero.demo">DEMOを無料で試す</span></button>
         <a href="#features" class="btn btn-ghost"><span data-i18n="hero.features">機能を見る</span></a>
       </div>
+      <p style="margin-bottom:18px"><span class="png-free" data-i18n="demo.pngfreeBig">🖼 DEMOでもPNG出力は無料</span></p>
       <div class="trust">
         <span><i class="ti ti-check"></i><span data-i18n="trust.noreg">登録不要</span></span>
-        <span><i class="ti ti-check"></i><span data-i18n="trust.try">15分でお試し</span></span>
+        <span><i class="ti ti-check"></i><span data-i18n="trust.try">時間制限なしでお試し</span></span>
         <span><i class="ti ti-check"></i><span data-i18n="trust.browser">ブラウザで完結</span></span>
       </div>
     </div>
 
     <div class="reveal maisoku">
       <div class="maisoku-bar">
-        <span class="lbl"><i class="ti ti-file-description" style="font-size:16px"></i><span data-i18n="mai.label">物件資料（マイソク）</span></span>
-        <span class="tag-teal" data-i18n="mai.tag">色付け済み</span>
+        <span class="lbl"><i class="ti ti-file-description" style="font-size:16px"></i><span data-i18n="mai.label">PDF資料（マイソク）</span></span>
+        <span class="tag-teal" data-i18n="mai.tag">編集済み</span>
       </div>
       <svg class="map" viewBox="0 0 340 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m1t">
-        <title id="m1t">対象地（本物件）を色付けした公図</title>
-        <polygon points="30,32 113,30 116,119 28,121" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.2"/>
-        <polygon points="113,30 207,32 204,122 116,119" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.2"/>
-        <polygon points="207,32 290,30 292,120 204,122" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.2"/>
-        <polygon points="28,121 116,119 118,212 30,210" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.2"/>
-        <polygon points="204,122 292,120 290,211 202,209" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.2"/>
-        <polygon points="116,119 204,122 202,209 118,212" fill="#d85a30" fill-opacity="0.28" stroke="#d85a30" stroke-width="2.4"/>
-        <polygon points="20,214 300,210 302,244 18,248" fill="#eceeec"/>
-        <text x="160" y="231" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#9aa6a3" font-family="Noto Sans JP, sans-serif">道　路</text>
-        <text x="71" y="78" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#869490" font-family="sans-serif">12-1</text>
-        <text x="160" y="76" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#869490" font-family="sans-serif">12-2</text>
-        <text x="248" y="76" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#869490" font-family="sans-serif">12-3</text>
-        <text x="73" y="166" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#869490" font-family="sans-serif">12-4</text>
-        <text x="248" y="166" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#869490" font-family="sans-serif">12-6</text>
-        <text x="160" y="180" text-anchor="middle" dominant-baseline="central" font-size="11.5" font-weight="700" fill="#993c1d" font-family="sans-serif">12-5</text>
-        <rect x="125" y="126" width="70" height="21" rx="10" fill="#d85a30"/>
-        <text x="160" y="137" text-anchor="middle" dominant-baseline="central" font-size="11.5" font-weight="700" fill="#fff" font-family="Noto Sans JP, sans-serif">本物件</text>
-        <path d="M155,147 L165,147 L160,153 Z" fill="#d85a30"/>
+        <title id="m1t">文字を書き込み・色付けしたPDF資料</title>
+        <rect x="16" y="14" width="308" height="262" rx="10" fill="#fff" stroke="#cdd8d4" stroke-width="1.4"/>
+        <rect x="34" y="32" width="90" height="66" rx="6" fill="#eceeec" stroke="#cdd8d4" stroke-width="1"/>
+        <path d="M56,72 L76,50 L92,64 L104,48" stroke="#c3ccc9" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="66" cy="46" r="6" fill="#c3ccc9"/>
+        <rect x="136" y="34" width="150" height="13" rx="3" fill="#3d4a47"/>
+        <rect x="136" y="55" width="110" height="9" rx="3" fill="#c3ccc9"/>
+        <rect x="136" y="70" width="122" height="9" rx="3" fill="#c3ccc9"/>
+        <rect x="34" y="112" width="256" height="1.4" fill="#e3e8e6"/>
+        <rect x="34" y="130" width="60" height="10" rx="3" fill="#9aa6a3"/>
+        <rect x="104" y="128" width="150" height="14" rx="4" fill="#faece7" stroke="#d85a30" stroke-width="1.6"/>
+        <text x="112" y="139" font-size="11" font-weight="700" fill="#993c1d" font-family="Noto Sans JP, sans-serif">港区南青山3-12-5</text>
+        <rect x="34" y="154" width="60" height="10" rx="3" fill="#9aa6a3"/>
+        <rect x="104" y="152" width="90" height="12" rx="3" fill="none"/>
+        <text x="104" y="161" font-size="11" font-weight="700" fill="#15323a" font-family="Noto Sans JP, sans-serif">4,980万円</text>
+        <rect x="34" y="178" width="60" height="10" rx="3" fill="#9aa6a3"/>
+        <text x="104" y="187" font-size="11" font-weight="700" fill="#15323a" font-family="Noto Sans JP, sans-serif">徒歩6分・南向き</text>
+        <rect x="34" y="204" width="256" height="1.4" fill="#e3e8e6"/>
+        <rect x="185" y="222" width="105" height="34" rx="8" fill="#e1f5ee" stroke="#1d9e75" stroke-width="1.4"/>
+        <text x="237" y="233" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0f6e56" font-family="Noto Sans JP, sans-serif">おすすめの物件です</text>
+        <path d="M215,244 l7,7 l13,-15" stroke="#0f6e56" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M180,238 L166,232" stroke="#1d9e75" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <rect x="34" y="224" width="118" height="9" rx="3" fill="#c3ccc9"/>
+        <rect x="34" y="240" width="98" height="9" rx="3" fill="#c3ccc9"/>
       </svg>
-      <p class="map-cap"><i class="ti ti-color-swatch" style="font-size:14px"></i><span data-i18n="mai.cap">対象地をワンクリックで着色 → マイソクにそのまま貼り付け</span></p>
+      <p class="map-cap"><i class="ti ti-color-swatch" style="font-size:14px"></i><span data-i18n="mai.cap">PDFに文字を書き込んで色付け → そのまま資料に貼り付け</span></p>
     </div>
   </div>
 </section>
@@ -270,19 +369,9 @@
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow" data-i18n="feat.eyebrow">できること</span>
-      <h2 class="title" data-i18n="feat.head">塗る・書く・刷る。公図まわりの作業を、これ一つで。</h2>
+      <h2 class="title" data-i18n="feat.head">書く・塗る・刷る。PDF加工まわりの作業を、これ一つで。</h2>
     </div>
     <div class="grid g4">
-      <div class="card reveal">
-        <div class="ico ico-coral"><i class="ti ti-color-swatch"></i></div>
-        <h3 data-i18n="feat1.t">公図に色付け</h3>
-        <p data-i18n="feat1.d">対象地をワンクリックで着色。「この物件です」がひと目で伝わるマイソクに。</p>
-      </div>
-      <div class="card reveal">
-        <div class="ico ico-teal"><i class="ti ti-typography"></i></div>
-        <h3 data-i18n="feat2.t">公図に文字入れ</h3>
-        <p data-i18n="feat2.d">地番・方位・コメントを自由に追記。手書きの書き込みは、もう要りません。</p>
-      </div>
       <div class="card reveal">
         <div class="ico ico-blue"><i class="ti ti-file-text"></i></div>
         <h3 data-i18n="feat3.t">PDFに文字入れ</h3>
@@ -293,6 +382,16 @@
         <h3 data-i18n="feat4.t">定型用紙へ重ね刷り</h3>
         <p data-i18n="feat4.d">印刷済みの用紙に、文字だけをピッタリ位置合わせ。申込書・契約書類の記入を自動化。</p>
       </div>
+      <div class="card reveal">
+        <div class="ico ico-coral"><i class="ti ti-color-swatch"></i></div>
+        <h3 data-i18n="feat1.t">公図に色付け</h3>
+        <p data-i18n="feat1.d">対象地をワンクリックで着色。「この物件です」がひと目で伝わるマイソクに。</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico ico-teal"><i class="ti ti-typography"></i></div>
+        <h3 data-i18n="feat2.t">公図に文字入れ</h3>
+        <p data-i18n="feat2.d">地番・方位・コメントを自由に追記。手書きの書き込みは、もう要りません。</p>
+      </div>
     </div>
   </div>
 </section>
@@ -302,20 +401,20 @@
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow" data-i18n="step.eyebrow">使い方</span>
-      <h2 class="title" data-i18n="step.head">開いて、塗って、印刷するだけ。</h2>
+      <h2 class="title" data-i18n="step.head">開いて、書いて、印刷するだけ。</h2>
     </div>
     <div class="grid g3">
       <div class="card step reveal">
         <div class="step-no">1</div>
         <i class="ti ti-file-upload"></i>
-        <h3 data-i18n="step1.t">公図・PDFを開く</h3>
-        <p data-i18n="step1.d">取得した公図やPDFを読み込むだけ。</p>
+        <h3 data-i18n="step1.t">PDF・公図を開く</h3>
+        <p data-i18n="step1.d">お手元のPDFや公図を読み込むだけ。</p>
       </div>
       <div class="card step reveal">
         <div class="step-no">2</div>
         <i class="ti ti-brush"></i>
-        <h3 data-i18n="step2.t">塗る・書く</h3>
-        <p data-i18n="step2.d">対象地を着色し、地番やコメントを記入。</p>
+        <h3 data-i18n="step2.t">書く・塗る</h3>
+        <p data-i18n="step2.d">PDFに文字を記入し、対象地を着色。</p>
       </div>
       <div class="card step reveal">
         <div class="step-no">3</div>
@@ -337,47 +436,46 @@
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow" style="color:var(--coral-deep);background:var(--coral-tint)" data-i18n="ba.eyebrow">ビフォー・アフター</span>
-      <h2 class="title" data-i18n="ba.head">色をひと塗りで、伝わり方が変わる。</h2>
+      <h2 class="title" data-i18n="ba.head">PDFに書き込むだけで、伝わり方が変わる。</h2>
     </div>
     <div class="grid g2">
       <div class="card reveal" style="padding:16px">
-        <div class="ba-head"><span class="ba-pill ba-before" data-i18n="ba.before">塗る前</span><span data-i18n="ba.beforeT">どの土地か分かりにくい</span></div>
+        <div class="ba-head"><span class="ba-pill ba-before" data-i18n="ba.before">書く前</span><span data-i18n="ba.beforeT">空欄が多く分かりにくい</span></div>
         <svg class="map" viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="b1t">
-          <title id="b1t">色付け前の公図</title>
-          <polygon points="24,26 96,24 98,100 22,102" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="96,24 178,26 176,102 98,100" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="178,26 256,24 258,100 176,102" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="22,102 98,100 100,176 24,178" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="98,100 176,102 174,175 100,176" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="176,102 258,100 256,177 174,175" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="16,180 262,176 264,200 14,204" fill="#eceeec"/>
-          <text x="60" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-1</text>
-          <text x="137" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-2</text>
-          <text x="217" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-3</text>
-          <text x="61" y="139" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-4</text>
-          <text x="137" y="139" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-5</text>
-          <text x="216" y="139" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-6</text>
+          <title id="b1t">文字入力前のPDF資料（空欄が多い）</title>
+          <rect x="14" y="10" width="252" height="200" rx="8" fill="#fff" stroke="#cdd8d4" stroke-width="1.2"/>
+          <rect x="30" y="26" width="110" height="12" rx="3" fill="#3d4a47"/>
+          <text x="30" y="66" font-size="11" fill="#7e8c8f" font-family="Noto Sans JP, sans-serif">氏名</text>
+          <rect x="86" y="54" width="164" height="18" rx="4" fill="#f4f7f5" stroke="#cdd8d4" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="30" y="96" font-size="11" fill="#7e8c8f" font-family="Noto Sans JP, sans-serif">住所</text>
+          <rect x="86" y="84" width="164" height="18" rx="4" fill="#f4f7f5" stroke="#cdd8d4" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="30" y="126" font-size="11" fill="#7e8c8f" font-family="Noto Sans JP, sans-serif">電話番号</text>
+          <rect x="86" y="114" width="164" height="18" rx="4" fill="#f4f7f5" stroke="#cdd8d4" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="30" y="156" font-size="11" fill="#7e8c8f" font-family="Noto Sans JP, sans-serif">備考</text>
+          <rect x="86" y="144" width="164" height="18" rx="4" fill="#f4f7f5" stroke="#cdd8d4" stroke-width="1" stroke-dasharray="3 3"/>
+          <rect x="30" y="180" width="220" height="1.2" fill="#e3e8e6"/>
+          <rect x="30" y="192" width="70" height="10" rx="3" fill="#c3ccc9"/>
         </svg>
       </div>
       <div class="card reveal" style="padding:16px">
-        <div class="ba-head"><span class="ba-pill ba-after" data-i18n="ba.after">塗った後</span><span data-i18n="ba.afterT">対象地がひと目で分かる</span></div>
+        <div class="ba-head"><span class="ba-pill ba-after" data-i18n="ba.after">書いた後</span><span data-i18n="ba.afterT">必要な情報がひと目で伝わる</span></div>
         <svg class="map" viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="a1t">
-          <title id="a1t">色付け後の公図</title>
-          <polygon points="24,26 96,24 98,100 22,102" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="96,24 178,26 176,102 98,100" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="178,26 256,24 258,100 176,102" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="22,102 98,100 100,176 24,178" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="176,102 258,100 256,177 174,175" fill="#f1f4f3" stroke="#cdd8d4" stroke-width="1.1"/>
-          <polygon points="98,100 176,102 174,175 100,176" fill="#d85a30" fill-opacity="0.30" stroke="#d85a30" stroke-width="2.2"/>
-          <polygon points="16,180 262,176 264,200 14,204" fill="#eceeec"/>
-          <text x="60" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-1</text>
-          <text x="137" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-2</text>
-          <text x="217" y="64" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-3</text>
-          <text x="61" y="139" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-4</text>
-          <text x="137" y="139" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="700" fill="#993c1d" font-family="sans-serif">12-5</text>
-          <text x="216" y="139" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#9aa6a3" font-family="sans-serif">12-6</text>
-          <rect x="104" y="88" width="66" height="19" rx="9.5" fill="#d85a30"/>
-          <text x="137" y="98" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#fff" font-family="Noto Sans JP, sans-serif">本物件</text>
+          <title id="a1t">文字入力後のPDF資料（記入済み）</title>
+          <rect x="14" y="10" width="252" height="200" rx="8" fill="#fff" stroke="#cdd8d4" stroke-width="1.2"/>
+          <rect x="30" y="26" width="110" height="12" rx="3" fill="#3d4a47"/>
+          <text x="30" y="66" font-size="11" fill="#7e8c8f" font-family="Noto Sans JP, sans-serif">氏名</text>
+          <text x="92" y="66" font-size="11.5" font-weight="700" fill="#15323a" font-family="Noto Sans JP, sans-serif">山田 太郎</text>
+          <text x="30" y="96" font-size="11" fill="#7e8c8f" font-family="Noto Sans JP, sans-serif">住所</text>
+          <rect x="86" y="84" width="164" height="18" rx="4" fill="#faece7" stroke="#d85a30" stroke-width="1.6"/>
+          <text x="92" y="96" font-size="11" font-weight="700" fill="#993c1d" font-family="Noto Sans JP, sans-serif">港区南青山3-12-5</text>
+          <text x="30" y="126" font-size="11" fill="#7e8c8f" font-family="Noto Sans JP, sans-serif">電話番号</text>
+          <text x="92" y="126" font-size="11.5" font-weight="700" fill="#15323a" font-family="Noto Sans JP, sans-serif">090-1234-5678</text>
+          <text x="30" y="156" font-size="11" fill="#7e8c8f" font-family="Noto Sans JP, sans-serif">備考</text>
+          <text x="92" y="156" font-size="11.5" font-weight="700" fill="#15323a" font-family="Noto Sans JP, sans-serif">南向き・角部屋</text>
+          <rect x="30" y="180" width="220" height="1.2" fill="#e3e8e6"/>
+          <rect x="186" y="186" width="64" height="20" rx="10" fill="#0f6e56"/>
+          <path d="M198,196 l5,5 l10,-11" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="222" y="197" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff" font-family="Noto Sans JP, sans-serif">記入済</text>
         </svg>
       </div>
     </div>
@@ -389,30 +487,32 @@
   <div class="wrap">
     <div class="sec-head center reveal">
       <span class="eyebrow" data-i18n="price.eyebrow">料金プラン</span>
-      <h2 class="title" data-i18n="price.head">シンプルに、ひとり月1,000円。</h2>
+      <h2 class="title" data-i18n="price.head">シンプルに、ひとり月500円。</h2>
     </div>
     <div class="price-card reveal">
       <p class="price-name" data-i18n="price.name">スタンダードプラン</p>
       <p class="price-for" data-i18n="price.for">1ユーザーあたり</p>
-      <p><span class="price-num">¥1,000</span><span class="price-unit" data-i18n="price.unit"> / 月（税別）</span></p>
+      <p><span class="price-num">¥500</span><span class="price-unit" data-i18n="price.unit"> / 月（税別）</span></p>
       <p class="price-note" data-i18n="price.note">全機能込み・追加料金なし</p>
       <div class="price-list">
-        <span><i class="ti ti-check"></i><span data-i18n="price.f1">公図の色付け・文字入れ</span></span>
         <span><i class="ti ti-check"></i><span data-i18n="price.f2">PDFへの文字入れ</span></span>
         <span><i class="ti ti-check"></i><span data-i18n="price.f3">定型用紙への重ね刷り印刷</span></span>
+        <span><i class="ti ti-check"></i><span data-i18n="price.f1">公図の色付け・文字入れ</span></span>
         <span><i class="ti ti-check"></i><span data-i18n="price.f4">インストール不要・ブラウザで完結</span></span>
       </div>
       <button class="btn btn-primary" data-act="register" data-i18n="price.cta">このプランで始める</button>
     </div>
     <p class="center" style="font-size:12.5px;color:var(--ink-faint);margin-top:18px" data-i18n="price.demo">まずは無料DEMOでお試しいただけます。</p>
+    <p class="center" style="margin-top:12px"><span class="png-free" data-i18n="demo.pngfreeBig">🖼 DEMOでもPNG出力は無料</span></p>
+    <p class="center png-free-note" data-i18n="demo.pngfree">🖼 デモログイン時でもPNG出力は無料です（透かしなし）</p>
   </div>
 </section>
 
 <!-- FINAL CTA -->
 <section class="final">
   <div class="wrap center reveal">
-    <h2 data-i18n="final.head">まずは15分、無料で試す。</h2>
-    <p data-i18n="final.sub">登録不要。お手元の公図を読み込んで、色付けの手軽さをそのまま体験してください。</p>
+    <h2 data-i18n="final.head">まずは無料で試す。</h2>
+    <p data-i18n="final.sub">登録不要。お手元のPDFを読み込んで、書き込みの手軽さをそのまま体験してください。</p>
     <button class="btn btn-light" data-act="demo"><i class="ti ti-player-play"></i><span data-i18n="hero.demo">DEMOを無料で試す</span></button>
     <div class="trust" style="margin-top:24px">
       <span><i class="ti ti-check"></i><span data-i18n="final.t1">クレジットカード不要</span></span>
@@ -452,7 +552,8 @@
       <label class="fld-label" for="p" data-i18n="auth.password">パスワード</label>
       <input class="fld" type="password" id="p" autocomplete="current-password">
       <button type="submit" class="btn btn-primary" id="loginBtn" style="margin-top:18px;padding:13px" data-i18n="auth.login">ログイン</button>
-      <button type="button" class="btn btn-ghost" id="demoBtn2" style="margin-top:10px" data-i18n="auth.demo">🎬 DEMOでお試し（15分）</button>
+      <button type="button" class="btn btn-ghost" id="demoBtn2" style="margin-top:10px" data-i18n="auth.demo">🎬 DEMOでお試し</button>
+      <p style="margin:10px 0 0;text-align:center"><span class="png-free sm" data-i18n="demo.pngfreeBig">🖼 DEMOでもPNG出力は無料</span></p>
       <div class="err" id="err"></div>
       <div class="modal-or"><span data-i18n="auth.noacct">アカウントをお持ちでない方は</span></div>
       <a href="register.html" class="btn btn-reg"><i class="ti ti-user-plus"></i><span data-i18n="auth.register">新規登録</span></a>

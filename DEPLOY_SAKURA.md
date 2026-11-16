@@ -16,9 +16,37 @@
 ```
 rpaint/
   .htaccess  index.html  login.html  register.html
-  mypage.html  admin.html
+  mypage.html  admin.html  help.html  i18n.js
+  favicon.svg  apple-touch-icon.png  ogp.png  sitemap.xml
   lib/ ...   api/ ...   (appdb.py / stripe_api.py / index.cgi / config.py ほか)
 ```
+
+### 1-1. robots.txt はドメイン直下に置く（SEO）
+`robots.txt` は **ドメイン直下しか参照されません**。`rpaint/robots.txt` に置いても
+検索エンジンには一切読まれないため、次の場所へコピーしてください。
+
+```bash
+cp ~/www/mary-inc.com/rpaint/robots.txt ~/www/mary-inc.com/robots.txt
+```
+
+同梱の `robots.txt` は **`/rpaint/` 専用ではなく、mary-inc.com 全体（WordPress の
+コーポレートサイト＋公図色付け）を対象にした内容** になっています。そのまま
+上書きコピーして問題ありません。
+
+**編集時の注意（この2点を外すとサイト全体に影響します）**
+
+1. 末尾の `Sitemap:` 2行を消さないこと。
+   物理ファイルを置くと WordPress の仮想 robots.txt が無効になり、
+   Yoast SEO が自動出力していた `https://mary-inc.com/sitemap.xml` の宣言も
+   同時に失われます。この2行がその代わりです。
+2. `User-agent:` と `Disallow:` の間に **空行を入れない**こと。
+   空行はレコードの区切りとして解釈され、厳密なパーサでは以降のルールが
+   すべて無視されます。区切りたい場合はコメント行（`#`）を使います。
+
+反映後、Google Search Console で以下2つのサイトマップを送信します。
+
+- `https://mary-inc.com/sitemap.xml`（コーポレートサイト）
+- `https://mary-inc.com/rpaint/sitemap.xml`（公図色付け）
 
 ## 2. パーミッション・改行コード
 - `api/index.cgi` … **実行権限 755**・**改行コード LF**（CRLFだと動きません）

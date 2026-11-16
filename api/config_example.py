@@ -11,8 +11,7 @@ DB_NAME = "あなたのDB名"                # 例: <ユーザー名>_kozu な�
 
 # 任意: セッション/デモ/登録の挙動
 # SESSION_TTL_MIN = 120
-# DEMO_USERNAMES = "DEMO"
-# DEMO_TTL_MIN = 15
+# DEMO_USERNAMES = "DEMO"   # デモの制限時間は無し(SESSION_TTL_MIN が適用される)
 # ALLOW_REGISTRATION = 1
 
 # ---- Stripe サブスク課金(月額) ----

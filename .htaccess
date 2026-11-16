@@ -42,4 +42,32 @@ AddHandler cgi-script .cgi
   <FilesMatch "\.html$">
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
+
+  # SEO: 画像・ライブラリは内容が変わらないので長期キャッシュ(表示速度=検索評価に影響)
+  <FilesMatch "\.(png|jpe?g|gif|svg|webp|ico|woff2?)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+</IfModule>
+
+# SEO: 表示速度(Core Web Vitals)対策 — テキスト系を gzip 圧縮して転送。
+# index.html は 200KB 超あるため効果が大きい。
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+  AddOutputFilterByType DEFLATE application/json application/xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# lib/ 配下(pdf.js・埋め込みフォント等)はバージョン固定の静的ファイル。長期キャッシュ。
+<IfModule mod_headers.c>
+  <FilesMatch "^(pdf|jspdf|NotoSansJP).*\.(js|min\.js)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+</IfModule>
+
+# 検索エンジンにインデックスさせない領域(HTMLの meta robots と二重で保険)
+<IfModule mod_headers.c>
+  <FilesMatch "^(admin|mypage)\.html$">
+    Header set X-Robots-Tag "noindex, nofollow"
+  </FilesMatch>
 </IfModule>

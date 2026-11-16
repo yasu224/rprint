@@ -1,0 +1,55 @@
+# ============================================================
+#  mary-inc.com  robots.txt
+#
+#  設置場所: ~/www/mary-inc.com/robots.txt ( = https://mary-inc.com/robots.txt )
+#  ※ robots.txt はドメイン直下のみ有効。/rpaint/robots.txt に置いても読まれません。
+#
+#  対象: コーポレートサイト(WordPress + Yoast SEO) と 公図色付け(/rpaint/) の両方
+#
+#  ★重要1★ 物理ファイルを置くと、WordPress が自動生成する「仮想 robots.txt」は
+#  無効になります。Yoast SEO が出力していたサイトマップ行もその時点で失われるため、
+#  末尾の Sitemap: 2行は絶対に消さないでください。
+#
+#  ★重要2★ User-agent: 〜 Disallow の間に「空行」を入れないでください。
+#  空行はレコードの区切りとして扱われ、厳密なパーサでは以降のルールが
+#  すべて無視されます。区切りたいときは下記のようにコメント行(#)を使います。
+# ============================================================
+User-agent: *
+#
+# ---- WordPress 管理領域 ----
+# admin-ajax.php はフロント表示にも使われるため許可する。
+# ブロックすると Google がページを描画できず、評価が下がります。
+# Google は「最長一致」で判定するため順序は不問だが、単純な先頭一致の
+# クローラでも正しく動くよう Allow を先に書く。
+Allow: /wp-admin/admin-ajax.php
+Disallow: /wp-admin/
+#
+# ---- サイト内検索結果 ----
+# /?s=... はURLが無限に生成され、中身も重複。クロール予算の浪費になるため除外。
+# ※ Disallow: /*s= と書くと ?tags= ?news= など s で終わる他のパラメータまで
+#    巻き込んで止めてしまうため、あえて ? と & を明示している。
+Disallow: /*?s=
+Disallow: /*&s=
+#
+# ---- トラックバック / コメントフィード ----
+# 本文の重複。通常のRSS(/feed/)は配信に使うためブロックしない。
+Disallow: /*/trackback/
+Disallow: /comments/feed/
+#
+# ---- 公図色付け (/rpaint/) ----
+# API は JSON 応答のみ。クロールする意味がないため除外。
+Disallow: /rpaint/api/
+#
+# ログイン後ページ(index / mypage / admin)と登録フォームは、
+# 各HTMLの <meta name="robots" content="noindex"> で除外しています。
+# ここで Disallow するとクロール自体が止まり noindex を読み取れなくなるため、
+# あえて robots.txt では止めていません。（添付ページも同じ理由で止めません）
+#
+# ---- 意図的にブロックしないもの ----
+# /wp-content/ /wp-includes/ 配下の CSS・JS・画像は一切ブロックしません。
+# これらを止めると Google がページを正しくレンダリングできず、
+# モバイルフレンドリー判定や Core Web Vitals の評価が落ちます。
+#
+# ---- サイトマップ ----
+Sitemap: https://mary-inc.com/sitemap.xml
+Sitemap: https://mary-inc.com/rpaint/sitemap.xml

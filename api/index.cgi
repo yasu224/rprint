@@ -68,7 +68,6 @@ def _cfg(key, default):
 try:
     SESSION_TTL = int(float(_cfg("SESSION_TTL_MIN", "120")) * 60)
     DEMO_USERNAMES = {u.strip().lower() for u in str(_cfg("DEMO_USERNAMES", "DEMO")).split(",") if u.strip()}
-    DEMO_TTL = int(float(_cfg("DEMO_TTL_MIN", "15")) * 60)
     ALLOW_REGISTRATION = str(_cfg("ALLOW_REGISTRATION", "1")) in ("1", "true", "True")
     SECURE_COOKIE = os.environ.get("HTTPS", "") in ("1", "true", "True", "on")
     # Cookie のパス。サブディレクトリ配置(例 /rpaint/)で他アプリと分離したい場合に指定。
@@ -120,7 +119,8 @@ def app_url(path=""):
 
 
 def ttl_for(user):
-    return DEMO_TTL if is_demo(user) else SESSION_TTL
+    # デモも通常アカウントと同じセッション時間(デモ専用の短い制限時間は廃止)
+    return SESSION_TTL
 
 
 # ---- CGI ヘルパー ----
@@ -252,7 +252,13 @@ def route():
     # ---- ページ閲覧の記録(公開・認証不要) : login.html 等のビーコンから呼ばれる ----
     if path == "/pageview" and method == "POST":
         page = str(read_body().get("page", ""))[:64] or "(unknown)"
-        appdb.add_access_log(page, client_ip(), client_ua())
+        # 管理者(ログイン中)のページ閲覧はアクセスログに記録しない
+        try:
+            _u, _ = appdb.get_session(cookie_token())
+        except Exception:
+            _u = None
+        if not is_admin(_u):
+            appdb.add_access_log(page, client_ip(), client_ua())
         return respond("200 OK", {"ok": True})
 
     if path == "/register" and method == "POST":
